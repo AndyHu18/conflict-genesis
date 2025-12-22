@@ -78,6 +78,60 @@ class ConflictAnalyzer:
         except Exception as e:
             raise ConflictAnalyzerError(f"❌ 音訊上傳失敗: {e}")
     
+    def _fix_truncated_json(self, raw_text: str) -> str:
+        """
+        嘗試修復被截斷的 JSON 字符串
+        
+        常見情況：
+        1. 末尾缺少 } 或 ]
+        2. 字符串未正確閉合
+        3. 多餘的逗號
+        """
+        import re
+        
+        text = raw_text.strip()
+        
+        # 統計開閉括號
+        open_braces = text.count('{')
+        close_braces = text.count('}')
+        open_brackets = text.count('[')
+        close_brackets = text.count(']')
+        
+        # 嘗試修復未閉合的字符串
+        # 找最後一個未閉合的引號
+        in_string = False
+        escape_next = False
+        for i, c in enumerate(text):
+            if escape_next:
+                escape_next = False
+                continue
+            if c == '\\':
+                escape_next = True
+                continue
+            if c == '"':
+                in_string = not in_string
+        
+        # 如果在字符串中結束，添加閉合引號
+        if in_string:
+            text += '"'
+        
+        # 移除末尾多餘的逗號
+        text = re.sub(r',\s*$', '', text)
+        text = re.sub(r',\s*}', '}', text)
+        text = re.sub(r',\s*]', ']', text)
+        
+        # 補充缺失的括號
+        missing_braces = open_braces - text.count('}')
+        missing_brackets = open_brackets - text.count(']')
+        
+        text += ']' * missing_brackets
+        text += '}' * missing_braces
+        
+        print(f"⚠️ [JSON修復] 補充了 {missing_braces} 個 '}}' 和 {missing_brackets} 個 ']'")
+        
+        return text
+    
+    
     def analyze_stage1(
         self,
         audio_path: str,
@@ -133,10 +187,21 @@ class ConflictAnalyzer:
             print(f"📍[一階分析] ✅ 完成")
         
         try:
-            result_data = json.loads(response.text)
+            raw_text = response.text
+            # 嘗試直接解析
+            try:
+                result_data = json.loads(raw_text)
+            except json.JSONDecodeError as parse_err:
+                # 嘗試修復截斷的 JSON
+                print(f"⚠️ [一階分析] JSON 解析失敗，嘗試修復: {parse_err}")
+                fixed_text = self._fix_truncated_json(raw_text)
+                result_data = json.loads(fixed_text)
+            
             result = Stage1Result.model_validate(result_data)
             return result
         except Exception as e:
+            # 打印原始響應以便調試
+            print(f"❌ [一階分析] 原始響應（前 500 字元）: {response.text[:500]}...")
             raise ConflictAnalyzerError(f"❌ 一階結果解析失敗: {e}")
     
     def analyze_stage2(
