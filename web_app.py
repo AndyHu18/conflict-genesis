@@ -674,12 +674,48 @@ HTML_TEMPLATE = '''
             <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()"></button>
         </div>
         <audio id="healingAudio" style="display:none;"></audio>
+        <!-- 音頻波形可視化 -->
+        <canvas id="audioVisualizer" width="200" height="40" style="display:none;"></canvas>
     </div>
 
     <style>
         @keyframes pulse-glow {
             0%, 100% { transform: scale(1); filter: brightness(1); }
             50% { transform: scale(1.05); filter: brightness(1.1); }
+        }
+        /* 音頻生成中動畫 */
+        @keyframes loading-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .healing-player.generating .healing-player-title::after {
+            content: '生成中...';
+            animation: loading-pulse 1.5s infinite;
+            color: #D4AF37;
+        }
+        .healing-player.generating .healing-play-btn {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        /* 生成完成閃爍動畫 */
+        @keyframes ready-flash {
+            0%, 100% { box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5); border-color: rgba(201, 169, 98, 0.4); }
+            50% { box-shadow: 0 -4px 50px rgba(212, 175, 55, 0.6), 0 0 30px rgba(212, 175, 55, 0.3); border-color: #D4AF37; }
+        }
+        .healing-player.ready {
+            animation: ready-flash 1s ease-in-out 3;
+        }
+        /* 音頻波形可視化 */
+        #audioVisualizer {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .healing-player.playing #audioVisualizer {
+            display: block !important;
         }
     </style>
 
@@ -1345,6 +1381,12 @@ HTML_TEMPLATE = '''
             partsProgress.style.display = 'block';
             partsProgress.textContent = '🎭 正在生成療育文稿...';
             
+            // ⚠️ 生成開始時立即顯示播放器（生成中狀態）
+            const healingPlayer = document.getElementById('healingPlayer');
+            healingPlayer.classList.add('show', 'generating');
+            healingPlayer.classList.remove('ready', 'playing');
+            document.querySelector('.healing-player-title').textContent = '🎵 療癒音頻 ';
+            
             // 分段進度模擬
             let progress = 5;
             const progressSteps = [
@@ -1437,8 +1479,14 @@ HTML_TEMPLATE = '''
                 // 顯示就緒卡片
                 audioReadyCard.style.display = 'block';
                 
-                // 彈出播放器
-                document.getElementById('healingPlayer').classList.add('show');
+                // ⚠️ 生成完成：移除生成中狀態，添加就緒閃爍動畫
+                const healingPlayer = document.getElementById('healingPlayer');
+                healingPlayer.classList.remove('generating');
+                healingPlayer.classList.add('ready');
+                document.querySelector('.healing-player-title').textContent = '🎵 開始您的專屬療癒引導';
+                
+                // 初始化音頻波形可視化
+                initAudioVisualizer(audio);
                 
                 return true;
             } else {
@@ -1460,22 +1508,102 @@ HTML_TEMPLATE = '''
         function onAudioEnded() {
             document.getElementById('healingPlayBtn').classList.remove('playing');
             document.getElementById('audioProgressBar').style.width = '0%';
+            document.getElementById('healingPlayer').classList.remove('playing');
+            stopVisualizer();
+        }
+        
+        // ============ 音頻波形可視化 ============
+        let audioContext = null;
+        let analyser = null;
+        let visualizerAnimationId = null;
+        
+        function initAudioVisualizer(audioElement) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const source = audioContext.createMediaElementSource(audioElement);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 64;
+                
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                console.log('🎵 音頻波形可視化已初始化');
+            } catch (err) {
+                console.warn('🎵 波形可視化初始化失敗:', err);
+            }
+        }
+        
+        function startVisualizer() {
+            if (!analyser) return;
+            
+            const canvas = document.getElementById('audioVisualizer');
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const barWidth = canvas.width / bufferLength;
+            
+            function draw() {
+                visualizerAnimationId = requestAnimationFrame(draw);
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                ctx.fillStyle = 'rgba(13, 13, 13, 0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height;
+                    
+                    // 金色漸變
+                    const hue = 45 + (i / bufferLength) * 10;
+                    ctx.fillStyle = `hsl(${hue}, 70%, ${50 + dataArray[i] / 5}%)`;
+                    
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+                    x += barWidth;
+                }
+            }
+            
+            draw();
+        }
+        
+        function stopVisualizer() {
+            if (visualizerAnimationId) {
+                cancelAnimationFrame(visualizerAnimationId);
+                visualizerAnimationId = null;
+            }
+            const canvas = document.getElementById('audioVisualizer');
+            if (canvas) canvas.style.display = 'none';
         }
         
         function toggleHealingAudio() {
             const audio = document.getElementById('healingAudio');
             const btn = document.getElementById('healingPlayBtn');
+            const player = document.getElementById('healingPlayer');
             
             if (!healingAudioReady) {
                 return;
             }
             
+            // 確保 AudioContext 已恢復（用戶交互後）
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
             if (audio.paused) {
                 audio.play();
                 btn.classList.add('playing');
+                player.classList.add('playing');
+                player.classList.remove('ready');
+                startVisualizer();
             } else {
                 audio.pause();
                 btn.classList.remove('playing');
+                player.classList.remove('playing');
+                stopVisualizer();
             }
         }
         
