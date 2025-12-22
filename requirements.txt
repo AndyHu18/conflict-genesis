@@ -20,6 +20,12 @@ pydub>=0.25.1
 # PDF 報告生成
 fpdf2>=2.8.0
 
+# 生產環境 WSGI 伺服器
+gunicorn>=21.0.0
+
+# HTTP 請求 (BGM 下載)
+requests>=2.31.0
+
 # 開發工具 (可選)
 # pytest>=7.0.0
 # black>=23.0.0
