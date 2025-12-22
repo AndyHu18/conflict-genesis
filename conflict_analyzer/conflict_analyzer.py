@@ -244,10 +244,21 @@ class ConflictAnalyzer:
             print(f"📍[二階分析] ✅ 完成")
         
         try:
-            result_data = json.loads(response.text)
+            raw_text = response.text
+            # 嘗試直接解析
+            try:
+                result_data = json.loads(raw_text)
+            except json.JSONDecodeError as parse_err:
+                # 嘗試修復截斷的 JSON
+                print(f"⚠️ [二階分析] JSON 解析失敗，嘗試修復: {parse_err}")
+                fixed_text = self._fix_truncated_json(raw_text)
+                result_data = json.loads(fixed_text)
+            
             result = Stage2Result.model_validate(result_data)
             return result
         except Exception as e:
+            # 打印原始響應以便調試
+            print(f"❌ [二階分析] 原始響應（前 500 字元）: {response.text[:500]}...")
             raise ConflictAnalyzerError(f"❌ 二階結果解析失敗: {e}")
     
     def analyze_stage3(
@@ -291,10 +302,21 @@ class ConflictAnalyzer:
             print(f"📍[三階分析] ✅ 完成")
         
         try:
-            result_data = json.loads(response.text)
+            raw_text = response.text
+            # 嘗試直接解析
+            try:
+                result_data = json.loads(raw_text)
+            except json.JSONDecodeError as parse_err:
+                # 嘗試修復截斷的 JSON
+                print(f"⚠️ [三階分析] JSON 解析失敗，嘗試修復: {parse_err}")
+                fixed_text = self._fix_truncated_json(raw_text)
+                result_data = json.loads(fixed_text)
+            
             result = Stage3Result.model_validate(result_data)
             return result
         except Exception as e:
+            # 打印原始響應以便調試
+            print(f"❌ [三階分析] 原始響應（前 500 字元）: {response.text[:500]}...")
             raise ConflictAnalyzerError(f"❌ 三階結果解析失敗: {e}")
     
     def full_analysis(

@@ -1,7 +1,7 @@
 ﻿# Lumina 心語 (Conflict Genesis) - 專案憲法
 
-> 最後更新: 2025-12-22
-> 版本: 4.3.2 (Imagen 4 原生文字渲染 + 增強音頻診斷)
+> 最後更新: 2025-12-23
+> 版本: 4.5.0 (串流 BGM 混合 + TTS 情緒控制 + UI 優化)
 
 ## 🎯 專案概述
 
@@ -10,8 +10,11 @@
 ### 核心功能
 - 🎙️ 音訊處理：支援長達 8 小時的錄音分析
 - 📊 四階段分析：演化追蹤 → 深層溯源 → 成長方案 → 數位催眠療癒
-- 🎨 視覺化簡報：**Imagen 4 原生文字渲染**，直接生成帶標題/引言的專業卡片
-- 🎵 分段音頻：解決 TTS 截斷問題，支援 5-8 分鐘療癒音頻
+- 🎨 視覺化簡報：Imagen 生成高品質情境圖，**去除載入中預設文字**
+- 🎵 串流療癒音頻：
+    - **即時 BGM 混合**：邊生成邊混合背景音樂，提供無縫收聽體驗
+    - **情緒 TSS**：支援 Director's Notes，控制語速、呼吸與情感曲線
+    - **即時串流**：解決 TTS 截斷問題，提升響應速度
 - 📑 PDF 報告：完整四階段報告匯出
 
 ---
@@ -37,9 +40,10 @@ conflict-genesis/
 │   ├── schemas.py                # Pydantic 數據模型
 │   ├── image_generator.py        # Imagen 圖像生成 (整合 VA)
 │   ├── visual_architect.py       # 視覺架構師 (簡報內容生成)
+│   ├── slide_composer.py         # 🆕 圖文合成器 (PIL 文字疊加)
 │   ├── healing_audio.py          # 療育音頻 (分段生成+縫合)
 │   ├── audio_mixer.py            # 音頻混音器 (語音+BGM)
-│   ├── lyria_music.py            # 🆕 Lyria 原創音樂生成
+│   ├── lyria_music.py            # Lyria 原創音樂生成
 │   ├── bgm_manager.py            # BGM 資源管理
 │   └── pdf_generator.py          # PDF 報告生成
 │

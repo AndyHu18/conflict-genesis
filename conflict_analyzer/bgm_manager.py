@@ -162,34 +162,107 @@ Lumina 心語 v4.1.0
             是否成功下載至少一個文件
         """
         # 公開可用的免費音樂 URL（多個備用來源）
-        # 使用 Internet Archive 和其他公開域音樂
+        # 使用 Bensound, Internet Archive 等公開域音樂
         sample_urls = [
+            # === 療癒環境音 ===
             {
                 "name": "healing_ambient.mp3",
                 "urls": [
-                    # Internet Archive - Public Domain Music
-                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/01_Peaceful_Forest.mp3",
-                    "https://archive.org/download/relaxing-sleep-music-219/relaxing-sleep-music-219.mp3",
                     "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3",
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/01_Peaceful_Forest.mp3",
                 ],
                 "mood": ["calm", "healing", "default"]
             },
+            # === 平靜鋼琴 ===
             {
                 "name": "calm_piano.mp3",
                 "urls": [
-                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/02_Sunset_Dreams.mp3",
                     "https://www.bensound.com/bensound-music/bensound-thejazzpiano.mp3",
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/02_Sunset_Dreams.mp3",
                 ],
                 "mood": ["sad", "ambient", "vulnerability"]
             },
+            # === 432Hz 冥想 ===
             {
                 "name": "meditation_432hz.mp3",
                 "urls": [
-                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/03_Deep_Relaxation.mp3",
                     "https://www.bensound.com/bensound-music/bensound-dreams.mp3",
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/03_Deep_Relaxation.mp3",
                 ],
                 "mood": ["soothing", "fear", "anxiety"]
-            }
+            },
+            # === 新增：柔和晨光 ===
+            {
+                "name": "gentle_morning.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-sunny.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-clearday.mp3",
+                ],
+                "mood": ["hopeful", "growth", "new_beginning"]
+            },
+            # === 新增：深度放鬆 ===
+            {
+                "name": "deep_relaxation.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-relaxing.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-betterdays.mp3",
+                ],
+                "mood": ["relaxation", "peace", "comfort"]
+            },
+            # === 新增：溫柔擁抱 ===
+            {
+                "name": "tender_embrace.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-love.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-memories.mp3",
+                ],
+                "mood": ["love", "compassion", "connection"]
+            },
+            # === 新增：內心平靜 ===
+            {
+                "name": "inner_peace.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-tomorrow.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-dreams.mp3",
+                ],
+                "mood": ["meditation", "mindfulness", "stillness"]
+            },
+            # === 新增：自然療癒 ===
+            {
+                "name": "nature_healing.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-acoustic-breeze.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-sweet.mp3",
+                ],
+                "mood": ["nature", "organic", "grounding"]
+            },
+            # === 新增：夢境漫步 ===
+            {
+                "name": "dreamwalk.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-once-again.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-november.mp3",
+                ],
+                "mood": ["dreamy", "ethereal", "contemplation"]
+            },
+            # === 新增：重生希望 ===
+            {
+                "name": "rebirth_hope.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-newdawn.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-epic.mp3",
+                ],
+                "mood": ["empowerment", "strength", "transformation"]
+            },
+            # === 新增：溫馨家園 ===
+            {
+                "name": "cozy_home.mp3",
+                "urls": [
+                    "https://www.bensound.com/bensound-music/bensound-littleidea.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-ukulele.mp3",
+                ],
+                "mood": ["warmth", "safety", "belonging"]
+            },
         ]
         
         print("\n" + "=" * 50)

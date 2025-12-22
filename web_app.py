@@ -72,22 +72,89 @@ HTML_TEMPLATE = '''
             --accent-warning: #D4A574;       /* 焦糖色 Caramel */
             --accent-healing: #D4A5A5;       /* 珊瑚玫瑰 */
             
-            /* 文字色 */
-            --text-primary: #3D3428;         /* 深棕色 Dark Brown */
-            --text-secondary: #6B5B4F;       /* 中棕色 Medium Brown */
-            --text-muted: #8B7D6B;           /* 淺棕色 Light Brown */
+            /* 文字色 - 高對比度版本 */
+            --text-primary: #2A2218;         /* 深棕色 Dark Brown - 更深 */
+            --text-secondary: #4A3D32;       /* 中棕色 Medium Brown - 加深 */
+            --text-muted: #5D4F42;           /* 淺棕色 Light Brown - 加深 */
             --border-color: rgba(201, 169, 98, 0.25);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
-        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
-            background: radial-gradient(ellipse at 20% 20%, rgba(201, 169, 98, 0.08) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 80%, rgba(184, 115, 81, 0.05) 0%, transparent 50%); }
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        #heroCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
-        header { text-align: center; margin-bottom: 50px; }
-        .logo { font-size: 3rem; margin-bottom: 15px; color: var(--text-primary); font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: 4px; }
-        .tagline { color: var(--text-secondary); font-size: 1.1rem; font-weight: 300; letter-spacing: 1px; }
-        .premium-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 10px 24px; background: rgba(139, 115, 85, 0.2); border: 1px solid rgba(139, 115, 85, 0.5); border-radius: 4px; font-size: 1rem; color: #5A4A3A; font-weight: 500; }
+        
+        /* Hero Section - 大師級視覺設計 */
+        header { 
+            text-align: center; 
+            margin-bottom: 50px; 
+            padding: 80px 40px 60px;
+            background: linear-gradient(135deg, #1a1512 0%, #2d2319 40%, #3d2d1f 70%, #1a1512 100%);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 20% 80%, rgba(139, 115, 85, 0.1) 0%, transparent 40%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(184, 134, 11, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #D4AF37, #F4D03F, #D4AF37, transparent);
+        }
+        .logo { 
+            font-size: 4rem; 
+            margin-bottom: 20px; 
+            color: #F4D03F; 
+            font-family: 'Playfair Display', serif; 
+            font-weight: 700; 
+            letter-spacing: 8px;
+            text-shadow: 0 4px 20px rgba(244, 208, 63, 0.4), 0 0 60px rgba(212, 175, 55, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .tagline { 
+            color: #E8DCC8; 
+            font-size: 1.3rem; 
+            font-weight: 400; 
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        .premium-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-top: 25px; 
+            padding: 14px 32px; 
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(184, 134, 11, 0.15)); 
+            border: 1px solid rgba(244, 208, 63, 0.4); 
+            border-radius: 50px; 
+            font-size: 1.05rem; 
+            color: #F4D03F; 
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
         .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 35px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(139, 115, 85, 0.08); }
         .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(139, 115, 85, 0.1); }
         .card-icon { font-size: 1.5rem; color: var(--accent-gold); }
@@ -119,19 +186,19 @@ HTML_TEMPLATE = '''
         
         /* 底部固定療育音頻播放器 - 黑金奢華配色 */
         .healing-player {
-            position: fixed;
+            position: fixed !important;
             bottom: -150px;
-            left: 0;
-            right: 0;
+            left: 0 !important;
+            right: 0 !important;
             background: linear-gradient(180deg, #1A1A1A, #0D0D0D);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(201, 169, 98, 0.4);
             padding: 20px 30px;
-            z-index: 9999;
+            z-index: 9999 !important;
             transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
         }
-        .healing-player.show { bottom: 0; }
+        .healing-player.show { bottom: 0 !important; }
         .healing-player-content {
             max-width: 900px;
             margin: 0 auto;
@@ -234,20 +301,43 @@ HTML_TEMPLATE = '''
             content: '✕';
         }
         .healing-close-btn:hover { color: #D4AF37; }
-        .audio-progress {
+        /* 進度條包裝器 */
+        .audio-progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-top: 10px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
+        }
+        .audio-progress {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
             overflow: hidden;
             cursor: pointer;
+            position: relative;
         }
         .audio-progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #D4AF37, #F4D03F);
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.3), rgba(244, 208, 63, 0.4));
             transition: width 0.1s linear;
-            border-radius: 2px;
+            border-radius: 6px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        /* 時間顯示 */
+        .audio-time {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'SF Mono', 'Consolas', monospace;
+            white-space: nowrap;
+            min-width: 80px;
+            text-align: right;
+        }
+        .audio-time span:first-child {
+            color: #D4AF37;
         }
         .prompt-textarea { width: 100%; min-height: 200px; padding: 15px; background: #0d0d15; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-secondary); font-family: monospace; font-size: 0.8rem; resize: vertical; }
         .prompt-textarea:focus { outline: none; border-color: var(--accent-primary); }
@@ -255,46 +345,516 @@ HTML_TEMPLATE = '''
         .btn-small { padding: 8px 15px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.3s; }
         .btn-small:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
         
-        .btn-primary { width: 100%; padding: 18px 30px; font-size: 1.1rem; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, var(--accent-gold), #c09b30); color: #000; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 50px rgba(212, 175, 55, 0.4); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { 
+            width: 100%; 
+            padding: 20px 35px; 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            border: none; 
+            border-radius: 16px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 50%, #8B6914 100%); 
+            color: #1a1a1a; 
+            letter-spacing: 2px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .btn-primary:not(:disabled) {
+            animation: btn-glow 2s ease-in-out infinite;
+        }
+        @keyframes btn-glow {
+            0%, 100% { box-shadow: 0 5px 30px rgba(212, 175, 55, 0.4); }
+            50% { box-shadow: 0 8px 50px rgba(212, 175, 55, 0.7), 0 0 20px rgba(244, 208, 63, 0.3); }
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-primary:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        .btn-primary:hover:not(:disabled) { 
+            transform: translateY(-4px) scale(1.02); 
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5); 
+        }
+        .btn-primary:disabled { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+            animation: none;
+        }
+        .btn-primary .btn-arrow {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
+        }
+        .btn-primary:hover:not(:disabled) .btn-arrow {
+            transform: translateX(8px);
+        }
+        .btn-primary .btn-icon {
+            font-size: 1.3rem;
+        }
         .btn-download { padding: 12px 25px; font-size: 0.95rem; font-weight: 500; border: 1px solid var(--accent-gold); border-radius: 8px; background: transparent; color: var(--accent-gold); cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-download:hover { background: var(--accent-gold); color: #000; }
         
-        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(10, 10, 18, 0.95); backdrop-filter: blur(10px); }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(10, 10, 18, 0.95); backdrop-filter: blur(10px); overflow: hidden; }
         .loading-overlay.show { display: flex; align-items: center; justify-content: center; }
-        .loading-container { text-align: center; max-width: 500px; padding: 40px; }
+        .loading-container { text-align: center; max-width: 500px; padding: 40px; position: relative; z-index: 10; }
+        /* 多層次粒子系統 */
         .particles { position: absolute; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-        .particle { position: absolute; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; animation: float 8s infinite ease-in-out; opacity: 0.6; }
-        @keyframes float { 0%, 100% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(-100vh); opacity: 0; } }
+        .particle { position: absolute; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; animation: float 8s infinite ease-in-out; opacity: 0.6; box-shadow: 0 0 6px rgba(212, 175, 55, 0.8); }
+        .particle.large { width: 8px; height: 8px; opacity: 0.3; animation-duration: 12s; box-shadow: 0 0 15px rgba(212, 175, 55, 0.6), 0 0 30px rgba(212, 175, 55, 0.3); }
+        .particle.glow { width: 3px; height: 3px; background: #fff; opacity: 0.9; animation-duration: 6s; box-shadow: 0 0 8px #fff, 0 0 12px var(--accent-gold); }
+        @keyframes float { 0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.8; transform: translateY(80vh) scale(1); } 90% { opacity: 0.8; transform: translateY(-80vh) scale(1); } 100% { transform: translateY(-100vh) scale(0); opacity: 0; } }
+        /* 脈動光暈效果 */
+        .loading-glow { position: absolute; width: 400px; height: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%); animation: pulse-glow-loading 3s ease-in-out infinite; pointer-events: none; z-index: 1; }
+        @keyframes pulse-glow-loading { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.8; } }
+
         .progress-ring-container { position: relative; width: 180px; height: 180px; margin: 0 auto 30px; }
-        .progress-ring { transform: rotate(-90deg); }
+        /* 水波上升動畫 - 高對比青藍色 */
+        .water-fill-container {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            top: 10px;
+            left: 10px;
+            border-radius: 50%;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 1;
+        }
+        .water-fill-container.active {
+            opacity: 1;
+        }
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, 
+                rgba(0, 212, 255, 0.4) 0%, 
+                rgba(0, 150, 255, 0.6) 50%, 
+                rgba(100, 200, 255, 0.8) 100%);
+            transition: height 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+        }
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='rgba(100,220,255,0.7)' d='M0,96L48,112C96,128,192,160,288,176C384,192,480,192,576,181.3C672,171,768,149,864,149.3C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") repeat-x;
+            background-size: 50% 30px;
+            background-position: 0 bottom;
+            animation: wave 2s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); }
+        }
+        .water-fill-container.active .water-wave {
+            animation: wave 2s linear infinite, water-shimmer 3s ease-in-out infinite;
+        }
+        @keyframes water-shimmer {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        /* ===== 火焰加熱動畫 ===== */
+        .fire-container {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+        .fire-container.active {
+            opacity: 1;
+        }
+        .flame {
+            width: 15px;
+            height: 45px;
+            background: linear-gradient(0deg, 
+                #ff4500 0%, 
+                #ff6b35 30%, 
+                #ffa500 60%, 
+                #ffd700 80%, 
+                rgba(255, 255, 0, 0.3) 100%);
+            border-radius: 50% 50% 30% 30%;
+            animation: flicker 0.3s ease-in-out infinite alternate;
+            filter: blur(1px);
+            box-shadow: 0 0 10px #ff6b35, 0 0 20px #ff4500, 0 0 30px rgba(255, 69, 0, 0.5);
+        }
+        .flame:nth-child(1) { animation-delay: 0s; height: 35px; }
+        .flame:nth-child(2) { animation-delay: 0.1s; height: 50px; }
+        .flame:nth-child(3) { animation-delay: 0.15s; height: 45px; }
+        .flame:nth-child(4) { animation-delay: 0.05s; height: 55px; }
+        .flame:nth-child(5) { animation-delay: 0.2s; height: 40px; }
+        .flame:nth-child(6) { animation-delay: 0.08s; height: 48px; }
+        .flame:nth-child(7) { animation-delay: 0.12s; height: 38px; }
+        
+        @keyframes flicker {
+            0% { 
+                transform: scaleY(1) scaleX(1) translateY(0);
+                opacity: 0.9;
+            }
+            100% { 
+                transform: scaleY(1.2) scaleX(0.9) translateY(-5px);
+                opacity: 1;
+            }
+        }
+        
+        /* 水缸加熱變色 - 從藍到紅的漸變 */
+        .water-fill.heating {
+            animation: heat-water 15s ease-in-out forwards;
+        }
+        @keyframes heat-water {
+            0% {
+                background: linear-gradient(180deg, 
+                    rgba(0, 212, 255, 0.4) 0%, 
+                    rgba(0, 150, 255, 0.6) 50%, 
+                    rgba(100, 200, 255, 0.8) 100%);
+                box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+            }
+            25% {
+                background: linear-gradient(180deg, 
+                    rgba(100, 200, 255, 0.4) 0%, 
+                    rgba(150, 100, 200, 0.5) 50%, 
+                    rgba(200, 100, 150, 0.7) 100%);
+                box-shadow: 0 0 20px rgba(150, 100, 200, 0.5);
+            }
+            50% {
+                background: linear-gradient(180deg, 
+                    rgba(200, 100, 150, 0.4) 0%, 
+                    rgba(255, 100, 100, 0.6) 50%, 
+                    rgba(255, 150, 100, 0.8) 100%);
+                box-shadow: 0 0 20px rgba(255, 100, 100, 0.5);
+            }
+            75% {
+                background: linear-gradient(180deg, 
+                    rgba(255, 80, 80, 0.5) 0%, 
+                    rgba(255, 120, 80, 0.7) 50%, 
+                    rgba(255, 180, 100, 0.9) 100%);
+                box-shadow: 0 0 25px rgba(255, 100, 50, 0.6);
+            }
+            100% {
+                background: linear-gradient(180deg, 
+                    rgba(255, 50, 50, 0.5) 0%, 
+                    rgba(255, 100, 50, 0.7) 50%, 
+                    rgba(255, 200, 100, 0.9) 100%);
+                box-shadow: 0 0 30px rgba(255, 80, 0, 0.7), 0 0 50px rgba(255, 150, 0, 0.4);
+            }
+        }
+        
+        /* 沸腾氣泡效果 */
+        .water-wave.boiling {
+            animation: wave 1s linear infinite, bubble-rise 0.5s ease-in-out infinite;
+        }
+        @keyframes bubble-rise {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(2px) translateY(-3px); }
+        }
+        
+        /* ===== 冷卻動畫 - 紅色從上往下逐漸變回藍色 ===== */
+        .water-fill.cooling {
+            animation: cool-water 12s ease-in-out forwards;
+        }
+        @keyframes cool-water {
+            0% {
+                background: linear-gradient(180deg, 
+                    rgba(255, 50, 50, 0.5) 0%, 
+                    rgba(255, 100, 50, 0.7) 50%, 
+                    rgba(255, 200, 100, 0.9) 100%);
+                box-shadow: 0 0 30px rgba(255, 80, 0, 0.7);
+            }
+            25% {
+                background: linear-gradient(180deg, 
+                    rgba(100, 150, 200, 0.4) 0%, 
+                    rgba(255, 100, 100, 0.6) 35%, 
+                    rgba(255, 150, 80, 0.8) 100%);
+                box-shadow: 0 0 25px rgba(150, 100, 150, 0.5);
+            }
+            50% {
+                background: linear-gradient(180deg, 
+                    rgba(80, 180, 220, 0.4) 0%, 
+                    rgba(120, 160, 200, 0.5) 50%, 
+                    rgba(200, 100, 100, 0.7) 100%);
+                box-shadow: 0 0 20px rgba(100, 150, 200, 0.5);
+            }
+            75% {
+                background: linear-gradient(180deg, 
+                    rgba(50, 200, 255, 0.4) 0%, 
+                    rgba(80, 180, 230, 0.5) 60%, 
+                    rgba(150, 150, 180, 0.7) 100%);
+                box-shadow: 0 0 20px rgba(50, 180, 255, 0.5);
+            }
+            100% {
+                background: linear-gradient(180deg, 
+                    rgba(0, 212, 255, 0.4) 0%, 
+                    rgba(0, 180, 255, 0.5) 50%, 
+                    rgba(100, 200, 255, 0.8) 100%);
+                box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+            }
+        }
+        
+        /* 冷卻時波浪變平靜 */
+        .water-wave.cooling {
+            animation: wave 3s linear infinite, gentle-shimmer 2s ease-in-out infinite;
+        }
+        @keyframes gentle-shimmer {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.9; }
+        }
+        
+        .progress-ring { transform: rotate(-90deg); position: relative; z-index: 2; }
         .progress-ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
         .progress-ring-fill { fill: none; stroke: url(#goldGradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 502; stroke-dashoffset: 502; transition: stroke-dashoffset 0.5s ease; }
         .progress-percent { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .loading-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; }
+        .loading-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #F5F2ED; }
         .loading-stage { font-size: 1rem; color: var(--accent-gold); margin-bottom: 25px; min-height: 25px; }
         .stage-list { text-align: left; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; }
-        .stage-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); transition: color 0.3s; }
+        .stage-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.05); transition: color 0.3s; }
         .stage-item:last-child { border-bottom: none; }
         .stage-item.active { color: var(--accent-gold); }
         .stage-item.done { color: var(--accent-success); }
         .stage-icon { width: 24px; text-align: center; }
         
-        .result-container { display: none; }
+        .result-container { display: none; position: relative; overflow: hidden; margin-top: 40px; }
         .result-container.show { display: block; }
+        /* 結果區域金色極光背景 */
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background: radial-gradient(circle at 30% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, rgba(201, 169, 98, 0.06) 0%, transparent 40%);
+            animation: aurora-flow 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes aurora-flow {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            25% { transform: translate(5%, 5%) rotate(2deg) scale(1.05); }
+            50% { transform: translate(-3%, 10%) rotate(-1deg) scale(1.02); }
+            75% { transform: translate(-5%, -3%) rotate(1deg) scale(1.08); }
+        }
+        .result-container > * { position: relative; z-index: 1; }
         
-        .stage-tabs { display: flex; gap: 10px; margin-bottom: 30px; }
-        .stage-tab { flex: 1; padding: 15px; border: 2px solid var(--border-color); border-radius: 12px; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.3s; font-size: 1rem; font-weight: 600; }
-        .stage-tab.active { border-color: var(--accent-gold); background: rgba(212, 175, 55, 0.1); color: var(--accent-gold); }
-        .stage-tab:hover:not(.active) { border-color: var(--text-muted); }
+        .stage-tabs { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+        .stage-tab { 
+            flex: 1; 
+            min-width: 150px;
+            padding: 16px 20px; 
+            border: none; 
+            border-radius: 14px; 
+            background: rgba(50, 50, 50, 0.8); 
+            color: #ffffff; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-size: 1rem; 
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        /* 一階：金色琥珀 */
+        .stage-tab:nth-child(1) { 
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); 
+            color: #1a1a1a;
+            text-shadow: none;
+        }
+        .stage-tab:nth-child(1):hover { box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
+        /* 二階：赤陶暖橙 */
+        .stage-tab:nth-child(2) { 
+            background: linear-gradient(135deg, #E07B4F 0%, #B85A3C 100%); 
+            color: #ffffff;
+        }
+        .stage-tab:nth-child(2):hover { box-shadow: 0 6px 25px rgba(224, 123, 79, 0.5); transform: translateY(-2px); }
+        /* 三階：森林療癒綠 */
+        .stage-tab:nth-child(3) { 
+            background: linear-gradient(135deg, #5B8C5A 0%, #3D5A35 100%); 
+            color: #ffffff;
+        }
+        .stage-tab:nth-child(3):hover { box-shadow: 0 6px 25px rgba(91, 140, 90, 0.5); transform: translateY(-2px); }
+        /* 四階：靈性紫羅蘭 */
+        .stage-tab:nth-child(4) { 
+            background: linear-gradient(135deg, #9B7EDE 0%, #7B5FC7 100%); 
+            color: #ffffff;
+        }
+        .stage-tab:nth-child(4):hover { box-shadow: 0 6px 25px rgba(155, 126, 222, 0.5); transform: translateY(-2px); }
+        
+        .stage-tab.active { 
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .stage-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+        }
         .stage-content { display: none; }
         .stage-content.active { display: block; }
         
-        .report-header { text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(99, 102, 241, 0.05)); border: 1px solid var(--border-color); border-radius: 20px; margin-bottom: 30px; }
-        .report-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .report-meta { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; }
-        .report-summary { font-size: 1.3rem; font-style: italic; color: var(--text-primary); padding: 25px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid var(--accent-gold); text-align: left; line-height: 1.8; }
+        /* 階段導航按鈕 */
+        .stage-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding: 25px 0;
+            border-top: 1px solid rgba(139, 115, 85, 0.2);
+        }
+        .stage-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border: 2px solid;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .stage-nav-btn.prev {
+            border-color: #8B4513;
+            color: #5D2E0C;
+            background: rgba(139, 69, 19, 0.1);
+        }
+        .stage-nav-btn.prev:hover {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: #fff;
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.35);
+        }
+        .stage-nav-btn.next {
+            border-color: #8B6914;
+            color: #5D4507;
+            background: rgba(139, 105, 20, 0.1);
+        }
+        .stage-nav-btn.next:hover {
+            background: linear-gradient(135deg, #B8860B, #D4AF37);
+            color: #fff;
+            transform: translateX(5px);
+            box-shadow: 0 6px 25px rgba(184, 134, 11, 0.4);
+        }
+        .stage-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .stage-nav-placeholder {
+            width: 180px;
+        }
+        /* 頂部導航樣式 */
+        .stage-nav.stage-nav-top {
+            margin-top: 0;
+            margin-bottom: 30px;
+            border-top: none;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.2);
+            padding-top: 0;
+            padding-bottom: 25px;
+        }
+        
+        /* Stage 1 Header - 金色琥珀系 */
+        .report-header { 
+            text-align: center; 
+            padding: 50px 40px; 
+            background: linear-gradient(165deg, rgba(212, 175, 55, 0.12) 0%, rgba(139, 115, 85, 0.08) 50%, rgba(201, 169, 98, 0.05) 100%); 
+            border: 1px solid rgba(212, 175, 55, 0.25); 
+            border-radius: 24px; 
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #D4AF37, #F4D03F, #D4AF37, transparent);
+        }
+        .report-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+            animation: header-glow 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes header-glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .report-title { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            color: #8B6914;
+            text-shadow: 0 2px 4px rgba(139, 105, 20, 0.15);
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', Georgia, serif;
+            letter-spacing: 2px;
+        }
+        .report-meta { 
+            color: #5D4A37; 
+            font-size: 0.95rem; 
+            margin-bottom: 20px; 
+            position: relative; 
+            z-index: 1; 
+            font-weight: 500;
+        }
+        .report-summary { 
+            font-size: 1.15rem; 
+            font-style: normal; 
+            color: #2A2218; 
+            padding: 25px 30px; 
+            background: linear-gradient(135deg, rgba(139, 105, 20, 0.08), rgba(201, 169, 98, 0.05)); 
+            border-radius: 16px; 
+            border-left: 5px solid #B8860B; 
+            border: 1px solid rgba(139, 105, 20, 0.2);
+            border-left: 5px solid #B8860B;
+            text-align: left; 
+            line-height: 1.9; 
+            position: relative; 
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(139, 105, 20, 0.08);
+        }
         
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .metrics-grid .metric-card:first-child { grid-column: span 2; }
@@ -332,52 +892,355 @@ HTML_TEMPLATE = '''
         .repair-title { color: var(--accent-success); font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .repair-item { margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; }
         .repair-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
-        
-        /* Stage 2 Styles */
-        .stage2-header { text-align: center; padding: 40px; background: rgba(184, 115, 81, 0.1); border: 1px solid rgba(184, 115, 81, 0.3); border-radius: 20px; margin-bottom: 30px; }
-        .stage2-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; color: #6B4A35; }
+        /* Stage 2 Styles - 赤陶暖褐系 */
+        .stage2-header { 
+            text-align: center; 
+            padding: 50px 40px; 
+            background: linear-gradient(165deg, rgba(184, 115, 81, 0.15) 0%, rgba(139, 92, 66, 0.10) 50%, rgba(107, 74, 53, 0.05) 100%); 
+            border: 1px solid rgba(184, 115, 81, 0.3); 
+            border-radius: 24px; 
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stage2-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #B87351, #D49A6A, #B87351, transparent);
+        }
+        .stage2-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(184, 115, 81, 0.1) 0%, transparent 50%);
+            animation: header-glow 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .stage2-title { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            color: #5C2D0E;
+            text-shadow: 0 2px 4px rgba(139, 69, 19, 0.12);
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', Georgia, serif;
+            letter-spacing: 2px;
+        }
+        .stage2-subtitle {
+            font-size: 1rem;
+            color: #4A2E15;
+            font-style: italic;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        /* Stage 2 專屬報告摘要 */
+        .stage2-header .report-summary {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.08), rgba(184, 115, 81, 0.05));
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            border-left: 5px solid #8B4513;
+            color: #3A2518;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.08);
+        }
+        /* Stage 3 專屬報告摘要 */
+        .stage3-header .report-summary {
+            background: linear-gradient(135deg, rgba(45, 80, 22, 0.08), rgba(107, 143, 98, 0.05));
+            border: 1px solid rgba(45, 80, 22, 0.2);
+            border-left: 5px solid #2D5016;
+            color: #1E2D16;
+            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.08);
+        }
+        /* Stage 2 專屬 meta */
+        .stage2-header .report-meta {
+            color: #4A2E15;
+        }
+        /* Stage 3 專屬 meta */
+        .stage3-header .report-meta {
+            color: #2A3D1A;
+        }
         
         .iceberg-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(139, 115, 85, 0.3); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-        .iceberg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .iceberg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: nowrap; }
+        .iceberg-header .speaker-avatar { flex-shrink: 0; }
+        .iceberg-header > div:last-child { white-space: nowrap; }
         .iceberg-section { margin-bottom: 15px; padding: 15px; background: rgba(139, 115, 85, 0.08); border-radius: 10px; border-left: 3px solid var(--accent-primary); }
-        .iceberg-label { font-size: 0.85rem; color: #4A3C2E; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .iceberg-label { font-size: 0.85rem; color: #3A2E22; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         
         .healing-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(212, 165, 165, 0.4); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-        .healing-original { padding: 15px; background: rgba(193, 122, 110, 0.1); border-radius: 10px; margin-bottom: 15px; color: #8B4A40; border-left: 3px solid var(--accent-danger); }
-        .healing-arrow { text-align: center; font-size: 1.5rem; margin: 10px 0; color: #6B5048; }
-        .healing-translation { padding: 15px; background: rgba(212, 165, 165, 0.15); border-radius: 10px; margin-bottom: 15px; color: #6B4848; border-left: 3px solid var(--accent-healing); }
-        .healing-response { padding: 15px; background: rgba(163, 184, 153, 0.15); border-radius: 10px; color: #3D5A35; border-left: 3px solid var(--accent-success); }
+        .healing-original { padding: 15px; background: rgba(193, 122, 110, 0.1); border-radius: 10px; margin-bottom: 15px; color: #6B3530; border-left: 3px solid var(--accent-danger); }
+        .healing-arrow { text-align: center; font-size: 1.5rem; margin: 10px 0; color: #4A3530; }
+        .healing-translation { padding: 15px; background: rgba(212, 165, 165, 0.15); border-radius: 10px; margin-bottom: 15px; color: #4A3030; border-left: 3px solid var(--accent-healing); }
+        .healing-response { padding: 15px; background: rgba(163, 184, 153, 0.15); border-radius: 10px; color: #2A4025; border-left: 3px solid var(--accent-success); }
         
         .action-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(212, 165, 116, 0.4); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-        .action-header { font-weight: 600; color: #6B4F2A; margin-bottom: 15px; }
+        .action-header { font-weight: 600; color: #4A3820; margin-bottom: 15px; }
         .action-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; padding: 12px; background: rgba(212, 165, 116, 0.08); border-radius: 8px; }
         .action-icon { font-size: 1.2rem; }
-        .action-label { font-size: 0.85rem; color: #6B4F2A; font-weight: 600; margin-bottom: 5px; }
+        .action-label { font-size: 0.85rem; color: #4A3820; font-weight: 600; margin-bottom: 5px; }
         
         .healing-message { text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; margin-top: 30px; }
         .healing-message-text { font-size: 1.2rem; font-style: italic; line-height: 1.8; color: var(--text-primary); }
         
-        /* Stage 3 Styles */
-        .stage3-header { text-align: center; padding: 40px; background: rgba(163, 184, 153, 0.15); border: 1px solid rgba(163, 184, 153, 0.4); border-radius: 20px; margin-bottom: 30px; }
-        .stage3-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; color: #3D5A35; }
+        /* Stage 3 Styles - 森林療癒綠系 */
+        .stage3-header { 
+            text-align: center; 
+            padding: 50px 40px; 
+            background: linear-gradient(165deg, rgba(163, 184, 153, 0.18) 0%, rgba(61, 90, 53, 0.10) 50%, rgba(34, 197, 94, 0.05) 100%); 
+            border: 1px solid rgba(163, 184, 153, 0.4); 
+            border-radius: 24px; 
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stage3-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #3D5A35, #6B8F62, #3D5A35, transparent);
+        }
+        .stage3-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(163, 184, 153, 0.12) 0%, transparent 50%);
+            animation: header-glow 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .stage3-title { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            color: #1E3A10;
+            text-shadow: 0 2px 4px rgba(45, 80, 22, 0.12);
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', Georgia, serif;
+            letter-spacing: 2px;
+        }
+        .stage3-subtitle {
+            font-size: 1rem;
+            color: #2A3D1A;
+            font-style: italic;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
         .growth-section { padding: 25px; background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(139, 115, 85, 0.2); border-radius: 16px; margin-bottom: 20px; }
-        .growth-title { font-size: 1.3rem; font-weight: 600; color: #3D5A35; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .growth-title { font-size: 1.3rem; font-weight: 600; color: #2A4025; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .growth-item { padding: 20px; background: rgba(163, 184, 153, 0.1); border-radius: 10px; margin-bottom: 15px; border-left: 3px solid var(--accent-stage3); }
         .growth-item .text-content { font-size: 1.1rem; line-height: 1.9; color: var(--text-primary); }
-        .growth-label { font-size: 0.9rem; color: #3D5A35; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .growth-label { font-size: 0.9rem; color: #2A4025; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .prompt-list { list-style: none; padding: 0; }
         .prompt-list li { padding: 18px 20px; margin-bottom: 12px; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--accent-success); border-radius: 0 12px 12px 0; font-size: 1.1rem; line-height: 1.7; }
         .closing-box { text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; margin-top: 30px; }
         .closing-text { font-size: 1.3rem; font-style: italic; line-height: 1.9; color: var(--text-primary); }
+        
+        /* 音頻就緒播放按鈕 */
+        .audio-ready-play-btn {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 25px 50px;
+            background: linear-gradient(135deg, #9B7EDE 0%, #7B5FC7 50%, #5B3FA7 100%);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(155, 126, 222, 0.4);
+        }
+        .audio-ready-play-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 50px rgba(155, 126, 222, 0.6);
+        }
+        .play-btn-circle {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            animation: pulse-play 2s ease-in-out infinite;
+        }
+        @keyframes pulse-play {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.2); }
+        }
+        .play-btn-icon {
+            font-size: 2rem;
+            color: #ffffff;
+            margin-left: 5px;
+        }
+        .play-btn-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 浮動短語雲 */
+        .floating-phrases-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .floating-phrase {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #3D5A35;
+            box-shadow: 0 4px 15px rgba(163, 184, 153, 0.3);
+            white-space: nowrap;
+            animation: phrase-float 12s ease-in-out forwards;
+            opacity: 0;
+        }
+        @keyframes phrase-float {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            70% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+        }
         
         .download-section { display: flex; justify-content: center; gap: 20px; padding: 30px; margin-top: 30px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); }
         .error-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 25px; border-radius: 16px; color: #fca5a5; }
         footer { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 50px; }
         footer a { color: var(--accent-gold); text-decoration: none; }
         .text-content { line-height: 1.8; color: var(--text-secondary); }
+        
+        /* 嵌入式備用播放器 */
+        .embedded-player-card {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.98), rgba(40, 35, 30, 0.95));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.15);
+        }
+        .embedded-player-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .embedded-player-icon {
+            font-size: 1.5rem;
+        }
+        .embedded-player-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            font-family: 'Playfair Display', serif;
+        }
+        .embedded-player-body {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .embedded-play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            background: linear-gradient(145deg, #2A2520, #1A1A1A);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .embedded-play-btn .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 14px solid var(--accent-gold);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 4px;
+        }
+        .embedded-play-btn.playing .play-icon {
+            border-left: 5px solid var(--accent-gold);
+            border-right: 5px solid var(--accent-gold);
+            border-top: none;
+            border-bottom: none;
+            width: 14px;
+            height: 18px;
+            margin-left: 0;
+        }
+        .embedded-play-btn:hover {
+            background: linear-gradient(145deg, var(--accent-gold), #8B7355);
+            transform: scale(1.05);
+        }
+        .embedded-play-btn:hover .play-icon {
+            border-left-color: #1A1A1A;
+        }
+        .embedded-progress-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .embedded-progress {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .embedded-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-gold), #F4D03F);
+            transition: width 0.1s;
+            border-radius: 4px;
+        }
+        .embedded-time {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'SF Mono', 'Consolas', monospace;
+        }
+        .embedded-time span:first-child {
+            color: var(--accent-gold);
+        }
     </style>
 </head>
 <body>
+    <canvas id="heroCanvas"></canvas>
     <div class="bg-animation"></div>
     <div class="container">
         <header>
@@ -443,18 +1306,35 @@ HTML_TEMPLATE = '''
             </div>
         </div>
 
-        <button class="btn-primary" id="analyzeBtn" disabled><span></span><span>開始四階段專業分析</span></button>
+        <!-- 錯誤提示卡片 -->
+        <div class="card" id="errorCard" style="display: none; border-color: var(--accent-danger); background: rgba(193, 122, 110, 0.1);">
+            <div class="card-header"><span class="card-icon">⚠️</span><span class="card-title" style="color: var(--accent-danger);">分析失敗</span></div>
+            <div id="errorMessage" style="padding: 20px; color: var(--text-secondary);"></div>
+        </div>
+
+        <button class="btn-primary analyze-btn-animated" id="analyzeBtn" disabled>
+            <span class="btn-text">開始四階段專業分析</span>
+            <span class="btn-arrow">→</span>
+        </button>
 
         <div class="result-container" id="resultContainer">
             <div class="stage-tabs">
                 <button class="stage-tab active" onclick="switchStage(1)"> 一階：衝突演化</button>
                 <button class="stage-tab" onclick="switchStage(2)"> 二階：深層溯源</button>
                 <button class="stage-tab" onclick="switchStage(3)"> 三階：成長方案</button>
-                <button class="stage-tab" onclick="switchStage(4)"> 總結與圖像</button>
+                <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
             </div>
 
             <!-- Stage 1 Content -->
             <div class="stage-content active" id="stage1Content">
+                <!-- Stage 1 頂部四按鈕 -->
+                <div class="stage-tabs in-page-tabs">
+                    <button class="stage-tab active" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
                 <div class="report-header">
                     <div class="report-title"> 衝突演化分析報告</div>
                     <div class="report-meta">分析時間：<span id="reportTime"></span> | 報告編號：<span id="reportId"></span></div>
@@ -480,14 +1360,59 @@ HTML_TEMPLATE = '''
                         <div id="repairAnalysis"></div>
                     </div>
                 </div>
+                
+                <!-- Stage 1 底部四按鈕 -->
+                <div class="stage-tabs in-page-tabs" style="margin-top: 30px;">
+                    <button class="stage-tab active" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
+                <!-- Stage 1 導航 -->
+                <div class="stage-nav" style="margin-top: 15px;">
+                    <div class="stage-nav-placeholder"></div>
+                    <button class="stage-nav-btn next" onclick="switchStage(2)">
+                        二階：深層溯源 →
+                    </button>
+                </div>
+                
+                <!-- Stage 1 下載區塊 -->
+                <div class="download-section in-page-download" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 20px;">
+                    <button class="download-card" onclick="downloadPDF()">
+                        <div class="download-icon">📄</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF 分析報告</div>
+                            <div class="download-desc">點擊下載完整分析報告</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                    <button class="download-card premium" onclick="downloadFullPackage()">
+                        <div class="download-badge">✨ 完整版</div>
+                        <div class="download-icon">📦</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF + 視覺化圖像</div>
+                            <div class="download-desc">包含 4 張視覺化圖像</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                </div>
             </div>
 
             <!-- Stage 2 Content -->
             <div class="stage-content" id="stage2Content">
+                <!-- Stage 2 頂部四按鈕 -->
+                <div class="stage-tabs in-page-tabs">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab active" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
                 <div class="stage2-header">
                     <div class="stage2-title"> 深層溯源與接納橋樑</div>
                     <div class="report-meta">將行為轉化為未滿足的內心需求</div>
-                    <div class="report-summary" id="deepInsight" style="border-left-color: var(--accent-healing);"></div>
+                    <div class="report-summary" id="deepInsight"></div>
                 </div>
 
                 <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">冰山下方分析</span></div><div id="icebergAnalysis"></div></div>
@@ -500,14 +1425,61 @@ HTML_TEMPLATE = '''
                 <div class="card"><div class="card-header"><span class="card-icon">️</span><span class="card-title">可執行的微小改變</span></div><div id="actionableChanges"></div></div>
                 <div class="card"><div class="card-header"><span class="card-icon">️</span><span class="card-title">共同責任重構</span></div><div class="text-content" id="sharedResponsibility"></div></div>
                 <div class="healing-message"><div class="healing-message-text" id="healingMessage"></div></div>
+                
+                <!-- Stage 2 底部四按鈕 -->
+                <div class="stage-tabs in-page-tabs" style="margin-top: 30px;">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab active" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
+                <!-- Stage 2 導航 -->
+                <div class="stage-nav" style="margin-top: 15px;">
+                    <button class="stage-nav-btn prev" onclick="switchStage(1)">
+                        ← 一階：衝突演化
+                    </button>
+                    <button class="stage-nav-btn next" onclick="switchStage(3)">
+                        三階：成長方案 →
+                    </button>
+                </div>
+                
+                <!-- Stage 2 下載區塊 -->
+                <div class="download-section in-page-download" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 20px;">
+                    <button class="download-card" onclick="downloadPDF()">
+                        <div class="download-icon">📄</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF 分析報告</div>
+                            <div class="download-desc">點擊下載完整分析報告</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                    <button class="download-card premium" onclick="downloadFullPackage()">
+                        <div class="download-badge">✨ 完整版</div>
+                        <div class="download-icon">📦</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF + 視覺化圖像</div>
+                            <div class="download-desc">包含 4 張視覺化圖像</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                </div>
             </div>
 
             <!-- Stage 3 Content -->
             <div class="stage-content" id="stage3Content">
+                <!-- Stage 3 頂部四按鈕 -->
+                <div class="stage-tabs in-page-tabs">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab active" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
                 <div class="stage3-header">
                     <div class="stage3-title"> 個人成長行動方案</div>
                     <div class="report-meta">專注「我能做什麼」而非「如何讓對方改變」</div>
-                    <div class="report-summary" id="positioning" style="border-left-color: var(--accent-success);"></div>
+                    <div class="report-summary" id="positioning"></div>
                 </div>
 
                 <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">我能做的修復</span></div><div id="repairSelfLed"></div></div>
@@ -518,10 +1490,57 @@ HTML_TEMPLATE = '''
                 <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">意義重構</span></div><div id="meaningMaking"></div></div>
                 <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">反思提問</span></div><ul class="prompt-list" id="reflectionPrompts"></ul></div>
                 <div class="closing-box"><div class="closing-text" id="closingMessage"></div></div>
+                
+                <!-- Stage 3 底部四按鈕 -->
+                <div class="stage-tabs in-page-tabs" style="margin-top: 30px;">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab active" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
+                <!-- Stage 3 導航 -->
+                <div class="stage-nav" style="margin-top: 15px;">
+                    <button class="stage-nav-btn prev" onclick="switchStage(2)">
+                        ← 二階：深層溯源
+                    </button>
+                    <button class="stage-nav-btn next" onclick="switchStage(4)">
+                        四階：療癒與重點 →
+                    </button>
+                </div>
+                
+                <!-- Stage 3 下載區塊 -->
+                <div class="download-section in-page-download" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 20px;">
+                    <button class="download-card" onclick="downloadPDF()">
+                        <div class="download-icon">📄</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF 分析報告</div>
+                            <div class="download-desc">點擊下載完整分析報告</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                    <button class="download-card premium" onclick="downloadFullPackage()">
+                        <div class="download-badge">✨ 完整版</div>
+                        <div class="download-icon">📦</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF + 視覺化圖像</div>
+                            <div class="download-desc">包含 4 張視覺化圖像</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                </div>
             </div>
 
             <!-- Stage 4: Summary & Images -->
             <div class="stage-content" id="stage4Content">
+                <!-- Stage 4 頂部四按鈕 -->
+                <div class="stage-tabs in-page-tabs">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab active" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
                 <div class="stage3-header" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.05)); border-color: rgba(139, 92, 246, 0.3);">
                     <div class="stage3-title" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); -webkit-background-clip: text;"> 分析總結與視覺化</div>
                     <div class="report-meta">自動提取三階段核心洞見，生成視覺化圖像與催眠療癒音頻</div>
@@ -559,6 +1578,27 @@ HTML_TEMPLATE = '''
 
                 <!-- 視覺化簡報卡片展示區（單列大圖） -->
                 <div id="generatedImagesContainer" style="display:none;">
+                    <!-- 嵌入式備用播放器 -->
+                    <div class="embedded-player-card" id="embeddedPlayerCard" style="display:none;">
+                        <div class="embedded-player-header">
+                            <span class="embedded-player-icon">🎵</span>
+                            <span class="embedded-player-title">專屬療癒音頻</span>
+                        </div>
+                        <div class="embedded-player-body">
+                            <button class="embedded-play-btn" id="embeddedPlayBtn" onclick="toggleHealingAudio()">
+                                <span class="play-icon"></span>
+                            </button>
+                            <div class="embedded-progress-wrapper">
+                                <div class="embedded-progress" onclick="seekAudio(event)">
+                                    <div class="embedded-progress-bar" id="embeddedProgressBar"></div>
+                                </div>
+                                <div class="embedded-time">
+                                    <span id="embeddedCurrentTime">0:00</span> / <span id="embeddedTotalTime">0:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="card" style="background: transparent; padding: 0; border: none;">
                         <div class="card-header" style="padding: 20px 0;"><span class="card-icon"></span><span class="card-title">四大分析視覺簡報</span></div>
                         
@@ -574,7 +1614,6 @@ HTML_TEMPLATE = '''
                                 <div style="padding: 20px 24px; background: linear-gradient(180deg, #FDF8F3 0%, #FAF6F1 100%);">
                                     <h3 id="slideTitle1" style="color: #3D3428; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">覺察時刻</h3>
                                     <ul id="slideBullets1" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: #6B5B4F; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#C9A962; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
@@ -588,21 +1627,21 @@ HTML_TEMPLATE = '''
                                 <div style="padding: 20px 24px; background: linear-gradient(180deg, #FAF5F2 0%, #F7F2EF 100%);">
                                     <h3 id="slideTitle2" style="color: #4A3C35; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">深層對話</h3>
                                     <ul id="slideBullets2" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: #6B5B4F; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#B87351; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
                             
-                            <!-- Card 3: 成長蛻變 (鼠尾草綠) -->
+                            <!-- Card 3: 成長蛻變 (鼠尾草綠) - 帶浮動短語雲 -->
                             <div class="insight-card" id="slideCard3" style="background: #F7FAF6; border: 1px solid #A3B899; border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 20px rgba(163,184,153,0.15);">
                                 <div style="position: relative;">
                                     <img id="imgStage3" style="width:100%; aspect-ratio:16/9; object-fit:cover; display:block; min-height: 320px;" alt="Stage 3 - 成長蛻變">
                                     <div style="position:absolute; top:16px; left:16px; background:#A3B899; color:#2D3A28; padding:6px 16px; border-radius:4px; font-size:0.75rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;">Stage 3</div>
+                                    <!-- 浮動短語雲容器 -->
+                                    <div id="floatingPhrasesContainer" class="floating-phrases-container"></div>
                                 </div>
                                 <div style="padding: 20px 24px; background: linear-gradient(180deg, #F7FAF6 0%, #F4F7F3 100%);">
                                     <h3 id="slideTitle3" style="color: #3A4A35; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">成長蛻變</h3>
                                     <ul id="slideBullets3" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: #5A6B55; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#A3B899; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
@@ -616,48 +1655,52 @@ HTML_TEMPLATE = '''
                                 <div style="padding: 20px 24px; background: linear-gradient(180deg, #FDF8F8 0%, #FAF5F5 100%);">
                                     <h3 id="slideTitle4" style="color: #4A3535; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">和諧共處</h3>
                                     <ul id="slideBullets4" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: #6B5555; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#D4A5A5; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
                             
                         </div>
-                    </div>
                 </div>
-
-                <!-- 音頻就緒提示 -->
-                <div class="card" id="audioReadyCard" style="display:none;">
-                    <div class="card-header"><span class="card-icon"></span><span class="card-title">數位催眠療癒音頻已就緒</span></div>
-                    <div style="padding: 20px; text-align: center;">
-                        <p style="color: var(--accent-secondary); font-size: 1.1rem; margin-bottom: 15px;"> 您的專屬療癒音頻已準備完成</p>
-                        <p style="color: var(--text-muted);">點擊下方巨型按鈕開始您的療癒之旅</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 高質感下載區塊 -->
-            <div class="download-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 30px;">
-                <!-- PDF 報告下載 -->
-                <button id="downloadPdfBtn" class="download-card" onclick="downloadPDF()" disabled>
-                    <div class="download-icon">📄</div>
-                    <div class="download-info">
-                        <div class="download-title">PDF 分析報告</div>
-                        <div class="download-desc" id="pdfDownloadStatus">⏳ 等待生成...</div>
-                    </div>
-                    <div class="download-arrow">→</div>
-                </button>
                 
-                <!-- PDF + 圖片完整版 -->
-                <button id="downloadFullBtn" class="download-card premium" onclick="downloadFullPackage()" disabled>
-                    <div class="download-badge">✨ 完整版</div>
-                    <div class="download-icon">📦</div>
-                    <div class="download-info">
-                        <div class="download-title">PDF + 視覺化圖像</div>
-                        <div class="download-desc" id="fullDownloadStatus">⏳ 等待圖片生成...</div>
-                    </div>
-                    <div class="download-arrow">→</div>
-                </button>
+                <!-- Stage 4 底部四按鈕 -->
+                <div class="stage-tabs in-page-tabs" style="margin-top: 30px;">
+                    <button class="stage-tab" onclick="switchStage(1)">一階：衝突演化</button>
+                    <button class="stage-tab" onclick="switchStage(2)">二階：深層溯源</button>
+                    <button class="stage-tab" onclick="switchStage(3)">三階：成長方案</button>
+                    <button class="stage-tab active" onclick="switchStage(4)">✨ 療癒與重點</button>
+                </div>
+                
+                <!-- Stage 4 導航 -->
+                <div class="stage-nav" style="margin-top: 15px;">
+                    <button class="stage-nav-btn prev" onclick="switchStage(3)">
+                        ← 三階：成長方案
+                    </button>
+                    <div class="stage-nav-placeholder"></div>
+                </div>
+                
+                <!-- Stage 4 下載區塊 -->
+                <div class="download-section in-page-download" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 20px;">
+                    <button id="downloadPdfBtn" class="download-card" onclick="downloadPDF()">
+                        <div class="download-icon">📄</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF 分析報告</div>
+                            <div class="download-desc" id="pdfDownloadStatus">點擊下載完整分析報告</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                    <button id="downloadFullBtn" class="download-card premium" onclick="downloadFullPackage()">
+                        <div class="download-badge">✨ 完整版</div>
+                        <div class="download-icon">📦</div>
+                        <div class="download-info">
+                            <div class="download-title">PDF + 視覺化圖像</div>
+                            <div class="download-desc" id="fullDownloadStatus">包含 4 張視覺化圖像</div>
+                        </div>
+                        <div class="download-arrow">→</div>
+                    </button>
+                </div>
             </div>
+            <!-- ↑ End of stage4Content -->
+            
             
             <style>
                 .download-card {
@@ -737,20 +1780,13 @@ HTML_TEMPLATE = '''
                 }
             </style>
 
-            <!-- 底部導航欄 (方便跳轉) -->
-            <div class="stage-tabs bottom-nav" style="margin-top: 40px; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), rgba(139, 115, 85, 0.05)); border-radius: 12px; border: 1px solid var(--border-color);">
-                <button class="stage-tab" onclick="switchStage(1)"> 一階：衝突演化</button>
-                <button class="stage-tab" onclick="switchStage(2)"> 二階：深層溯源</button>
-                <button class="stage-tab" onclick="switchStage(3)"> 三階：成長方案</button>
-                <button class="stage-tab" onclick="switchStage(4)"> 總結與圖像</button>
-            </div>
         </div>
 
         <div class="card" id="errorCard" style="display: none;"><div class="error-box"><strong> 分析失敗</strong><p id="errorMessage" style="margin-top: 15px;"></p></div></div>
 
         <footer>
-            <p>Lumina 心語  2024 | 四階段分析：演化追蹤 + 深層溯源 + 成長方案 + 數位催眠療癒</p>
-            <p style="margin-top: 10px;">本報告由先進原生心靈引擎驅動生成</p>
+            <p>Lumina 心語 ✦ 2025 | 四階段分析：演化追蹤 + 深層溯源 + 成長方案 + 數位催眠療癒</p>
+            <p style="margin-top: 10px;">由智能大腦 AI 引擎驅動生成</p>
         </footer>
     </div>
 
@@ -760,17 +1796,25 @@ HTML_TEMPLATE = '''
         <div class="healing-player-content">
             <div class="healing-player-icon" style="animation: pulse-glow 2s ease-in-out infinite;"></div>
             <div class="healing-player-info">
-                <div class="healing-player-title"> 開始您的專屬療癒引導</div>
+                <div class="healing-player-title">🎵 開始您的專屬療癒引導</div>
                 <div class="healing-player-subtitle">閉上眼睛，讓艾瑞克森式催眠帶您進入深度放鬆</div>
-                <div class="audio-progress" onclick="seekAudio(event)">
-                    <div class="audio-progress-bar" id="audioProgressBar"></div>
+                <!-- 進度條和時間 -->
+                <div class="audio-progress-wrapper">
+                    <div class="audio-progress" onclick="seekAudio(event)">
+                        <div class="audio-progress-bar" id="audioProgressBar"></div>
+                        <!-- 嵌入式波形視覺化 -->
+                        <canvas id="audioVisualizer" width="300" height="30" style="display:none;"></canvas>
+                    </div>
+                    <div class="audio-time">
+                        <span id="audioCurrentTime">0:00</span>
+                        <span>/</span>
+                        <span id="audioTotalTime">0:00</span>
+                    </div>
                 </div>
             </div>
             <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()"></button>
         </div>
         <audio id="healingAudio" style="display:none;"></audio>
-        <!-- 音頻波形可視化 -->
-        <canvas id="audioVisualizer" width="200" height="40" style="display:none;"></canvas>
     </div>
 
     <style>
@@ -800,14 +1844,16 @@ HTML_TEMPLATE = '''
         .healing-player.ready {
             animation: ready-flash 1s ease-in-out 3;
         }
-        /* 音頻波形可視化 */
+        /* 音頻波形可視化 - 嵌入進度條內部 */
         #audioVisualizer {
             position: absolute;
-            bottom: 85px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            background: transparent;
+            pointer-events: none;
         }
         .healing-player.playing #audioVisualizer {
             display: block !important;
@@ -815,15 +1861,31 @@ HTML_TEMPLATE = '''
     </style>
 
     <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-glow"></div>
         <div class="particles" id="particles"></div>
         <div class="loading-container">
             <div class="progress-ring-container">
+                <!-- 水波上升動畫 -->
+                <div class="water-fill-container" id="waterFillContainer">
+                    <div class="water-fill" id="waterFill"></div>
+                    <div class="water-wave" id="waterWave"></div>
+                </div>
                 <svg class="progress-ring" width="180" height="180">
                     <defs><linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#d4af37"/><stop offset="100%" style="stop-color:#f4d03f"/></linearGradient></defs>
                     <circle class="progress-ring-bg" cx="90" cy="90" r="80"></circle>
                     <circle class="progress-ring-fill" id="progressRing" cx="90" cy="90" r="80"></circle>
                 </svg>
                 <div class="progress-percent" id="progressPercent">0%</div>
+                <!-- 火焰加熱動畫 -->
+                <div class="fire-container" id="fireContainer">
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                </div>
             </div>
             <div class="loading-title" id="loadingTitle">正在深度分析中...</div>
             <div class="loading-stage" id="loadingStage">準備分析環境</div>
@@ -865,6 +1927,12 @@ HTML_TEMPLATE = '''
             document.querySelectorAll('.stage-tab').forEach((t, i) => t.classList.toggle('active', i === stage - 1));
             document.querySelectorAll('.stage-content').forEach((c, i) => c.classList.toggle('active', i === stage - 1));
             
+            // 顯示/隱藏 Stage 4 導航按鈕
+            const stage4Nav = document.getElementById('stage4Nav');
+            if (stage4Nav) {
+                stage4Nav.style.display = stage === 4 ? 'flex' : 'none';
+            }
+            
             // 滾動到對應階段內容的開頭
             const stageContentIds = ['stage1Content', 'stage2Content', 'stage3Content', 'stage4Content'];
             const targetElement = document.getElementById(stageContentIds[stage - 1]);
@@ -878,13 +1946,171 @@ HTML_TEMPLATE = '''
 
         function createParticles() {
             const c = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = Math.random() * 100 + '%'; p.style.animationDelay = Math.random() * 8 + 's'; p.style.animationDuration = (5 + Math.random() * 5) + 's'; c.appendChild(p); }
+            // 普通金色粒子
+            for (let i = 0; i < 35; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                p.style.animationDuration = (6 + Math.random() * 6) + 's';
+                c.appendChild(p);
+            }
+            // 大型光暈粒子
+            for (let i = 0; i < 8; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle large';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 12 + 's';
+                p.style.animationDuration = (10 + Math.random() * 8) + 's';
+                c.appendChild(p);
+            }
+            // 小型閃爍光點
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle glow';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 6 + 's';
+                p.style.animationDuration = (4 + Math.random() * 4) + 's';
+                c.appendChild(p);
+            }
         }
         createParticles();
+
+        // ========== Hero 區域動態背景動畫 ==========
+        (function initHeroAnimation() {
+            const canvas = document.getElementById('heroCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            let auroraOffset = 0;
+            let animationId;
+
+            // 調整畫布大小
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                initParticles();
+            }
+
+            // 初始化療癒光點
+            function initParticles() {
+                particles = [];
+                const count = Math.min(60, Math.floor(width * height / 20000));
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: -Math.random() * 0.5 - 0.2,
+                        size: Math.random() * 3 + 1,
+                        alpha: Math.random() * 0.5 + 0.2,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: Math.random() * 0.02 + 0.01
+                    });
+                }
+            }
+
+            // 繪製極光效果 - 增強對比度
+            function drawAurora() {
+                auroraOffset += 0.003;
+                const gradient1 = ctx.createLinearGradient(0, 0, width, height * 0.6);
+                gradient1.addColorStop(0, 'rgba(201, 169, 98, 0)');
+                gradient1.addColorStop(0.2, `rgba(201, 169, 98, ${0.12 + Math.sin(auroraOffset) * 0.05})`);
+                gradient1.addColorStop(0.4, `rgba(212, 175, 55, ${0.18 + Math.sin(auroraOffset * 1.5) * 0.07})`);
+                gradient1.addColorStop(0.6, `rgba(184, 115, 81, ${0.12 + Math.sin(auroraOffset * 0.8) * 0.05})`);
+                gradient1.addColorStop(1, 'rgba(139, 115, 85, 0)');
+
+                ctx.fillStyle = gradient1;
+                ctx.fillRect(0, 0, width, height);
+
+                // 第二層極光 - 波動效果
+                const waveY = height * 0.25 + Math.sin(auroraOffset * 2) * 60;
+                const gradient2 = ctx.createRadialGradient(
+                    width * 0.3, waveY, 0,
+                    width * 0.3, waveY, width * 0.5
+                );
+                gradient2.addColorStop(0, `rgba(212, 175, 55, ${0.20 + Math.sin(auroraOffset * 1.2) * 0.08})`);
+                gradient2.addColorStop(0.4, `rgba(201, 169, 98, ${0.12 + Math.sin(auroraOffset) * 0.05})`);
+                gradient2.addColorStop(1, 'rgba(201, 169, 98, 0)');
+                ctx.fillStyle = gradient2;
+                ctx.fillRect(0, 0, width, height);
+
+                // 第三層極光 - 右下角呼吸光暈
+                const waveY2 = height * 0.7 + Math.sin(auroraOffset * 1.5) * 40;
+                const gradient3 = ctx.createRadialGradient(
+                    width * 0.75, waveY2, 0,
+                    width * 0.75, waveY2, width * 0.4
+                );
+                gradient3.addColorStop(0, `rgba(184, 115, 81, ${0.15 + Math.sin(auroraOffset * 0.9) * 0.06})`);
+                gradient3.addColorStop(0.5, `rgba(139, 115, 85, ${0.08 + Math.sin(auroraOffset * 1.3) * 0.04})`);
+                gradient3.addColorStop(1, 'rgba(139, 115, 85, 0)');
+                ctx.fillStyle = gradient3;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // 繪製浮動光點
+            function drawParticles() {
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.pulse += p.pulseSpeed;
+
+                    // 邊界循環
+                    if (p.y < -20) { p.y = height + 20; p.x = Math.random() * width; }
+                    if (p.x < -20) p.x = width + 20;
+                    if (p.x > width + 20) p.x = -20;
+
+                    const pulseAlpha = p.alpha * (0.7 + Math.sin(p.pulse) * 0.3);
+                    const pulseSize = p.size * (0.9 + Math.sin(p.pulse) * 0.15);
+
+                    // 外層光暈 - 增強可見度
+                    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulseSize * 6);
+                    gradient.addColorStop(0, `rgba(255, 215, 100, ${pulseAlpha * 1.2})`);
+                    gradient.addColorStop(0.3, `rgba(212, 175, 55, ${pulseAlpha * 0.7})`);
+                    gradient.addColorStop(0.6, `rgba(201, 169, 98, ${pulseAlpha * 0.25})`);
+                    gradient.addColorStop(1, 'rgba(201, 169, 98, 0)');
+
+                    ctx.beginPath();
+                    ctx.fillStyle = gradient;
+                    ctx.arc(p.x, p.y, pulseSize * 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 核心亮點 - 更亮更明顯
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(255, 250, 240, ${pulseAlpha * 0.8})`;
+                    ctx.arc(p.x, p.y, pulseSize * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            // 動畫循環
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                drawAurora();
+                drawParticles();
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // 啟動
+            window.addEventListener('resize', resize);
+            resize();
+            animate();
+
+            // 可見性優化 - 頁面不可見時暫停動畫
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    cancelAnimationFrame(animationId);
+                } else {
+                    animate();
+                }
+            });
+        })();
 
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('audioFile');
         const analyzeBtn = document.getElementById('analyzeBtn');
+        
         uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
         uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
         uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
@@ -893,8 +2119,12 @@ HTML_TEMPLATE = '''
         function handleFile(file) { selectedFile = file; document.getElementById('fileName').textContent = file.name; document.getElementById('fileSize').textContent = `(${(file.size / 1048576).toFixed(1)} MB)`; document.getElementById('fileInfo').classList.add('show'); analyzeBtn.disabled = false; }
 
         let progressInterval;
+        let waterFillInterval = null;
+        let waterFillStarted = false;
+        
         function startProgress() {
             let progress = 0;
+            waterFillStarted = false;
             const stages = [
                 { pct: 8, text: '上傳音訊中...', id: 's1' },
                 { pct: 18, text: '一階：建立聲學基線...', id: 's2' },
@@ -910,22 +2140,148 @@ HTML_TEMPLATE = '''
                 if (progress > 98) progress = 98;
                 document.getElementById('progressRing').style.strokeDashoffset = 502 - (502 * progress / 100);
                 document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+                
+                // 當進度達到 98% 時，啟動水波上升動畫
+                if (progress >= 98 && !waterFillStarted) {
+                    waterFillStarted = true;
+                    startWaterFillAnimation();
+                }
+                
                 if (idx < stages.length && progress >= stages[idx].pct) {
                     document.getElementById('loadingStage').textContent = stages[idx].text;
                     if (idx >= 4 && idx < 6) document.getElementById('loadingTitle').textContent = '正在深層溯源...';
                     if (idx >= 6) document.getElementById('loadingTitle').textContent = '正在建構成長方案...';
                     const el = document.getElementById(stages[idx].id);
-                    el.classList.add('active'); el.querySelector('.stage-icon').textContent = '';
-                    if (idx > 0) { const prev = document.getElementById(stages[idx - 1].id); prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.stage-icon').textContent = ''; }
+                    el.classList.add('active'); el.querySelector('.stage-icon').textContent = '⏳';
+                    if (idx > 0) { const prev = document.getElementById(stages[idx - 1].id); prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.stage-icon').textContent = '✓'; }
                     idx++;
                 }
             }, 100);
         }
+        
+        // 水波上升動畫
+        let heatingPhaseStarted = false;
+        
+        function startWaterFillAnimation() {
+            const container = document.getElementById('waterFillContainer');
+            const waterFill = document.getElementById('waterFill');
+            container.classList.add('active');
+            heatingPhaseStarted = false;
+            
+            let waterLevel = 0;
+            document.getElementById('loadingTitle').textContent = '✨ 正在整合分析結果...';
+            document.getElementById('loadingStage').textContent = '即將完成，請稍候片刻';
+            
+            waterFillInterval = setInterval(() => {
+                waterLevel += 0.3;  // 慢速上升，配合分析時間
+                
+                // 當水滿到 95% 時，啟動火焰加熱階段
+                if (waterLevel >= 95 && !heatingPhaseStarted) {
+                    heatingPhaseStarted = true;
+                    waterLevel = 100;
+                    waterFill.style.height = '100%';
+                    startHeatingPhase();
+                }
+                
+                if (waterLevel <= 95) {
+                    waterFill.style.height = waterLevel + '%';
+                }
+            }, 100);
+        }
+        
+        // 火焰加熱階段 - 水從藍色變紅色
+        function startHeatingPhase() {
+            clearInterval(waterFillInterval);
+            waterFillInterval = null;
+            
+            const fireContainer = document.getElementById('fireContainer');
+            const waterFill = document.getElementById('waterFill');
+            const waterWave = document.getElementById('waterWave');
+            
+            // 顯示火焰
+            fireContainer.classList.add('active');
+            
+            // 開始加熱動畫 - 水變色
+            waterFill.classList.add('heating');
+            waterWave.classList.add('boiling');
+            
+            // 更新文字提示
+            document.getElementById('loadingTitle').textContent = '🔥 正在煉化分析精華...';
+            document.getElementById('loadingStage').textContent = '萃取核心洞察中';
+            
+            // 階段性更新提示文字
+            setTimeout(() => {
+                document.getElementById('loadingTitle').textContent = '✨ 療癒能量凝聚中...';
+                document.getElementById('loadingStage').textContent = '即將完成，感謝您的耐心';
+            }, 8000);
+            
+            // 15秒後開始冷卻階段
+            setTimeout(() => {
+                startCoolingPhase();
+            }, 15000);
+        }
+        
+        // 冷卻階段 - 水從紅色逐漸冷卻變回藍色
+        function startCoolingPhase() {
+            const fireContainer = document.getElementById('fireContainer');
+            const waterFill = document.getElementById('waterFill');
+            const waterWave = document.getElementById('waterWave');
+            
+            // 熄滅火焰
+            fireContainer.classList.remove('active');
+            
+            // 移除加熱效果，添加冷卻效果
+            waterFill.classList.remove('heating');
+            waterWave.classList.remove('boiling');
+            waterFill.classList.add('cooling');
+            waterWave.classList.add('cooling');
+            
+            // 更新文字提示為「報告撰寫中」
+            document.getElementById('loadingTitle').textContent = '📝 報告撰寫中...';
+            document.getElementById('loadingStage').textContent = '正在組織分析結果與建議';
+            
+            // 冷卻過程中的文字更新
+            setTimeout(() => {
+                document.getElementById('loadingTitle').textContent = '📖 整理療癒方案...';
+                document.getElementById('loadingStage').textContent = '為您量身打造成長路徑';
+            }, 6000);
+            
+            setTimeout(() => {
+                document.getElementById('loadingTitle').textContent = '✅ 報告即將完成！';
+                document.getElementById('loadingStage').textContent = '感謝您的耐心等待';
+            }, 12000);
+        }
+        
+        function stopWaterFillAnimation() {
+            if (waterFillInterval) {
+                clearInterval(waterFillInterval);
+                waterFillInterval = null;
+            }
+            
+            // 如果還沒進入加熱階段，快速填滿
+            const waterFill = document.getElementById('waterFill');
+            if (waterFill) waterFill.style.height = '100%';
+            
+            // 清除火焰和加熱效果
+            const fireContainer = document.getElementById('fireContainer');
+            if (fireContainer) fireContainer.classList.remove('active');
+            
+            // 重置水的顏色（為下次使用）
+            if (waterFill) {
+                waterFill.classList.remove('heating', 'cooling');
+            }
+            const waterWave = document.getElementById('waterWave');
+            if (waterWave) {
+                waterWave.classList.remove('boiling', 'cooling');
+            }
+        }
+        
         function stopProgress() {
             clearInterval(progressInterval);
+            stopWaterFillAnimation();
             document.getElementById('progressPercent').textContent = '100%';
             document.getElementById('progressRing').style.strokeDashoffset = 0;
-            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.stage-icon').textContent = ''; });
+            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.stage-icon').textContent = '✓'; });
         }
 
         analyzeBtn.addEventListener('click', async () => {
@@ -935,9 +2291,14 @@ HTML_TEMPLATE = '''
             document.getElementById('loadingOverlay').classList.add('show');
             document.getElementById('loadingTitle').textContent = '正在深度分析中...';
             analyzeBtn.disabled = true;
-            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active', 'done'); el.querySelector('.stage-icon').textContent = ''; });
+            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active', 'done'); el.querySelector('.stage-icon').textContent = '○'; });
             document.getElementById('progressRing').style.strokeDashoffset = 502;
             document.getElementById('progressPercent').textContent = '0%';
+            // 重置水波動畫
+            const waterContainer = document.getElementById('waterFillContainer');
+            const waterFill = document.getElementById('waterFill');
+            if (waterContainer) waterContainer.classList.remove('active');
+            if (waterFill) waterFill.style.height = '0%';
             startProgress();
 
             const formData = new FormData();
@@ -959,6 +2320,19 @@ HTML_TEMPLATE = '''
             } catch (err) { stopProgress(); document.getElementById('loadingOverlay').classList.remove('show'); showError('網路錯誤：' + err.message); }
             finally { analyzeBtn.disabled = false; }
         });
+        
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorCard = document.getElementById('errorCard');
+            const errorMessage = document.getElementById('errorMessage');
+            if (errorCard && errorMessage) {
+                errorMessage.textContent = message;
+                errorCard.style.display = 'block';
+                errorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                alert('分析失敗：' + message);
+            }
+        }
 
         function displayResult(r, reportId) {
             currentReportId = reportId;  // 儲存報告 ID 供圖像生成使用
@@ -1066,8 +2440,94 @@ HTML_TEMPLATE = '''
             // 分析完成，啟用 PDF 下載按鈕
             updateDownloadButtons(true, false);
             
+            // 啟動浮動短語雲（從分析結果提取短語）
+            startFloatingPhrases(r);
+            
             // 分析完成後自動開始生成療育音頻
             onAnalysisComplete();
+        }
+        
+        // 浮動短語雲系統
+        let phraseIntervalId = null;
+        function startFloatingPhrases(result) {
+            const container = document.getElementById('floatingPhrasesContainer');
+            if (!container) return;
+            
+            // 從分析結果中提取有意義的短語
+            const phrases = extractPhrases(result);
+            if (phrases.length === 0) return;
+            
+            let idx = 0;
+            
+            function createPhrase() {
+                if (phrases.length === 0) return;
+                
+                // 隨機選取短語
+                const phrase = phrases[idx % phrases.length];
+                idx++;
+                
+                const el = document.createElement('div');
+                el.className = 'floating-phrase';
+                el.textContent = phrase;
+                
+                // 隨機位置（避免重疊）
+                el.style.left = (10 + Math.random() * 60) + '%';
+                el.style.top = (20 + Math.random() * 50) + '%';
+                
+                container.appendChild(el);
+                
+                // 動畫結束後移除
+                setTimeout(() => {
+                    el.remove();
+                }, 12000);
+            }
+            
+            // 啟動：每 8 秒出現一個短語
+            createPhrase();
+            phraseIntervalId = setInterval(createPhrase, 8000);
+        }
+        
+        function extractPhrases(result) {
+            const phrases = [];
+            const s3 = result.stage3 || {};
+            
+            // 從 Stage 3 提取關鍵短語
+            if (s3.positioning) {
+                // 截取前 20 個字
+                const pos = s3.positioning.slice(0, 30);
+                if (pos.length > 10) phrases.push('✨ ' + pos + '...');
+            }
+            
+            // 從反思提問中提取
+            if (s3.reflection_prompts && Array.isArray(s3.reflection_prompts)) {
+                s3.reflection_prompts.slice(0, 3).forEach(q => {
+                    const short = q.slice(0, 25);
+                    if (short.length > 8) phrases.push('💭 ' + short + '...');
+                });
+            }
+            
+            // 從意義重構中提取
+            if (s3.meaning_making) {
+                if (s3.meaning_making.message_to_self) {
+                    const msg = s3.meaning_making.message_to_self.slice(0, 28);
+                    if (msg.length > 10) phrases.push('💫 ' + msg + '...');
+                }
+            }
+            
+            // 從我的邊界中提取
+            if (s3.my_boundaries && s3.my_boundaries.core_needs) {
+                const needs = s3.my_boundaries.core_needs.slice(0, 25);
+                if (needs.length > 8) phrases.push('🌿 ' + needs + '...');
+            }
+            
+            // 從 Stage 2 提取
+            const s2 = result.stage2 || {};
+            if (s2.deep_insight_summary) {
+                const insight = s2.deep_insight_summary.slice(0, 28);
+                if (insight.length > 12) phrases.push('🔮 ' + insight + '...');
+            }
+            
+            return phrases;
         }
 
         function showError(msg) { document.getElementById('errorMessage').textContent = msg; document.getElementById('errorCard').style.display = 'block'; }
@@ -1078,31 +2538,68 @@ HTML_TEMPLATE = '''
             window.open(`/download-pdf/${currentReportId}`, '_blank'); 
         }
         
-        // 下載完整包（PDF + 圖片）
-        function downloadFullPackage() {
+        // 下載完整包（PDF 內嵌圖片）
+        async function downloadFullPackage() {
             if (!currentReportId || !imagesReady) { 
                 alert('圖片尚未生成完成，請稍候'); 
                 return; 
             }
-            // 下載 PDF
-            window.open(`/download-pdf/${currentReportId}`, '_blank');
             
-            // 延遲下載圖片（避免瀏覽器阻擋多個下載）
-            setTimeout(() => {
-                // 下載所有生成的圖片
+            const btn = document.getElementById('downloadFullBtn');
+            const status = document.getElementById('fullDownloadStatus');
+            btn.disabled = true;
+            status.textContent = '⏳ 正在生成完整版 PDF...';
+            
+            try {
+                // 收集所有圖片的 base64
                 const imgIds = ['imgStage1', 'imgStage2', 'imgStage3', 'imgCombined'];
-                const stageNames = ['1_衝突演化', '2_深層溯源', '3_成長方案', '4_融合總覽'];
+                const images = [];
                 
-                imgIds.forEach((id, index) => {
+                imgIds.forEach(id => {
                     const img = document.getElementById(id);
                     if (img && img.src && img.src.startsWith('data:image')) {
-                        const link = document.createElement('a');
-                        link.href = img.src;
-                        link.download = `Lumina心語_${stageNames[index]}.png`;
-                        setTimeout(() => link.click(), index * 500);
+                        // 提取 base64 部分（去掉 data:image/png;base64, 前綴）
+                        const base64 = img.src.split(',')[1];
+                        images.push(base64);
+                    } else {
+                        images.push(null);  // 該圖片生成失敗
                     }
                 });
-            }, 1000);
+                
+                // 呼叫後端生成帶圖片的 PDF
+                const resp = await fetch('/download-pdf-with-images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        report_id: currentReportId,
+                        images: images
+                    })
+                });
+                
+                if (resp.ok) {
+                    // 下載 PDF
+                    const blob = await resp.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `衝突分析報告_完整版_${currentReportId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    status.textContent = '✅ 下載完成！';
+                } else {
+                    const error = await resp.json();
+                    throw new Error(error.error || '下載失敗');
+                }
+            } catch (err) {
+                console.error('下載完整版 PDF 失敗:', err);
+                status.textContent = '❌ 下載失敗，請重試';
+                alert('下載失敗：' + err.message);
+            } finally {
+                btn.disabled = false;
+            }
         }
         
         // 按鈕狀態管理
@@ -1176,14 +2673,14 @@ HTML_TEMPLATE = '''
                 
                 console.log(`📍[${i+1}/4] 請求生成：${key}`);
                 
-                // ⚠️ 自動重試 3 次
+                // ⚠️ 自動重試 6 次
                 let imageSuccess = false;
                 let lastError = null;
                 
-                for (let attempt = 1; attempt <= 3 && !imageSuccess; attempt++) {
+                for (let attempt = 1; attempt <= 6 && !imageSuccess; attempt++) {
                     if (attempt > 1) {
                         console.log(`🔄[${i+1}/4] ${key} 第 ${attempt} 次重試...`);
-                        progressText.textContent = `🔄 [${i+1}/4]「${name}」重試中 (${attempt}/3)...`;
+                        progressText.textContent = `🔄 [${i+1}/4]「${name}」重試中 (${attempt}/6)...`;
                         await new Promise(r => setTimeout(r, 2000));  // 重試前等待 2 秒
                     }
                     
@@ -1248,9 +2745,9 @@ HTML_TEMPLATE = '''
                     }
                 }
                 
-                // 3 次都失敗後才顯示手動重試
+                // 6 次都失敗後才顯示手動重試
                 if (!imageSuccess) {
-                    console.error(`❌[${i+1}/4] ${key} 自動重試 3 次失敗，顯示手動重試按鈕`);
+                    console.error(`❌[${i+1}/4] ${key} 自動重試 6 次失敗，顯示手動重試按鈕`);
                     failedStages.push(i);
                     showFailedPlaceholder(imgId, i, name);
                 }
@@ -1520,13 +3017,331 @@ HTML_TEMPLATE = '''
         
         const audioNarrator = new AudioNarrator();
         
+        // ========== 串流音頻播放器 ==========
+        class StreamingAudioPlayer {
+            constructor() {
+                this.audioQueue = [];  // 音頻片段隊列
+                this.currentIndex = 0;
+                this.isPlaying = false;
+                this.audioElement = null;
+                this.totalParts = 0;
+                this.receivedParts = 0;
+                this.onStatusUpdate = null;
+            }
+            
+            init(audioElement, statusCallback) {
+                this.audioElement = audioElement;
+                this.onStatusUpdate = statusCallback;
+                this.audioQueue = [];
+                this.currentIndex = 0;
+                this.isPlaying = false;
+                this.totalParts = 0;
+                this.receivedParts = 0;
+                this.partDurations = [];  // 追蹤每個片段的時長
+                this.totalDuration = 0;   // 總時長
+                this.elapsedBeforeCurrent = 0;  // 當前片段之前已播放的時間
+                
+                // 當前片段播放結束時，自動播放下一個
+                this.audioElement.onended = () => this.playNext();
+                
+                // 綁定 timeupdate 事件以更新進度條
+                this.audioElement.ontimeupdate = () => this.updateProgress();
+                
+                // 當片段載入完成時，記錄其時長
+                this.audioElement.onloadedmetadata = () => {
+                    if (this.currentIndex < this.partDurations.length) {
+                        this.partDurations[this.currentIndex] = this.audioElement.duration;
+                        this.totalDuration = this.partDurations.reduce((sum, d) => sum + (d || 0), 0);
+                    }
+                };
+            }
+            
+            // 更新進度條
+            updateProgress() {
+                if (!this.audioElement || !this.isPlaying) return;
+                
+                const currentPartTime = this.audioElement.currentTime || 0;
+                const totalElapsed = this.elapsedBeforeCurrent + currentPartTime;
+                
+                // 估算總時長（基於已收到的片段）
+                const avgPartDuration = this.totalDuration / (this.partDurations.filter(d => d > 0).length || 1);
+                const estimatedTotal = avgPartDuration * this.totalParts;
+                
+                const progress = estimatedTotal > 0 ? (totalElapsed / estimatedTotal) * 100 : 0;
+                
+                const progressBar = document.getElementById('audioProgressBar');
+                const currentTimeEl = document.getElementById('audioCurrentTime');
+                const totalTimeEl = document.getElementById('audioTotalTime');
+                
+                if (progressBar) progressBar.style.width = Math.min(progress, 100) + '%';
+                if (currentTimeEl) currentTimeEl.textContent = this.formatTime(totalElapsed);
+                if (totalTimeEl) totalTimeEl.textContent = this.formatTime(estimatedTotal);
+                
+                // 同步備用播放器
+                const embeddedBar = document.getElementById('embeddedProgressBar');
+                const embeddedCurrent = document.getElementById('embeddedCurrentTime');
+                const embeddedTotal = document.getElementById('embeddedTotalTime');
+                if (embeddedBar) embeddedBar.style.width = Math.min(progress, 100) + '%';
+                if (embeddedCurrent) embeddedCurrent.textContent = this.formatTime(totalElapsed);
+                if (embeddedTotal) embeddedTotal.textContent = this.formatTime(estimatedTotal);
+            }
+            
+            formatTime(seconds) {
+                if (!seconds || isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // 添加新的音頻片段到隊列
+            addAudioPart(base64Audio, partNumber) {
+                const audioUrl = 'data:audio/wav;base64,' + base64Audio;
+                this.audioQueue.push({ url: audioUrl, part: partNumber });
+                this.receivedParts++;
+                this.partDurations.push(0);  // 預留位置
+                
+                console.log(`📥 收到音頻片段 ${partNumber}/${this.totalParts}`);
+                
+                // 如果是第一個片段且還沒開始播放，立即開始！
+                if (this.audioQueue.length === 1 && !this.isPlaying) {
+                    this.startPlaying();
+                }
+            }
+            
+            startPlaying() {
+                if (this.audioQueue.length === 0) return;
+                
+                this.isPlaying = true;
+                this.currentIndex = 0;
+                this.playCurrentPart();
+            }
+            
+            playCurrentPart() {
+                if (this.currentIndex >= this.audioQueue.length) {
+                    // 還沒有更多片段，等待...
+                    if (this.receivedParts < this.totalParts) {
+                        console.log('⏳ 等待更多片段...');
+                        // 設置一個檢查器，等待新片段
+                        const waitForNext = setInterval(() => {
+                            if (this.currentIndex < this.audioQueue.length) {
+                                clearInterval(waitForNext);
+                                this.playCurrentPart();
+                            } else if (this.receivedParts >= this.totalParts) {
+                                clearInterval(waitForNext);
+                                this.onComplete();
+                            }
+                        }, 500);
+                    } else {
+                        this.onComplete();
+                    }
+                    return;
+                }
+                
+                const part = this.audioQueue[this.currentIndex];
+                this.audioElement.src = part.url;
+                this.audioElement.play().catch(e => console.error('播放錯誤:', e));
+                
+                if (this.onStatusUpdate) {
+                    this.onStatusUpdate(`🎵 正在播放 ${part.part}/${this.totalParts}...`);
+                }
+            }
+            
+            playNext() {
+                // 累加已播放片段的時長
+                if (this.currentIndex < this.partDurations.length) {
+                    this.elapsedBeforeCurrent += this.partDurations[this.currentIndex] || 0;
+                }
+                this.currentIndex++;
+                this.playCurrentPart();
+            }
+            
+            onComplete() {
+                this.isPlaying = false;
+                if (this.onStatusUpdate) {
+                    this.onStatusUpdate('✅ 療癒音頻播放完成');
+                }
+                console.log('✅ 所有音頻片段播放完成');
+            }
+            
+            pause() {
+                if (this.audioElement) {
+                    this.audioElement.pause();
+                    this.isPlaying = false;
+                }
+            }
+            
+            resume() {
+                if (this.audioElement && !this.isPlaying) {
+                    this.audioElement.play();
+                    this.isPlaying = true;
+                }
+            }
+        }
+        
+        const streamingPlayer = new StreamingAudioPlayer();
+        
+        // 串流式生成療育音頻（邊生成邊播放）
+        async function generateHealingAudioStream() {
+            if (!currentReportId) return false;
+            
+            const progressBar = document.getElementById('audioGenProgressBar');
+            const progressText = document.getElementById('audioProgressText');
+            const partsProgress = document.getElementById('audioPartsProgress');
+            const healingPlayer = document.getElementById('healingPlayer');
+            const audio = document.getElementById('healingAudio');
+            
+            // 初始化串流播放器
+            streamingPlayer.init(audio, (status) => {
+                partsProgress.textContent = status;
+            });
+            
+            // 顯示播放器（生成中狀態）
+            healingPlayer.classList.add('show', 'generating');
+            healingPlayer.classList.remove('ready', 'playing');
+            document.querySelector('.healing-player-title').textContent = '🎵 療癒音頻串流生成中...';
+            
+            progressText.textContent = '正在連接串流...';
+            progressBar.style.width = '5%';
+            partsProgress.style.display = 'block';
+            
+            const stage4Prompt = document.getElementById('stage4Prompt').value;
+            
+            try {
+                const response = await fetch('/generate-audio-stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        report_id: currentReportId,
+                        stage4_prompt: stage4Prompt,
+                        voice: 'warm_female'
+                    })
+                });
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // 解析 SSE 事件
+                    const lines = buffer.split('\\n');
+                    buffer = lines.pop() || '';  // 保留不完整的行
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                handleStreamEvent(data, progressBar, progressText, partsProgress);
+                            } catch (e) {
+                                console.warn('解析 SSE 事件失敗:', line);
+                            }
+                        }
+                    }
+                }
+                
+                // 處理完成 - 檢查是否真的有音頻片段
+                if (streamingPlayer.audioQueue.length === 0) {
+                    // 沒有任何音頻片段成功，降級到傳統模式
+                    console.warn('⚠️ 串流模式沒有成功生成任何片段，降級到傳統模式...');
+                    progressText.textContent = '⚠️ 串流失敗，切換到傳統模式...';
+                    return await generateHealingAudioAuto();
+                }
+                
+                progressBar.style.width = '100%';
+                progressText.textContent = `✅ 串流生成完成！(${streamingPlayer.audioQueue.length} 個片段)`;
+                healingPlayer.classList.remove('generating');
+                healingPlayer.classList.add('ready');
+                document.querySelector('.healing-player-title').textContent = '🎵 串流療癒音頻';
+                healingAudioReady = true;
+                
+                return true;
+                
+            } catch (err) {
+                console.error('串流生成錯誤:', err);
+                progressText.textContent = '❌ 串流生成失敗，切換到傳統模式...';
+                // 降級到傳統模式
+                return await generateHealingAudioAuto();
+            }
+        }
+        
+        function handleStreamEvent(data, progressBar, progressText, partsProgress) {
+            switch (data.type) {
+                case 'status':
+                    progressText.textContent = data.message;
+                    break;
+                    
+                case 'info':
+                    streamingPlayer.totalParts = data.total_parts;
+                    partsProgress.textContent = data.message;
+                    progressBar.style.width = '15%';
+                    break;
+                    
+                case 'audio':
+                    // 收到音頻片段！
+                    streamingPlayer.addAudioPart(data.audio_base64, data.part);
+                    const pct = 15 + (data.part / data.total) * 80;
+                    progressBar.style.width = pct + '%';
+                    progressText.textContent = `🎙️ 已生成 ${data.part}/${data.total} 片段`;
+                    break;
+                    
+                case 'part_error':
+                    console.warn(`片段 ${data.part} 生成失敗:`, data.error);
+                    break;
+                    
+                case 'complete_with_bgm':
+                    // 🎵 收到混合了 BGM 的完整音頻！
+                    console.log('🎵 收到混合 BGM 的完整音頻！方法:', data.bgm_method);
+                    partsProgress.textContent = `🎵 已混合背景音樂 (${data.bgm_method})`;
+                    
+                    // 設置主音頻播放器使用混合後的音頻
+                    const audio = document.getElementById('healingAudio');
+                    audio.src = 'data:audio/wav;base64,' + data.audio_base64;
+                    audio.addEventListener('timeupdate', updateAudioProgress);
+                    audio.addEventListener('ended', onAudioEnded);
+                    
+                    // 更新 UI 狀態
+                    healingAudioReady = true;
+                    const healingPlayer = document.getElementById('healingPlayer');
+                    healingPlayer.classList.remove('generating');
+                    healingPlayer.classList.add('ready');
+                    document.querySelector('.healing-player-title').textContent = '🎵 療癒音頻（含背景音樂）';
+                    
+                    // 顯示嵌入式備用播放器
+                    const embeddedPlayer = document.getElementById('embeddedPlayerCard');
+                    if (embeddedPlayer) embeddedPlayer.style.display = 'block';
+                    break;
+                    
+                case 'bgm_skipped':
+                    console.log('⚠️ BGM 跳過:', data.reason);
+                    partsProgress.textContent = `⚠️ 背景音樂跳過: ${data.reason}`;
+                    break;
+                    
+                case 'bgm_error':
+                    console.warn('❌ BGM 混合錯誤:', data.error);
+                    partsProgress.textContent = '⚠️ 背景音樂混合失敗，使用純語音';
+                    break;
+                    
+                case 'complete':
+                    partsProgress.textContent = `✅ 生成完成！成功 ${data.success_count || '?'} 個片段`;
+                    break;
+                    
+                case 'error':
+                    progressText.textContent = '❌ ' + data.message;
+                    break;
+            }
+        }
+        
         // 自動生成音頻（帶自動重試 3 次）
         async function generateHealingAudioAuto() {
             if (!currentReportId) return false;
             
             const progressBar = document.getElementById('audioGenProgressBar');
             const progressText = document.getElementById('audioProgressText');
-            const audioReadyCard = document.getElementById('audioReadyCard');
+
             const partsProgress = document.getElementById('audioPartsProgress');
             
             progressText.textContent = '正在生成分段療癒腳本...';
@@ -1566,15 +3381,15 @@ HTML_TEMPLATE = '''
             
             const stage4Prompt = document.getElementById('stage4Prompt').value;
             
-            // ⚠️ 自動重試 3 次
+            // ⚠️ 自動重試 6 次
             let success = false;
             let lastError = null;
             let data = null;
             
-            for (let attempt = 1; attempt <= 3 && !success; attempt++) {
+            for (let attempt = 1; attempt <= 6 && !success; attempt++) {
                 if (attempt > 1) {
                     console.log(`🔄 音頻生成第 ${attempt} 次重試...`);
-                    progressText.textContent = `🔄 音頻生成重試中 (${attempt}/3)...`;
+                    progressText.textContent = `🔄 音頻生成重試中 (${attempt}/6)...`;
                     await new Promise(r => setTimeout(r, 3000));  // 重試前等待 3 秒
                 }
                 
@@ -1629,8 +3444,7 @@ HTML_TEMPLATE = '''
                 
                 healingAudioReady = true;
                 
-                // 顯示就緒卡片
-                audioReadyCard.style.display = 'block';
+
                 
                 // ⚠️ 生成完成：移除生成中狀態，添加就緒閃爍動畫
                 const healingPlayer = document.getElementById('healingPlayer');
@@ -1641,6 +3455,12 @@ HTML_TEMPLATE = '''
                 // 初始化音頻波形可視化
                 initAudioVisualizer(audio);
                 
+                // 顯示嵌入式備用播放器
+                const embeddedPlayer = document.getElementById('embeddedPlayerCard');
+                if (embeddedPlayer) {
+                    embeddedPlayer.style.display = 'block';
+                }
+                
                 return true;
             } else {
                 progressText.innerHTML = `❌ 音頻生成失敗（重試 3 次）<button onclick="generateHealingAudioAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">重試</button>`;
@@ -1650,11 +3470,31 @@ HTML_TEMPLATE = '''
             }
         }
         
+        // 格式化時間為 M:SS 格式
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
         function updateAudioProgress() {
             const audio = document.getElementById('healingAudio');
             if (audio.duration) {
                 const progress = (audio.currentTime / audio.duration) * 100;
                 document.getElementById('audioProgressBar').style.width = progress + '%';
+                
+                // 更新時間顯示
+                document.getElementById('audioCurrentTime').textContent = formatTime(audio.currentTime);
+                document.getElementById('audioTotalTime').textContent = formatTime(audio.duration);
+                
+                // 同步備用播放器
+                const embeddedBar = document.getElementById('embeddedProgressBar');
+                const embeddedCurrent = document.getElementById('embeddedCurrentTime');
+                const embeddedTotal = document.getElementById('embeddedTotalTime');
+                if (embeddedBar) embeddedBar.style.width = progress + '%';
+                if (embeddedCurrent) embeddedCurrent.textContent = formatTime(audio.currentTime);
+                if (embeddedTotal) embeddedTotal.textContent = formatTime(audio.duration);
             }
         }
         
@@ -1662,6 +3502,14 @@ HTML_TEMPLATE = '''
             document.getElementById('healingPlayBtn').classList.remove('playing');
             document.getElementById('audioProgressBar').style.width = '0%';
             document.getElementById('healingPlayer').classList.remove('playing');
+            document.getElementById('audioCurrentTime').textContent = '0:00';
+            
+            // 同步備用播放器
+            const embeddedBtn = document.getElementById('embeddedPlayBtn');
+            const embeddedBar = document.getElementById('embeddedProgressBar');
+            if (embeddedBtn) embeddedBtn.classList.remove('playing');
+            if (embeddedBar) embeddedBar.style.width = '0%';
+            
             stopVisualizer();
         }
         
@@ -1693,7 +3541,13 @@ HTML_TEMPLATE = '''
             if (!analyser) return;
             
             const canvas = document.getElementById('audioVisualizer');
+            const container = canvas.parentElement;
+            
+            // 動態調整 canvas 尺寸以匹配進度條
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
             canvas.style.display = 'block';
+            
             const ctx = canvas.getContext('2d');
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
@@ -1704,18 +3558,18 @@ HTML_TEMPLATE = '''
                 
                 analyser.getByteFrequencyData(dataArray);
                 
-                ctx.fillStyle = 'rgba(13, 13, 13, 0.85)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // 透明背景
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 let x = 0;
                 for (let i = 0; i < bufferLength; i++) {
-                    const barHeight = (dataArray[i] / 255) * canvas.height;
+                    const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
                     
-                    // 金色漸變
-                    const hue = 45 + (i / bufferLength) * 10;
-                    ctx.fillStyle = `hsl(${hue}, 70%, ${50 + dataArray[i] / 5}%)`;
+                    // 金色漸變帶透明度
+                    const alpha = 0.4 + (dataArray[i] / 255) * 0.5;
+                    ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
                     
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+                    ctx.fillRect(x, (canvas.height - barHeight) / 2, barWidth - 1, barHeight);
                     x += barWidth;
                 }
             }
@@ -1736,6 +3590,7 @@ HTML_TEMPLATE = '''
             const audio = document.getElementById('healingAudio');
             const btn = document.getElementById('healingPlayBtn');
             const player = document.getElementById('healingPlayer');
+            const embeddedBtn = document.getElementById('embeddedPlayBtn');
             
             if (!healingAudioReady) {
                 return;
@@ -1751,11 +3606,13 @@ HTML_TEMPLATE = '''
                 btn.classList.add('playing');
                 player.classList.add('playing');
                 player.classList.remove('ready');
+                if (embeddedBtn) embeddedBtn.classList.add('playing');
                 startVisualizer();
             } else {
                 audio.pause();
                 btn.classList.remove('playing');
                 player.classList.remove('playing');
+                if (embeddedBtn) embeddedBtn.classList.remove('playing');
                 stopVisualizer();
             }
         }
@@ -1782,33 +3639,63 @@ HTML_TEMPLATE = '''
         // 三階分析完成後自動生成圖片和音頻
         // ⚠️ 修正：圖像和音頻「並行」生成（各自獨立，不互相等待）
         async function onAnalysisComplete() {
-            // 重置進度
-            document.getElementById('imageProgressBar').style.width = '0%';
-            document.getElementById('audioGenProgressBar').style.width = '0%';
-            document.getElementById('imageProgressText').textContent = '準備中...';
-            document.getElementById('audioProgressText').textContent = '準備中...';
-            document.getElementById('generatedImagesContainer').style.display = 'none';
-            document.getElementById('audioReadyCard').style.display = 'none';
+            console.log('📍[onAnalysisComplete] 開始執行，currentReportId =', currentReportId);
             
-            // ============ 並行生成：圖像和音頻同時進行 ============
-            // 音頻只需要文字分析結果，不需要等圖像
-            console.log('📍 開始並行生成（圖像 || 音頻）...');
+            if (!currentReportId) {
+                console.error('❌ currentReportId 為空，無法生成圖像和音頻！');
+                document.getElementById('imageProgressText').textContent = '❌ 報告 ID 遺失';
+                document.getElementById('audioProgressText').textContent = '❌ 報告 ID 遺失';
+                return;
+            }
             
-            // 同時啟動兩個任務
-            const imagePromise = generateImagesAuto().then(result => {
-                console.log('📍 圖像生成完成！', result);
-                return result;
-            });
-            
-            const audioPromise = generateHealingAudioAuto().then(result => {
-                console.log('📍 音頻生成完成！', result);
-                return result;
-            });
-            
-            // 等待兩者都完成（但它們是並行的）
-            const [imageResult, audioResult] = await Promise.all([imagePromise, audioPromise]);
-            
-            console.log('✅ 所有自動生成完成！', { imageResult, audioResult });
+            try {
+                // 重置進度
+                document.getElementById('imageProgressBar').style.width = '0%';
+                document.getElementById('audioGenProgressBar').style.width = '0%';
+                document.getElementById('imageProgressText').textContent = '正在啟動...';
+                document.getElementById('audioProgressText').textContent = '正在啟動...';
+                document.getElementById('generatedImagesContainer').style.display = 'none';
+                
+                // 顯示固定底部播放器
+                const healingPlayer = document.getElementById('healingPlayer');
+                if (healingPlayer) {
+                    healingPlayer.classList.add('show');
+                    healingPlayer.classList.add('generating');
+                    console.log('📍 底部播放器已顯示');
+                }
+                const titleEl = document.querySelector('.healing-player-title');
+                if (titleEl) titleEl.textContent = '🎵 正在生成您的專屬療癒音頻...';
+                
+                // ============ 並行生成：圖像和音頻同時進行 ============
+                console.log('📍 開始並行生成（圖像 || 串流音頻）...');
+                
+                // 同時啟動兩個任務
+                const imagePromise = generateImagesAuto().then(result => {
+                    console.log('📍 圖像生成完成！', result);
+                    return result;
+                }).catch(err => {
+                    console.error('❌ 圖像生成錯誤:', err);
+                    document.getElementById('imageProgressText').textContent = '❌ 生成失敗: ' + err.message;
+                    return false;
+                });
+                
+                // 使用串流模式生成音頻（邊生成邊播放）
+                const audioPromise = generateHealingAudioStream().then(result => {
+                    console.log('📍 串流音頻生成完成！', result);
+                    return result;
+                }).catch(err => {
+                    console.error('❌ 串流音頻生成錯誤:', err);
+                    document.getElementById('audioProgressText').textContent = '❌ 生成失敗: ' + err.message;
+                    return false;
+                });
+                
+                // 等待兩者都完成（但它們是並行的）
+                const [imageResult, audioResult] = await Promise.all([imagePromise, audioPromise]);
+                
+                console.log('✅ 所有自動生成完成！', { imageResult, audioResult });
+            } catch (err) {
+                console.error('❌ onAnalysisComplete 嚴重錯誤:', err);
+            }
         }
     </script>
 </body>
@@ -1932,11 +3819,20 @@ def generate_images():
         )
         
         # 轉換圖像為 base64，並追蹤失敗的圖像
+        # ============ 關鍵修復：批量模式圖文合成 ============
         images = {}
         failed_images = []
-        for key, img_bytes in result["images"].items():
+        slide_data_list = result.get("slides", [])
+        stage_keys = ["stage1", "stage2", "stage3", "combined"]
+        
+        # 初始化 SlideComposer - 已移除，gemini-3-pro-image-preview 原生支援文字渲染
+        
+        for i, key in enumerate(stage_keys):
+            img_bytes = result["images"].get(key)
             if img_bytes:
+                # 直接使用 Imagen 生成的圖片（已包含文字）
                 images[key] = ImageGenerator.bytes_to_base64(img_bytes)
+                print(f"   ✅ {key} 圖像已就緒")
             else:
                 failed_images.append(key)
         
@@ -2030,16 +3926,19 @@ def generate_single_image():
         image_folder.mkdir(exist_ok=True)
         
         if image_bytes:
+            # gemini-3-pro-image-preview 原生支援文字渲染，無需 SlideComposer
+            final_image_bytes = image_bytes
+            
             output_path = image_folder / f"{stage_key}_visualization.png"
             with open(output_path, "wb") as f:
-                f.write(image_bytes)
-            print(f"   ✅ 生成成功！({len(image_bytes)} bytes)")
+                f.write(final_image_bytes)
+            print(f"   ✅ 生成成功！({len(final_image_bytes)} bytes)")
             
             return jsonify({
                 'success': True,
                 'stage_key': stage_key,
                 'stage_index': stage_index,
-                'image_base64': ImageGenerator.bytes_to_base64(image_bytes),
+                'image_base64': ImageGenerator.bytes_to_base64(final_image_bytes),
                 'slide': slide.to_dict(),
                 'message': f'{stage_key} 圖像生成成功'
             })
@@ -2172,6 +4071,147 @@ def generate_audio():
         return jsonify({'success': False, 'error': f'音頻生成錯誤：{str(e)}'})
 
 
+@app.route('/generate-audio-stream', methods=['POST'])
+def generate_audio_stream():
+    """
+    串流式生成療育音頻（SSE）
+    每生成一個片段就立即推送給前端，實現邊生成邊播放
+    """
+    import base64
+    from flask import Response, stream_with_context
+    
+    data = request.get_json()
+    report_id = data.get('report_id')
+    stage4_prompt = data.get('stage4_prompt', DEFAULT_STAGE4_PROMPT)
+    voice = data.get('voice', 'warm_female')
+    
+    print("\n" + "=" * 60)
+    print("🎵 [Audio Stream API] 串流音頻生成請求")
+    print("=" * 60)
+    
+    def generate():
+        try:
+            # 驗證報告
+            report_path = app.config['REPORTS_FOLDER'] / f"{report_id}.json"
+            if not report_path.exists():
+                yield f"data: {json.dumps({'type': 'error', 'message': '找不到報告'})}\n\n"
+                return
+            
+            with open(report_path, 'r', encoding='utf-8') as f:
+                report_data = json.load(f)
+            
+            stage1 = report_data.get('stage1', {})
+            stage2 = report_data.get('stage2', {})
+            stage3 = report_data.get('stage3', {})
+            
+            # 初始化生成器
+            generator = HealingAudioGenerator()
+            
+            # 1. 生成文稿
+            yield f"data: {json.dumps({'type': 'status', 'message': '正在生成療育文稿...'})}\n\n"
+            
+            from conflict_analyzer.prompts import get_stage4_prompt
+            from conflict_analyzer.healing_audio import split_script_by_parts
+            
+            script = generator.generate_healing_script(
+                stage1, stage2, stage3, stage4_prompt
+            )
+            
+            # 2. 拆分文稿
+            parts = split_script_by_parts(script)
+            total_parts = len(parts)
+            
+            yield f"data: {json.dumps({'type': 'info', 'total_parts': total_parts, 'message': f'文稿已拆分為 {total_parts} 個片段'})}\n\n"
+            
+            # 2.5 初始化串流 BGM 混合器
+            from conflict_analyzer.healing_audio import StreamingBGMMixer
+            yield f"data: {json.dumps({'type': 'status', 'message': '正在載入背景音樂...'})}\n\n"
+            bgm_mixer = StreamingBGMMixer(stage2)
+            
+            if bgm_mixer.is_ready:
+                yield f"data: {json.dumps({'type': 'bgm_loaded', 'bgm_file': bgm_mixer.bgm_path.name if bgm_mixer.bgm_path else None})}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'bgm_warning', 'message': '無可用背景音樂，將輸出純語音'})}\n\n"
+            
+            # 3. 逐個生成並立即推送（邊生成邊播放，每片段都帶 BGM）
+            import time as time_module
+            audio_clips = []  # 收集所有片段
+            failed_parts = []
+            
+            for i, (part_name, content) in enumerate(parts, 1):
+                yield f"data: {json.dumps({'type': 'status', 'message': f'正在生成 {part_name} ({i}/{total_parts})...'})}\n\n"
+                
+                audio_data = None
+                last_error = None
+                
+                # 額外重試機制
+                for extra_retry in range(3):
+                    try:
+                        if extra_retry > 0:
+                            yield f"data: {json.dumps({'type': 'status', 'message': f'{part_name} 重試中... (第 {extra_retry + 1} 次)'})}\n\n"
+                            time_module.sleep(2 * extra_retry)
+                        
+                        audio_data = generator.text_to_speech_single(content, voice, part_name)
+                        break
+                        
+                    except Exception as e:
+                        last_error = e
+                        print(f"   ❌ {part_name} 第 {extra_retry + 1} 輪失敗: {e}")
+                        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                            break
+                
+                if audio_data:
+                    # 🎵 使用串流 BGM 混合器即時混合背景音樂
+                    if bgm_mixer.is_ready:
+                        mixed_audio = bgm_mixer.mix_segment(audio_data)
+                        audio_base64 = base64.b64encode(mixed_audio).decode('utf-8')
+                        print(f"   ✅ {part_name} + BGM 已推送到前端")
+                    else:
+                        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                        print(f"   ✅ {part_name} 已推送到前端（純語音）")
+                    
+                    audio_clips.append(audio_data)  # 保存原始音頻用於可能的後處理
+                    
+                    yield f"data: {json.dumps({'type': 'audio', 'part': i, 'total': total_parts, 'audio_base64': audio_base64, 'part_name': part_name, 'has_bgm': bgm_mixer.is_ready})}\n\n"
+                else:
+                    failed_parts.append({'part': part_name, 'error': str(last_error)})
+                    yield f"data: {json.dumps({'type': 'part_error', 'part': i, 'error': str(last_error)})}\n\n"
+            
+            # 4. 嘗試混合 BGM
+            if audio_clips and len(audio_clips) == total_parts:
+                try:
+                    yield f"data: {json.dumps({'type': 'status', 'message': '正在混合背景音樂...'})}\n\n"
+                    stitched_audio = generator.stitch_audio_clips(audio_clips)
+                    final_audio, bgm_status = generator._apply_bgm_mixing(stitched_audio, stage2)
+                    
+                    if bgm_status.get('success'):
+                        final_base64 = base64.b64encode(final_audio).decode('utf-8')
+                        yield f"data: {json.dumps({'type': 'complete_with_bgm', 'audio_base64': final_base64, 'bgm_method': bgm_status.get('method', 'unknown')})}\n\n"
+                        print(f"   🎵 BGM 混合成功: {bgm_status.get('method')}")
+                    else:
+                        yield f"data: {json.dumps({'type': 'bgm_skipped', 'reason': bgm_status.get('error', '未知原因')})}\n\n"
+                except Exception as bgm_error:
+                    print(f"   ⚠️ BGM 混合失敗: {bgm_error}")
+                    yield f"data: {json.dumps({'type': 'bgm_error', 'error': str(bgm_error)})}\n\n"
+            
+            # 5. 完成
+            yield f"data: {json.dumps({'type': 'complete', 'message': '所有片段生成完成', 'success_count': len(audio_clips), 'fail_count': len(failed_parts)})}\n\n"
+            
+        except Exception as e:
+            traceback.print_exc()
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+
 @app.route('/download-pdf/<report_id>')
 def download_pdf(report_id):
     """下載 PDF 報告"""
@@ -2201,6 +4241,44 @@ def download_pdf(report_id):
     except Exception as e:
         traceback.print_exc()
         return f"PDF 生成錯誤：{str(e)}", 500
+
+
+@app.route('/download-pdf-with-images', methods=['POST'])
+def download_pdf_with_images():
+    """下載內嵌圖片的完整 PDF 報告"""
+    try:
+        data = request.get_json()
+        report_id = data.get('report_id')
+        images = data.get('images', [])  # 圖片 base64 陣列
+        
+        if not report_id:
+            return jsonify({'success': False, 'error': '缺少報告編號'}), 400
+        
+        # 讀取報告資料
+        report_path = app.config['REPORTS_FOLDER'] / f"{report_id}.json"
+        if not report_path.exists():
+            return jsonify({'success': False, 'error': '找不到報告'}), 404
+        
+        with open(report_path, 'r', encoding='utf-8') as f:
+            report_data = json.load(f)
+        
+        # 生成內嵌圖片的 PDF
+        pdf_bytes = generate_pdf_report(report_data, report_id, images=images)
+        
+        # 返回 PDF 下載
+        from io import BytesIO
+        pdf_buffer = BytesIO(pdf_bytes)
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"衝突分析報告_完整版_{report_id}.pdf"
+        )
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'PDF 生成錯誤：{str(e)}'}), 500
 
 
 if __name__ == '__main__':

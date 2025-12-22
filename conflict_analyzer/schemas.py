@@ -76,15 +76,38 @@ class DualPerspective(BaseModel):
 
 class RepairAnalysis(BaseModel):
     """修復嘗試分析"""
-    attempts: str = Field(description="是否有任何降溫/修復嘗試")
-    responses: str = Field(description="這些嘗試如何被回應")
-    missed_opportunities: str = Field(description="哪些時刻本可降溫但被錯過")
+    attempts: str = Field(default="", description="是否有任何降溫/修復嘗試")
+    responses: str = Field(default="", description="這些嘗試如何被回應")
+    missed_opportunities: str = Field(default="", description="哪些時刻本可降溫但被錯過")
+
+
+class SpeakerInfo(BaseModel):
+    """說話者資訊（包含性別識別）"""
+    gender: str = Field(
+        default="unknown",
+        description="性別：male（男性）、female（女性）、unknown（無法判斷）"
+    )
+    role: Optional[str] = Field(
+        default=None,
+        description="角色描述（如：丈夫、妻子、主管、員工等），可選"
+    )
+    voice_characteristics: Optional[str] = Field(
+        default=None,
+        description="聲音特徵（如：低沉、尖銳、溫和等），可選"
+    )
+
+
+class SpeakersInfo(BaseModel):
+    """雙方說話者資訊"""
+    speaker_a: SpeakerInfo = Field(description="說話者 A 的資訊")
+    speaker_b: SpeakerInfo = Field(description="說話者 B 的資訊")
 
 
 class Stage1Result(BaseModel):
     """一階分析結果：衝突演化追蹤"""
     overall_dynamic: str = Field(description="一句話描述這場衝突的本質模式")
     energy_pattern: str = Field(description="情緒能量如何流動")
+    speakers_info: Optional[SpeakersInfo] = Field(default=None, description="說話者性別與角色識別")
     evolution_map: List[EvolutionPhase] = Field(description="衝突演化階段列表")
     turning_points: List[TurningPoint] = Field(description="關鍵轉折點列表")
     dual_perspective: DualPerspective = Field(description="雙方各自的主觀體驗")

@@ -135,14 +135,18 @@ class AudioMixer:
         # 嘗試找到匹配情緒的 BGM（文件名包含情緒關鍵詞）
         style = EMOTION_TO_BGM_STYLE.get(emotion.lower(), "healing")
         
-        for bgm in bgm_files:
-            if style.lower() in bgm.stem.lower():
-                print(f"📍[AudioMixer] 選擇匹配 BGM: {bgm.name}")
-                return bgm
+        # 收集所有匹配的 BGM
+        matched_bgm = [bgm for bgm in bgm_files if style.lower() in bgm.stem.lower()]
         
-        # 如果沒有匹配的，隨機選擇一個
+        if matched_bgm:
+            # 從匹配的 BGM 中隨機選擇一個
+            selected = random.choice(matched_bgm)
+            print(f"📍[AudioMixer] 隨機選擇匹配 BGM ({len(matched_bgm)} 個可選): {selected.name}")
+            return selected
+        
+        # 如果沒有匹配的，從全部 BGM 中隨機選擇
         selected = random.choice(bgm_files)
-        print(f"📍[AudioMixer] 隨機選擇 BGM: {selected.name}")
+        print(f"📍[AudioMixer] 隨機選擇 BGM ({len(bgm_files)} 個可選): {selected.name}")
         return selected
     
     def load_audio(self, audio_data: bytes, format: str = "wav") -> AudioSegment:

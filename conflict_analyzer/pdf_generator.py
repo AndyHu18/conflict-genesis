@@ -5,9 +5,12 @@ Lumina 心語 - PDF 報告生成模組 v2.0
 """
 
 import os
+import io
+import base64
 import json
+import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 from datetime import datetime
 from fpdf import FPDF
 
@@ -144,10 +147,10 @@ class LuminaReportPDF(FPDF):
         self.line(30, 40, 30, 55)
         self.line(self.w - 30, 40, self.w - 30, 55)
         
-        # 下方裝飾框
-        self.line(30, self.h - 50, self.w - 30, self.h - 50)
-        self.line(30, self.h - 50, 30, self.h - 65)
-        self.line(self.w - 30, self.h - 50, self.w - 30, self.h - 65)
+        # 下方裝飾框（更靠近底部，避免與報告資訊區塊重疊）
+        self.line(30, self.h - 30, self.w - 30, self.h - 30)
+        self.line(30, self.h - 30, 30, self.h - 45)
+        self.line(self.w - 30, self.h - 30, self.w - 30, self.h - 45)
     
     def draw_gold_divider(self, y: float, style: str = 'full'):
         """繪製金色分隔線"""
@@ -239,19 +242,22 @@ class LuminaReportPDF(FPDF):
         self.ln(4)
     
     def key_value_row(self, key: str, value: str):
-        """鍵值對行"""
+        """鍵值對行 - 改為上下排列避免換行空白問題"""
         if not value:
             return
         
+        # 標籤行
         self.set_font(self.font_name, 'B' if self.font_name == "Helvetica" else '', 10)
         self.set_text_color(*self.current_stage_color)
         self.set_x(24)
-        self.cell(50, 6, self.safe_text(f"● {key}"), 0, 0)
+        self.cell(0, 6, self.safe_text(f"● {key}"), 0, 1)  # 換行
         
+        # 內容行（縮進對齊）
         self.set_font(self.font_name, '', 10)
         self.set_text_color(*DesignSystem.TEXT_DARK)
-        self.multi_cell(self.w - 80, 6, self.safe_text(str(value)), align='L')
-        self.ln(2)
+        self.set_x(32)  # 內容縮進
+        self.multi_cell(self.w - 50, 6, self.safe_text(str(value)), align='L')
+        self.ln(4)
     
     def bullet_item(self, text: str, indent: int = 0):
         """項目符號"""
@@ -297,12 +303,44 @@ class LuminaReportPDF(FPDF):
 def generate_pdf_report(
     report_data: Dict[str, Any],
     report_id: str,
-    output_path: Optional[Path] = None
+    output_path: Optional[Path] = None,
+    images: Optional[List[str]] = None  # 可選：4 張圖片的 base64 字串
 ) -> bytes:
     """
     生成視覺驚艷的四階段 PDF 報告
+    
+    Args:
+        report_data: 分析結果數據
+        report_id: 報告編號
+        output_path: 可選的輸出路徑
+        images: 可選的圖片列表（4 張 base64 編碼的 PNG 圖片）
     """
     pdf = LuminaReportPDF()
+    
+    # 輔助函數：在 Stage 後嵌入對應圖片
+    def embed_stage_image(stage_index: int, stage_title: str):
+        """在當前 Stage 後嵌入對應圖片"""
+        if not images or stage_index >= len(images) or not images[stage_index]:
+            return
+        
+        try:
+            img_data = base64.b64decode(images[stage_index])
+            with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp_file:
+                tmp_file.write(img_data)
+                tmp_path = tmp_file.name
+            
+            # 新增圖片頁
+            pdf.add_page()
+            pdf.set_font(pdf.font_name, 'B' if pdf.font_name == "Helvetica" else '', 14)
+            pdf.set_text_color(*DesignSystem.PRIMARY_GOLD)
+            pdf.cell(0, 10, pdf.safe_text(f"✦ {stage_title} — 視覺化簡報"), 0, 1, 'C')
+            pdf.ln(8)
+            
+            page_width = pdf.w - 40
+            pdf.image(tmp_path, x=20, y=pdf.get_y(), w=page_width)
+            os.unlink(tmp_path)
+        except Exception as e:
+            print(f"⚠️ 嵌入 Stage {stage_index + 1} 圖片失敗: {e}")
     
     # ========== 封面頁 ==========
     pdf.add_page()
@@ -327,27 +365,47 @@ def generate_pdf_report(
     pdf.set_text_color(*DesignSystem.TEXT_LIGHT)
     pdf.cell(0, 8, pdf.safe_text("專業衝突分析報告"), 0, 1, 'C')
     
-    pdf.ln(30)
+    pdf.ln(35)
     
-    # 報告資訊
+    # 報告資訊區塊 - 使用固定 Y 位置避免重疊
+    info_y = 165  # 固定位置，確保不會與其他元素重疊
+    info_height = 80  # 區塊高度
+    
+    pdf.set_fill_color(30, 30, 30)  # 深色背景
+    pdf.rect(30, info_y, pdf.w - 60, info_height, 'F')
+    
+    # 金色邊框
+    pdf.set_draw_color(*DesignSystem.PRIMARY_GOLD)
+    pdf.set_line_width(0.5)
+    pdf.rect(30, info_y, pdf.w - 60, info_height, 'D')
+    
+    pdf.set_y(info_y + 10)
+    pdf.set_font(pdf.font_name, 'B' if pdf.font_name == "Helvetica" else '', 11)
+    pdf.set_text_color(*DesignSystem.PRIMARY_GOLD)
+    pdf.cell(0, 8, pdf.safe_text("報告資訊"), 0, 1, 'C')
+    
+    pdf.ln(4)
     pdf.set_font(pdf.font_name, '', 10)
-    pdf.set_text_color(*DesignSystem.TEXT_MUTED)
-    pdf.cell(0, 6, pdf.safe_text(f"報告編號：{report_id}"), 0, 1, 'C')
-    pdf.cell(0, 6, pdf.safe_text(f"生成時間：{datetime.now().strftime('%Y年%m月%d日 %H:%M')}"), 0, 1, 'C')
+    pdf.set_text_color(*DesignSystem.TEXT_LIGHT)
     
-    # 底部說明
-    pdf.set_y(pdf.h - 70)
+    now = datetime.now()
+    pdf.cell(0, 7, pdf.safe_text(f"報告編號：{report_id}"), 0, 1, 'C')
+    pdf.cell(0, 7, pdf.safe_text(f"分析日期：{now.strftime('%Y年%m月%d日')}"), 0, 1, 'C')
+    pdf.cell(0, 7, pdf.safe_text(f"生成時間：{now.strftime('%H:%M:%S')}"), 0, 1, 'C')
+    
+    # 分析統計摘要 - 在資訊區塊內
+    pdf.ln(2)
     pdf.set_font(pdf.font_name, '', 9)
     pdf.set_text_color(*DesignSystem.TEXT_MUTED)
-    pdf.multi_cell(0, 5, pdf.safe_text(
-        "四階段深度分析\n"
-        "衝突演化 • 深層溯源 • 成長方案 • 數位療癒"
-    ), align='C')
+    stage_count = sum(1 for k in ['stage1', 'stage2', 'stage3'] if report_data.get(k))
+    pdf.cell(0, 5, pdf.safe_text(f"四階段深度分析"), 0, 1, 'C')
+    pdf.cell(0, 5, pdf.safe_text(f"衝突演化 • 深層溯源 • 成長方案 • 數位療癒"), 0, 1, 'C')
     
-    pdf.set_y(pdf.h - 40)
-    pdf.set_font(pdf.font_name, '', 8)
+    # 涵蓋統計 - 在區塊下方
+    pdf.set_y(info_y + info_height + 10)
+    pdf.set_font(pdf.font_name, '', 9)
     pdf.set_text_color(100, 100, 100)
-    pdf.cell(0, 5, pdf.safe_text("Powered by Advanced AI Analysis Engine"), 0, 1, 'C')
+    pdf.cell(0, 5, pdf.safe_text(f"涵蓋 {stage_count} 個深度分析階段 + 數位催眠療癒"), 0, 1, 'C')
     
     stage1 = report_data.get('stage1', {})
     stage2 = report_data.get('stage2', {})
@@ -392,6 +450,9 @@ def generate_pdf_report(
             impact = tp.get('impact', tp.get('why_critical', ''))
             if event:
                 pdf.bullet_item(f"{event}" + (f" — {impact}" if impact else ""))
+    
+    # 嵌入 Stage 1 視覺化圖片
+    embed_stage_image(0, "衝突演化追蹤")
     
     # ========== 第二階段：深層溯源 ==========
     pdf.add_page()
@@ -441,6 +502,9 @@ def generate_pdf_report(
         pdf.set_x(22)
         pdf.cell(0, 8, pdf.safe_text("▎療癒訊息"), 0, 1)
         pdf.quote_block(stage2['healing_message'])
+    
+    # 嵌入 Stage 2 視覺化圖片
+    embed_stage_image(1, "深層溯源與接納橋樑")
     
     # ========== 第三階段：個人成長行動方案 ==========
     pdf.add_page()
@@ -513,6 +577,9 @@ def generate_pdf_report(
         pdf.cell(0, 8, pdf.safe_text("▎結語"), 0, 1)
         pdf.quote_block(stage3['closing'])
     
+    # 嵌入 Stage 3 視覺化圖片
+    embed_stage_image(2, "個人成長行動方案")
+    
     # ========== 第四階段：數位催眠療癒 ==========
     pdf.add_page()
     pdf.stage_header(4, "數位催眠療癒", "專屬於您的療癒引導音頻")
@@ -543,9 +610,11 @@ def generate_pdf_report(
     pdf.set_font(pdf.font_name, '', 9)
     pdf.set_text_color(*DesignSystem.TEXT_MUTED)
     pdf.multi_cell(0, 5, pdf.safe_text(
-        "提醒：請透過網頁播放器聆聽療癒音頻。\n"
-        "本報告僅供個人使用，不構成專業醫療或心理諮詢建議。"
+        "提醒：請透過網頁播放器聆聽療癒音頻。"
     ), align='C')
+    
+    # 嵌入 Stage 4（融合總覽）視覺化圖片
+    embed_stage_image(3, "融合總覽")
     
     # 輸出
     if output_path:
