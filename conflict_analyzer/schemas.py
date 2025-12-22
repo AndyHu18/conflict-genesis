@@ -5,9 +5,40 @@ Lumina 心語 - Pydantic Schemas
 三階：個人成長行動方案
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
+import re
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional, List, Any
 from enum import Enum
+
+
+def truncate_repetition(text: str, max_repeat: int = 3) -> str:
+    """
+    檢測並截斷重複內容
+    
+    如果同一段文字重複超過 max_repeat 次，則截斷為一次 + 提示
+    """
+    if not text or len(text) < 50:
+        return text
+    
+    # 尋找重複模式（至少 20 個字符的重複）
+    for chunk_size in range(20, min(len(text) // 2, 200)):
+        pattern = text[:chunk_size]
+        count = text.count(pattern)
+        if count > max_repeat:
+            # 發現重複，截斷到第一次出現
+            first_occurrence = text.find(pattern)
+            end_of_first = first_occurrence + len(pattern)
+            # 找到句號或逗號作為結束點
+            end_point = text.find('。', end_of_first)
+            if end_point == -1:
+                end_point = text.find('，', end_of_first)
+            if end_point == -1:
+                end_point = end_of_first + 50
+            
+            return text[:end_point + 1] if end_point < len(text) else text[:end_of_first]
+    
+    return text
+
 
 
 class EnergyPattern(str, Enum):
@@ -66,57 +97,65 @@ class Stage1Result(BaseModel):
 
 class IcebergAnalysis(BaseModel):
     """冰山下方分析"""
-    speaker_id: str = Field(description="說話者標識 (A 或 B)")
-    surface_behavior: str = Field(description="表面行為描述")
-    underlying_fear: str = Field(description="深層恐懼")
-    underlying_desire: str = Field(description="深層渴望")
-    unmet_need: str = Field(description="未滿足的需求")
-    possible_trigger: str = Field(description="可能的觸發來源")
+    speaker_id: str = Field(description="說話者標識 (A 或 B)", max_length=20)
+    surface_behavior: str = Field(description="表面行為描述", max_length=300)
+    underlying_fear: str = Field(description="深層恐懼", max_length=300)
+    underlying_desire: str = Field(description="深層渴望", max_length=300)
+    unmet_need: str = Field(description="未滿足的需求", max_length=300)
+    possible_trigger: str = Field(description="可能的觸發來源", max_length=400)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def truncate_all_fields(cls, v: Any) -> Any:
+        """截斷所有字段中的重複內容"""
+        if isinstance(v, str):
+            return truncate_repetition(v)
+        return v
 
 
 class PerspectiveShift(BaseModel):
     """視角轉換練習"""
-    for_speaker: str = Field(description="這個練習是給誰的")
-    prompt: str = Field(description="換位思考的引導問題")
-    insight: str = Field(description="透過這個視角可能獲得的洞察")
+    for_speaker: str = Field(description="這個練習是給誰的", max_length=20)
+    prompt: str = Field(description="換位思考的引導問題", max_length=300)
+    insight: str = Field(description="透過這個視角可能獲得的洞察", max_length=400)
 
 
 class DefenseMechanismInsight(BaseModel):
     """防禦機制洞察"""
-    speaker_id: str = Field(description="說話者標識")
-    defense_pattern: str = Field(description="防禦模式描述")
-    trigger_for_other: str = Field(description="這如何觸發了對方的防禦")
-    self_awareness_prompt: str = Field(description="自我覺察的引導")
+    speaker_id: str = Field(description="說話者標識", max_length=20)
+    defense_pattern: str = Field(description="防禦模式描述", max_length=300)
+    trigger_for_other: str = Field(description="這如何觸發了對方的防禦", max_length=400)
+    self_awareness_prompt: str = Field(description="自我覺察的引導", max_length=300)
 
 
 class HealingReframe(BaseModel):
     """療癒性重構"""
-    original_statement: str = Field(description="原始的攻擊性話語或行為")
-    vulnerable_translation: str = Field(description="翻譯成脆弱性需求的版本")
-    compassionate_response: str = Field(description="對方可以如何回應這個需求")
+    original_statement: str = Field(description="原始的攻擊性話語或行為", max_length=300)
+    vulnerable_translation: str = Field(description="翻譯成脆弱性需求的版本", max_length=400)
+    compassionate_response: str = Field(description="對方可以如何回應這個需求", max_length=300)
 
 
 class ActionableChange(BaseModel):
     """可執行的微小改變"""
-    for_speaker: str = Field(description="這個建議是給誰的")
-    trigger_situation: str = Field(description="觸發情境")
-    old_pattern: str = Field(description="舊的反應模式")
-    new_approach: str = Field(description="建議的新做法")
-    cooling_phrase: str = Field(description="降溫用語")
+    for_speaker: str = Field(description="這個建議是給誰的", max_length=20)
+    trigger_situation: str = Field(description="觸發情境", max_length=300)
+    old_pattern: str = Field(description="舊的反應模式", max_length=300)
+    new_approach: str = Field(description="建議的新做法", max_length=400)
+    cooling_phrase: str = Field(description="降溫用語", max_length=200)
 
 
 class Stage2Result(BaseModel):
     """二階分析結果：深層溯源與接納橋樑"""
-    deep_insight_summary: str = Field(description="這場衝突的深層動力總結")
+    deep_insight_summary: str = Field(description="這場衝突的深層動力總結", max_length=500)
     iceberg_analysis: List[IcebergAnalysis] = Field(description="雙方各自的冰山下方分析")
-    attachment_dynamic: str = Field(description="雙方依附模式如何互動")
-    cognitive_style_clash: str = Field(description="認知風格差異如何影響衝突")
+    attachment_dynamic: str = Field(description="雙方依附模式如何互動", max_length=500)
+    cognitive_style_clash: str = Field(description="認知風格差異如何影響衝突", max_length=500)
     perspective_shifts: List[PerspectiveShift] = Field(description="視角轉換練習")
     defense_insights: List[DefenseMechanismInsight] = Field(description="防禦機制洞察")
     healing_reframes: List[HealingReframe] = Field(description="療癒性重構")
     actionable_changes: List[ActionableChange] = Field(description="可執行的微小改變")
-    shared_responsibility: str = Field(description="共同責任重構")
-    healing_message: str = Field(description="療癒寄語")
+    shared_responsibility: str = Field(description="共同責任重構", max_length=500)
+    healing_message: str = Field(description="療癒寄語", max_length=500)
 
 
 # ============ 三階分析輸出結構 ============
