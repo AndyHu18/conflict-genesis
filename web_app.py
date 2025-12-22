@@ -2334,6 +2334,68 @@ HTML_TEMPLATE = '''
             }
         }
 
+        // 類似 Windows 通知的 Toast 提示
+        function showToast(message, type = 'info') {
+            // 創建容器如果不存在
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'audio' ? '#C9A962' : (type === 'image' ? '#B87351' : '#6366F1'); // Gold for audio, Terra for image
+            const icon = type === 'audio' ? '🎵' : (type === 'image' ? '🎨' : 'ℹ️');
+            
+            toast.style.cssText = `
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-left: 4px solid ${bgColor};
+                padding: 16px 20px;
+                border-radius: 8px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 280px;
+                transform: translateX(120%);
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+                font-family: 'Segoe UI', sans-serif;
+                margin-bottom: 10px;
+                pointer-events: auto;
+                opacity: 0;
+            `;
+            
+            toast.innerHTML = `
+                <div style="font-size: 1.4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${icon}</div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="color: #333; font-weight: 600; font-size: 0.95rem;">${type === 'audio' ? '音頻播放' : (type === 'image' ? '圖像生成' : '系統通知')}</span>
+                    <span style="color: #666; font-size: 0.85rem; margin-top: 2px;">${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // 進場動畫
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateX(0)';
+                toast.style.opacity = '1';
+                // 播放音效 (可選)
+                // const audio = new Audio('/static/notification_simple-01.wav');
+                // audio.volume = 0.2;
+                // audio.play().catch(e => {}); 
+            });
+            
+            // 5秒後自動移除
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+
         function displayResult(r, reportId) {
             currentReportId = reportId;  // 儲存報告 ID 供圖像生成使用
             const s1 = r.stage1, s2 = r.stage2;
@@ -2700,6 +2762,11 @@ HTML_TEMPLATE = '''
                             console.log(`✅[${i+1}/4] ${key} 生成成功！`);
                             successCount++;
                             imageSuccess = true;
+                            
+                            // 🔔 如果是第一張圖 (Stage 1)，跳出通知
+                            if (i === 0) {
+                                showToast('視覺化圖與分析摘要已生成！', 'image');
+                            }
                             
                             // 即時顯示圖片
                             const imgEl = document.getElementById(imgId);
@@ -3283,6 +3350,12 @@ HTML_TEMPLATE = '''
                 case 'audio':
                     // 收到音頻片段！
                     streamingPlayer.addAudioPart(data.audio_base64, data.part);
+                    
+                    // 🔔 如果是第一段音頻 (Part 1)，跳出通知
+                    if (data.part === 1) {
+                        showToast('療癒音頻開始串流播放...', 'audio');
+                    }
+                    
                     const pct = 15 + (data.part / data.total) * 80;
                     progressBar.style.width = pct + '%';
                     progressText.textContent = `🎙️ 已生成 ${data.part}/${data.total} 片段`;
