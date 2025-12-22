@@ -100,10 +100,22 @@ class LuminaReportPDF(FPDF):
         self.cell(0, 5, self.safe_text(f'— {self.page_no()} —'), 0, 0, 'C')
     
     def safe_text(self, text: str) -> str:
-        """安全處理文本"""
+        """安全處理文本，修復排版問題"""
         if not text:
             return ""
         text = str(text)
+        
+        # 移除可能導致空隙的問題字符
+        # 1. 將全角空格替換為半角空格
+        text = text.replace('\u3000', ' ')  # 全角空格
+        text = text.replace('\u00A0', ' ')  # Non-breaking space
+        text = text.replace('\t', ' ')      # Tab
+        
+        # 2. 移除多餘的連續空格
+        import re
+        text = re.sub(r' +', ' ', text)
+        
+        # 3. 中文標點替換（非使用中文字體時）
         if not self.use_chinese:
             replacements = {
                 '：': ': ', '，': ', ', '。': '. ', '！': '! ',
@@ -113,6 +125,7 @@ class LuminaReportPDF(FPDF):
             }
             for ch, rep in replacements.items():
                 text = text.replace(ch, rep)
+        
         return text
     
     # ============ 封面設計元素 ============
@@ -222,7 +235,7 @@ class LuminaReportPDF(FPDF):
         self.set_font(self.font_name, '', 10)
         self.set_text_color(*DesignSystem.TEXT_DARK)
         self.set_x(24)
-        self.multi_cell(content_width, 6, self.safe_text(content))
+        self.multi_cell(content_width, 6, self.safe_text(content), align='L')
         self.ln(4)
     
     def key_value_row(self, key: str, value: str):
@@ -237,7 +250,7 @@ class LuminaReportPDF(FPDF):
         
         self.set_font(self.font_name, '', 10)
         self.set_text_color(*DesignSystem.TEXT_DARK)
-        self.multi_cell(self.w - 80, 6, self.safe_text(str(value)))
+        self.multi_cell(self.w - 80, 6, self.safe_text(str(value)), align='L')
         self.ln(2)
     
     def bullet_item(self, text: str, indent: int = 0):
@@ -256,7 +269,7 @@ class LuminaReportPDF(FPDF):
         self.ellipse(x_offset, self.get_y() + 2, 2.5, 2.5, 'F')
         
         self.set_x(x_offset + 6)
-        self.multi_cell(self.w - x_offset - 24, 6, self.safe_text(text))
+        self.multi_cell(self.w - x_offset - 24, 6, self.safe_text(text), align='L')
         self.ln(1)
     
     def quote_block(self, text: str):
@@ -274,7 +287,7 @@ class LuminaReportPDF(FPDF):
         self.set_font(self.font_name, '', 10)
         self.set_text_color(*DesignSystem.TEXT_DARK)
         self.set_x(30)
-        self.multi_cell(self.w - 50, 7, self.safe_text(text))
+        self.multi_cell(self.w - 50, 7, self.safe_text(text), align='L')
         
         end_y = self.get_y()
         self.line(24, start_y, 24, end_y)
