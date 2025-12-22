@@ -981,63 +981,81 @@ HTML_TEMPLATE = '''
                 
                 console.log(`📍[${i+1}/4] 請求生成：${key}`);
                 
-                try {
-                    const resp = await fetch('/generate-single-image', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            report_id: currentReportId,
-                            stage_index: i
-                        })
-                    });
-                    
-                    const data = await resp.json();
-                    
-                    if (data.success && data.image_base64) {
-                        console.log(`✅[${i+1}/4] ${key} 生成成功！`);
-                        successCount++;
-                        
-                        // 即時顯示圖片
-                        const imgEl = document.getElementById(imgId);
-                        if (imgEl) {
-                            imgEl.src = 'data:image/png;base64,' + data.image_base64;
-                            imgEl.style.opacity = '1';
-                            // 移除可能存在的重試按鈕
-                            const retryBtn = imgEl.parentElement.querySelector('.retry-btn');
-                            if (retryBtn) retryBtn.remove();
-                        }
-                        
-                        // 填充簡報卡片數據
-                        if (data.slide) {
-                            const num = i < 3 ? (i + 1).toString() : '4';
-                            const color = stageColors[i];
-                            const textColor = textColors[i];
-                            
-                            const titleEl = document.getElementById('slideTitle' + num);
-                            if (titleEl && data.slide.slide_title) titleEl.textContent = data.slide.slide_title;
-                            
-                            const insightEl = document.getElementById('slideInsight' + num);
-                            if (insightEl && data.slide.core_insight) insightEl.textContent = data.slide.core_insight;
-                            
-                            const bulletsEl = document.getElementById('slideBullets' + num);
-                            if (bulletsEl && data.slide.data_bullets && data.slide.data_bullets.length > 0) {
-                                bulletsEl.innerHTML = data.slide.data_bullets.map(bullet => 
-                                    `<li style="color: ${textColor}; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;">
-                                        <span style="color:${color}; margin-right:10px;">—</span>
-                                        <span>${bullet}</span>
-                                    </li>`
-                                ).join('');
-                            }
-                        }
-                        
-                        progressBar.style.width = `${pct}%`;
-                    } else {
-                        console.warn(`❌[${i+1}/4] ${key} 生成失敗:`, data.error);
-                        failedStages.push(i);
-                        showFailedPlaceholder(imgId, i, name);
+                // ⚠️ 自動重試 3 次
+                let imageSuccess = false;
+                let lastError = null;
+                
+                for (let attempt = 1; attempt <= 3 && !imageSuccess; attempt++) {
+                    if (attempt > 1) {
+                        console.log(`🔄[${i+1}/4] ${key} 第 ${attempt} 次重試...`);
+                        progressText.textContent = `🔄 [${i+1}/4]「${name}」重試中 (${attempt}/3)...`;
+                        await new Promise(r => setTimeout(r, 2000));  // 重試前等待 2 秒
                     }
-                } catch (err) {
-                    console.error(`❌[${i+1}/4] ${key} 請求錯誤:`, err);
+                    
+                    try {
+                        const resp = await fetch('/generate-single-image', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                report_id: currentReportId,
+                                stage_index: i
+                            })
+                        });
+                        
+                        const data = await resp.json();
+                        
+                        if (data.success && data.image_base64) {
+                            console.log(`✅[${i+1}/4] ${key} 生成成功！`);
+                            successCount++;
+                            imageSuccess = true;
+                            
+                            // 即時顯示圖片
+                            const imgEl = document.getElementById(imgId);
+                            if (imgEl) {
+                                imgEl.src = 'data:image/png;base64,' + data.image_base64;
+                                imgEl.style.opacity = '1';
+                                // 移除可能存在的重試按鈕
+                                const retryBtn = imgEl.parentElement.querySelector('.retry-btn');
+                                if (retryBtn) retryBtn.remove();
+                            }
+                            
+                            // 填充簡報卡片數據
+                            if (data.slide) {
+                                const num = i < 3 ? (i + 1).toString() : '4';
+                                const color = stageColors[i];
+                                const textColor = textColors[i];
+                                
+                                const titleEl = document.getElementById('slideTitle' + num);
+                                if (titleEl && data.slide.slide_title) titleEl.textContent = data.slide.slide_title;
+                                
+                                const insightEl = document.getElementById('slideInsight' + num);
+                                if (insightEl && data.slide.core_insight) insightEl.textContent = data.slide.core_insight;
+                                
+                                const bulletsEl = document.getElementById('slideBullets' + num);
+                                if (bulletsEl && data.slide.data_bullets && data.slide.data_bullets.length > 0) {
+                                    bulletsEl.innerHTML = data.slide.data_bullets.map(bullet => 
+                                        `<li style="color: ${textColor}; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;">
+                                            <span style="color:${color}; margin-right:10px;">—</span>
+                                            <span>${bullet}</span>
+                                        </li>`
+                                    ).join('');
+                                }
+                            }
+                            
+                            progressBar.style.width = `${pct}%`;
+                        } else {
+                            lastError = data.error;
+                            console.warn(`❌[${i+1}/4] ${key} 第 ${attempt} 次失敗:`, data.error);
+                        }
+                    } catch (err) {
+                        lastError = err.message;
+                        console.error(`❌[${i+1}/4] ${key} 第 ${attempt} 次請求錯誤:`, err);
+                    }
+                }
+                
+                // 3 次都失敗後才顯示手動重試
+                if (!imageSuccess) {
+                    console.error(`❌[${i+1}/4] ${key} 自動重試 3 次失敗，顯示手動重試按鈕`);
                     failedStages.push(i);
                     showFailedPlaceholder(imgId, i, name);
                 }
@@ -1372,31 +1390,34 @@ HTML_TEMPLATE = '''
             document.getElementById('healingPlayBtn').textContent = '';
         }
         
-        // 三階分析完成後自動**序列化**生成圖片和音頻
-        // ⚠️ 重要：不要使用 Promise.all！這會觸發 API 並行限制導致連線重置
+        // 三階分析完成後自動生成圖片和音頻
+        // ⚠️ 修正：圖像和音頻「並行」生成（各自獨立，不互相等待）
         async function onAnalysisComplete() {
             // 重置進度
             document.getElementById('imageProgressBar').style.width = '0%';
             document.getElementById('audioGenProgressBar').style.width = '0%';
             document.getElementById('imageProgressText').textContent = '準備中...';
-            document.getElementById('audioProgressText').textContent = '等待圖像完成...';
+            document.getElementById('audioProgressText').textContent = '準備中...';
             document.getElementById('generatedImagesContainer').style.display = 'none';
             document.getElementById('audioReadyCard').style.display = 'none';
             
-            // ============ 序列化生成：避免 API 限流 ============
-            // 原因：Tier 1 API 限制並行數為 2，同時發送 4 張圖 + 1 個音頻會崩潰
-            console.log('📍 開始序列化生成（圖像 → 音頻）...');
+            // ============ 並行生成：圖像和音頻同時進行 ============
+            // 音頻只需要文字分析結果，不需要等圖像
+            console.log('📍 開始並行生成（圖像 || 音頻）...');
             
-            // Step 1: 先生成圖像（內部已經序列化）
-            console.log('📍[Step 1/2] 正在生成圖像...');
-            const imageResult = await generateImagesAuto();
-            console.log('📍[Step 1/2] 圖像生成完成！', imageResult);
+            // 同時啟動兩個任務
+            const imagePromise = generateImagesAuto().then(result => {
+                console.log('📍 圖像生成完成！', result);
+                return result;
+            });
             
-            // Step 2: 圖像完成後，再生成音頻
-            console.log('📍[Step 2/2] 正在生成音頻...');
-            document.getElementById('audioProgressText').textContent = '正在生成...';
-            const audioResult = await generateHealingAudioAuto();
-            console.log('📍[Step 2/2] 音頻生成完成！', audioResult);
+            const audioPromise = generateHealingAudioAuto().then(result => {
+                console.log('📍 音頻生成完成！', result);
+                return result;
+            });
+            
+            // 等待兩者都完成（但它們是並行的）
+            const [imageResult, audioResult] = await Promise.all([imagePromise, audioPromise]);
             
             console.log('✅ 所有自動生成完成！', { imageResult, audioResult });
         }
