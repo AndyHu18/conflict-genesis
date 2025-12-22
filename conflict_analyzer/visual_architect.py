@@ -247,11 +247,19 @@ class VisualArchitect:
             visual_essence = result_json.get("visual_essence", "")
             emotions = result_json.get("emotions", "")
             
-            # 如果標題過長，截斷
-            if len(slide_title) > 6:
-                slide_title = slide_title[:6]
-            if len(core_insight) > 15:
-                core_insight = core_insight[:15]
+            # 智能截斷標題（最多 8 字，確保不在逗號後截斷）
+            if len(slide_title) > 8:
+                # 嘗試在標點前截斷
+                for i in range(8, 0, -1):
+                    if slide_title[i-1] in '。！？：；':
+                        slide_title = slide_title[:i]
+                        break
+                else:
+                    slide_title = slide_title[:8]
+            
+            # 副標題最多 20 字
+            if len(core_insight) > 20:
+                core_insight = core_insight[:20]
             
             # 如果沒有提取到 visual_essence，使用 fallback
             if not visual_essence:
@@ -301,18 +309,30 @@ class VisualArchitect:
         """
         關鍵修正：程式碼層級硬編碼組合 image_prompt
         
-        格式：CONSTANT_STYLE + Subject: visual_essence + Vibe: emotions + Background
+        格式：固定風格 + 中文標題 + 視覺隱喻
+        
+        ⚠️ 重要修正：
+        1. 所有文字必須是繁體中文
+        2. 標題字體必須夠大（72pt+）
+        3. 副標題字體適中（36pt+）
+        4. 嚴禁任何英文標籤
         """
         background = STAGE_BACKGROUNDS.get(stage_id, "warm cream backdrop")
         
-        # 硬編碼組合（遵循 /nano 示範）
+        # 硬編碼組合 - 強制中文輸出 + 大字體
         final_prompt = (
-            f"{CONSTANT_STYLE} "
-            f"Subject: Professional infographic slide with Chinese title '{slide_title}' in bold navy blue font, "
-            f"subtitle '{core_insight}' in charcoal gray. "
+            f"Artstyle: Professional Infographic, clean typography, isometric illustrations, "
+            f"warm color palette, soft studio lighting, 16:9 aspect ratio, 4K resolution. "
+            f"CRITICAL LANGUAGE REQUIREMENT: ALL TEXT MUST BE IN TRADITIONAL CHINESE (繁體中文). "
+            f"NO ENGLISH TEXT ALLOWED on the infographic. "
+            f"Main Title: '{slide_title}' - MUST be in LARGE bold Traditional Chinese font (72pt or larger), "
+            f"positioned at top center with dark navy blue color. "
+            f"Subtitle: '{core_insight}' - in Traditional Chinese (36pt), charcoal gray color. "
             f"Visual metaphor: {visual_essence}. "
-            f"Vibe: {emotions}. "
-            f"Background: {background}."
+            f"Mood: {emotions}. "
+            f"Background: {background}. "
+            f"All labels and annotations on the image MUST be in Traditional Chinese ONLY. "
+            f"Font size must be clearly readable - minimum 24pt for any text element."
         )
         
         return final_prompt

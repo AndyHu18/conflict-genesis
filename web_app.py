@@ -956,8 +956,13 @@ HTML_TEMPLATE = '''
             let successCount = 0;
             failedStages = [];  // 重置失敗清單
             
-            // 先顯示容器和佔位符
+            // 先顯示容器
             container.style.display = 'block';
+            
+            // ⚠️ 關鍵修正：在生成前顯示「生成中」佔位符
+            for (let i = 0; i < 4; i++) {
+                showLoadingPlaceholder(imgIds[i], i, stageNames[i]);
+            }
             
             console.log('📍 開始逐張生成圖像（增量渲染模式）...');
             
@@ -970,6 +975,9 @@ HTML_TEMPLATE = '''
                 
                 progressText.textContent = `🎨 [${i+1}/4] 正在渲染「${name}」...`;
                 progressBar.style.width = `${10 + i * 20}%`;
+                
+                // 更新當前圖的佔位符為「正在生成」
+                showLoadingPlaceholder(imgId, i, name, true);
                 
                 console.log(`📍[${i+1}/4] 請求生成：${key}`);
                 
@@ -1051,6 +1059,49 @@ HTML_TEMPLATE = '''
             
             console.log(`✅ 圖像處理完成！成功：${successCount}/4`);
             return successCount > 0;
+        }
+        
+        // 顯示「生成中」佔位符
+        function showLoadingPlaceholder(imgId, stageIndex, stageName, isActive = false) {
+            const imgEl = document.getElementById(imgId);
+            if (!imgEl) return;
+            
+            const stageColors = ['#C9A962', '#B87351', '#A3B899', '#D4A5A5'];
+            const color = stageColors[stageIndex] || '#C9A962';
+            
+            // 移除可能存在的重試按鈕
+            const retryBtn = imgEl.parentElement?.querySelector('.retry-btn');
+            if (retryBtn) retryBtn.remove();
+            
+            if (isActive) {
+                // 正在生成中（動態）
+                imgEl.src = 'data:image/svg+xml,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                        <rect fill="#1A1A1A" width="400" height="300" rx="12"/>
+                        <circle cx="180" cy="150" r="8" fill="${color}" opacity="0.8">
+                            <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="200" cy="150" r="8" fill="${color}" opacity="0.6">
+                            <animate attributeName="opacity" values="0.6;0.8;0.6" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="220" cy="150" r="8" fill="${color}" opacity="0.4">
+                            <animate attributeName="opacity" values="0.4;0.6;0.4" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <text x="200" y="190" fill="${color}" font-size="14" text-anchor="middle" font-family="sans-serif">正在渲染「${stageName}」...</text>
+                    </svg>
+                `);
+            } else {
+                // 等待中（靜態）
+                imgEl.src = 'data:image/svg+xml,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                        <rect fill="#1A1A1A" width="400" height="300" rx="12"/>
+                        <circle cx="200" cy="140" r="20" fill="none" stroke="${color}" stroke-width="2" opacity="0.4"/>
+                        <text x="200" y="145" fill="${color}" font-size="16" text-anchor="middle" font-family="sans-serif" opacity="0.6">${stageIndex + 1}</text>
+                        <text x="200" y="185" fill="#888" font-size="12" text-anchor="middle" font-family="sans-serif">等待生成...</text>
+                    </svg>
+                `);
+            }
+            imgEl.style.opacity = '1';
         }
         
         // 顯示失敗佔位符 + 重試按鈕
