@@ -264,12 +264,25 @@ class VisualArchitect:
         
         # Stage 4: 綜合圖（使用所有數據）
         print("   🎵 設計 Stage 4: 療癒旅程...")
+        
+        # 安全提取 iceberg_analysis
+        iceberg = stage2_result.get("iceberg_analysis", {})
+        core_need = ""
+        if isinstance(iceberg, dict):
+            user_iceberg = iceberg.get("user", {})
+            if isinstance(user_iceberg, dict):
+                core_need = user_iceberg.get("unmet_need", "")
+        elif isinstance(iceberg, list) and len(iceberg) > 0:
+            first_item = iceberg[0]
+            if isinstance(first_item, dict):
+                core_need = first_item.get("unmet_need", "")
+        
         combined_context = {
-            "overall_dynamic": stage1_result.get("overall_dynamic", ""),
-            "core_need": stage2_result.get("iceberg_analysis", {}).get("user", {}).get("unmet_need", ""),
-            "healing_message": stage2_result.get("healing_message", ""),
-            "meaning_making": stage3_result.get("meaning_making", {}),
-            "closing": stage3_result.get("closing", "")
+            "overall_dynamic": stage1_result.get("overall_dynamic", "") if isinstance(stage1_result, dict) else "",
+            "core_need": core_need,
+            "healing_message": stage2_result.get("healing_message", "") if isinstance(stage2_result, dict) else "",
+            "meaning_making": stage3_result.get("meaning_making", {}) if isinstance(stage3_result, dict) else {},
+            "closing": stage3_result.get("closing", "") if isinstance(stage3_result, dict) else ""
         }
         slides.append(self.generate_slide_content(4, combined_context))
         

@@ -171,8 +171,24 @@ class HealingAudioGenerator:
                 )
             )
             
-            # 獲取 PCM 數據
-            pcm_data = response.candidates[0].content.parts[0].inline_data.data
+            # 安全獲取 PCM 數據
+            if not response.candidates:
+                raise ValueError("TTS 回應沒有 candidates")
+            
+            candidate = response.candidates[0]
+            if not hasattr(candidate, 'content') or not candidate.content:
+                raise ValueError("TTS 回應沒有 content")
+            
+            if not candidate.content.parts:
+                raise ValueError("TTS 回應沒有 parts")
+            
+            part = candidate.content.parts[0]
+            if not hasattr(part, 'inline_data') or not part.inline_data:
+                raise ValueError("TTS 回應沒有 inline_data")
+            
+            pcm_data = part.inline_data.data
+            if not pcm_data:
+                raise ValueError("TTS 回應的音頻數據為空")
             
             # 轉換為 WAV
             wav_data = self._pcm_to_wav(pcm_data)
@@ -294,6 +310,66 @@ class HealingAudioGenerator:
         print(f"   ✅ 基礎 WAV 拼接完成")
         return output_buffer.read()
     
+    def _apply_bgm_mixing(
+        self, 
+        voice_audio: bytes,
+        stage2_result: Dict[str, Any]
+    ) -> bytes:
+        """
+        將語音與背景音樂混合
+        
+        Args:
+            voice_audio: 語音音頻 bytes
+            stage2_result: 二階分析結果（用於提取情緒）
+            
+        Returns:
+            混合後的音頻 bytes（如果無 BGM 則返回原語音）
+        """
+        try:
+            from conflict_analyzer.audio_mixer import AudioMixer
+            
+            # 從 stage2 提取情緒標籤
+            emotion = "healing"  # 預設為療癒
+            if isinstance(stage2_result, dict):
+                # 嘗試從不同欄位提取情緒
+                if stage2_result.get("sentiment_vibe"):
+                    emotion = stage2_result["sentiment_vibe"]
+                elif stage2_result.get("attachment_dynamic"):
+                    # 從依附動態中提取關鍵詞
+                    dynamic = str(stage2_result["attachment_dynamic"]).lower()
+                    if any(word in dynamic for word in ["焦慮", "anxiety"]):
+                        emotion = "calm"
+                    elif any(word in dynamic for word in ["悲傷", "sad"]):
+                        emotion = "sadness"
+                    elif any(word in dynamic for word in ["恐懼", "fear"]):
+                        emotion = "fear"
+                    elif any(word in dynamic for word in ["脆弱", "vulnerable"]):
+                        emotion = "vulnerability"
+            
+            print(f"📍[BGM Mixing] 情緒標籤: {emotion}")
+            
+            # 初始化混音器（不需要自動下載，因為會使用 Lyria）
+            mixer = AudioMixer(auto_download=False)
+            
+            # 優先使用 Lyria 生成原創 BGM
+            # 如果 Lyria 失敗，會自動降級到本地 BGM
+            print("📍[BGM Mixing] 嘗試使用 Lyria 生成原創 BGM...")
+            
+            mixed_audio = mixer.mix_voice_with_lyria(
+                voice_bytes=voice_audio,
+                emotion=emotion,
+                voice_format="wav"
+            )
+            
+            return mixed_audio
+            
+        except ImportError as e:
+            print(f"⚠️ AudioMixer 不可用: {e}，返回純語音")
+            return voice_audio
+        except Exception as e:
+            print(f"⚠️ BGM 混音失敗: {e}，返回純語音")
+            return voice_audio
+    
     def generate_healing_audio(
         self,
         stage1_result: Dict[str, Any],
@@ -354,7 +430,7 @@ class HealingAudioGenerator:
         
         # 3. 順序生成每個片段的音頻
         if progress_callback:
-            progress_callback(3, 4, f"正在生成 {len(parts)} 個音頻片段...")
+            progress_callback(3, 5, f"正在生成 {len(parts)} 個音頻片段...")
         
         print(f"\n📍[Sequential TTS] 開始順序生成 {len(parts)} 個音頻片段...")
         audio_clips = []
@@ -372,9 +448,15 @@ class HealingAudioGenerator:
         
         # 4. 縫合音頻
         if progress_callback:
-            progress_callback(4, 4, "正在編織您的專屬療癒能量...")
+            progress_callback(4, 5, "正在編織您的專屬療癒能量...")
         
-        final_audio = self.stitch_audio_clips(audio_clips)
+        stitched_audio = self.stitch_audio_clips(audio_clips)
+        
+        # 5. 混音：加入背景音樂 (如果可用)
+        if progress_callback:
+            progress_callback(5, 5, "正在融合療癒氛圍音樂...")
+        
+        final_audio = self._apply_bgm_mixing(stitched_audio, stage2_result)
         
         # 儲存（如果指定了目錄）
         if output_dir:

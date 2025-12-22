@@ -498,73 +498,74 @@ HTML_TEMPLATE = '''
                     </div>
                 </div>
 
-                <!-- 簡報卡片展示區 (NotebookLM 風格) -->
+                <!-- 視覺化簡報卡片展示區 (圖上文下，2x2 格子) -->
                 <div id="generatedImagesContainer" style="display:none;">
-                    <!-- Slide 1: 衝突演化 -->
-                    <div class="slide-card" id="slideCard1" style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(0,0,0,0.3)); border: 1px solid rgba(245,158,11,0.3); border-radius: 16px; margin-bottom: 20px; overflow: hidden;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-                            <div style="padding: 0;">
-                                <img id="imgStage1" style="width:100%; height:280px; object-fit:cover; display:block;" alt="Stage 1">
+                    <div class="card" style="background: transparent; padding: 0; border: none;">
+                        <div class="card-header" style="padding: 20px 0;"><span class="card-icon">✨</span><span class="card-title">四大分析洞察</span></div>
+                        
+                        <!-- 2x2 Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            
+                            <!-- Card 1: 衝突演化 -->
+                            <div class="insight-card" id="slideCard1" style="background: linear-gradient(180deg, rgba(245,158,11,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(245,158,11,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                                <div style="position: relative;">
+                                    <img id="imgStage1" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 1">
+                                    <div style="position:absolute; top:12px; left:12px; background:rgba(245,158,11,0.9); color:#000; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 1</div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <h3 id="slideTitle1" style="color: #F59E0B; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">衝突演化</h3>
+                                    <p id="slideInsight1" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">每一場衝突都是一面鏡子。</p>
+                                    <ul id="slideBullets1" style="list-style: none; padding: 0; margin: 0;">
+                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#F59E0B; margin-right:8px;">•</span><span>載入中...</span></li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div style="padding: 25px;">
-                                <div style="color: #F59E0B; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Stage 1 • 衝突演化</div>
-                                <h3 id="slideTitle1" style="color: white; font-size: 1.5rem; margin: 0 0 12px 0; font-weight: 700;">能量引爆點</h3>
-                                <p id="slideInsight1" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; font-style: italic;">每一場衝突都是一面鏡子。</p>
-                                <ul id="slideBullets1" style="list-style: none; padding: 0; margin: 0;">
-                                    <li style="color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• 關鍵洞察載入中...</li>
-                                </ul>
+                            
+                            <!-- Card 2: 深層溯源 -->
+                            <div class="insight-card" id="slideCard2" style="background: linear-gradient(180deg, rgba(8,145,178,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(8,145,178,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                                <div style="position: relative;">
+                                    <img id="imgStage2" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 2">
+                                    <div style="position:absolute; top:12px; left:12px; background:rgba(8,145,178,0.9); color:#fff; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 2</div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <h3 id="slideTitle2" style="color: #0891B2; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">深層溯源</h3>
+                                    <p id="slideInsight2" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">憤怒的表面之下，往往藏著最柔軟的渴望。</p>
+                                    <ul id="slideBullets2" style="list-style: none; padding: 0; margin: 0;">
+                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#0891B2; margin-right:8px;">•</span><span>載入中...</span></li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 2: 深層溯源 -->
-                    <div class="slide-card" id="slideCard2" style="background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(0,0,0,0.3)); border: 1px solid rgba(8,145,178,0.3); border-radius: 16px; margin-bottom: 20px; overflow: hidden;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-                            <div style="padding: 25px; order: 1;">
-                                <div style="color: #0891B2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Stage 2 • 深層溯源</div>
-                                <h3 id="slideTitle2" style="color: white; font-size: 1.5rem; margin: 0 0 12px 0; font-weight: 700;">冰山下的渴望</h3>
-                                <p id="slideInsight2" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; font-style: italic;">憤怒的表面之下，往往藏著最柔軟的渴望。</p>
-                                <ul id="slideBullets2" style="list-style: none; padding: 0; margin: 0;">
-                                    <li style="color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• 深層洞察載入中...</li>
-                                </ul>
+                            
+                            <!-- Card 3: 成長方案 -->
+                            <div class="insight-card" id="slideCard3" style="background: linear-gradient(180deg, rgba(34,197,94,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(34,197,94,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                                <div style="position: relative;">
+                                    <img id="imgStage3" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 3">
+                                    <div style="position:absolute; top:12px; left:12px; background:rgba(34,197,94,0.9); color:#000; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 3</div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <h3 id="slideTitle3" style="color: #22C55E; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">成長方案</h3>
+                                    <p id="slideInsight3" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">改變不是背叛自己，而是給自己更多選擇。</p>
+                                    <ul id="slideBullets3" style="list-style: none; padding: 0; margin: 0;">
+                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#22C55E; margin-right:8px;">•</span><span>載入中...</span></li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div style="padding: 0; order: 2;">
-                                <img id="imgStage2" style="width:100%; height:280px; object-fit:cover; display:block;" alt="Stage 2">
+                            
+                            <!-- Card 4: 療癒旅程 -->
+                            <div class="insight-card" id="slideCard4" style="background: linear-gradient(180deg, rgba(236,72,153,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(236,72,153,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                                <div style="position: relative;">
+                                    <img id="imgCombined" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Combined">
+                                    <div style="position:absolute; top:12px; left:12px; background:rgba(236,72,153,0.9); color:#fff; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 4</div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <h3 id="slideTitle4" style="color: #EC4899; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">療癒旅程</h3>
+                                    <p id="slideInsight4" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">修復不是回到從前，而是創造更美好的未來。</p>
+                                    <ul id="slideBullets4" style="list-style: none; padding: 0; margin: 0;">
+                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#EC4899; margin-right:8px;">•</span><span>載入中...</span></li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 3: 成長方案 -->
-                    <div class="slide-card" id="slideCard3" style="background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(0,0,0,0.3)); border: 1px solid rgba(34,197,94,0.3); border-radius: 16px; margin-bottom: 20px; overflow: hidden;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-                            <div style="padding: 0;">
-                                <img id="imgStage3" style="width:100%; height:280px; object-fit:cover; display:block;" alt="Stage 3">
-                            </div>
-                            <div style="padding: 25px;">
-                                <div style="color: #22C55E; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Stage 3 • 成長方案</div>
-                                <h3 id="slideTitle3" style="color: white; font-size: 1.5rem; margin: 0 0 12px 0; font-weight: 700;">改變的力量</h3>
-                                <p id="slideInsight3" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; font-style: italic;">改變不是背叛自己，而是給自己更多選擇。</p>
-                                <ul id="slideBullets3" style="list-style: none; padding: 0; margin: 0;">
-                                    <li style="color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• 行動建議載入中...</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Slide 4: 療癒旅程 -->
-                    <div class="slide-card" id="slideCard4" style="background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(0,0,0,0.3)); border: 1px solid rgba(236,72,153,0.3); border-radius: 16px; margin-bottom: 20px; overflow: hidden;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
-                            <div style="padding: 25px; order: 1;">
-                                <div style="color: #EC4899; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Stage 4 • 療癒旅程</div>
-                                <h3 id="slideTitle4" style="color: white; font-size: 1.5rem; margin: 0 0 12px 0; font-weight: 700;">重構與共生</h3>
-                                <p id="slideInsight4" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; font-style: italic;">修復不是回到從前，而是創造更美好的未來。</p>
-                                <ul id="slideBullets4" style="list-style: none; padding: 0; margin: 0;">
-                                    <li style="color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• 療癒洞察載入中...</li>
-                                </ul>
-                            </div>
-                            <div style="padding: 0; order: 2;">
-                                <img id="imgCombined" style="width:100%; height:280px; object-fit:cover; display:block;" alt="Combined">
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -574,7 +575,7 @@ HTML_TEMPLATE = '''
                     <div class="card-header"><span class="card-icon">🎵</span><span class="card-title">數位催眠療癒音頻已就緒</span></div>
                     <div style="padding: 20px; text-align: center;">
                         <p style="color: var(--accent-secondary); font-size: 1.1rem; margin-bottom: 15px;">✨ 您的專屬療癒音頻已準備完成</p>
-                        <p style="color: var(--text-muted);">請點擊下方浮動播放器開始您的數位催眠療癒之旅</p>
+                        <p style="color: var(--text-muted);">點擊下方巨型按鈕開始您的療癒之旅</p>
                     </div>
                 </div>
             </div>
@@ -591,26 +592,37 @@ HTML_TEMPLATE = '''
 
         <footer>
             <p>衝突基因 © 2024 | 四階段分析：演化追蹤 + 深層溯源 + 成長方案 + 數位催眠療癒</p>
-            <p style="margin-top: 10px;">本報告由 <a href="https://ai.google.dev" target="_blank">先進人工智慧</a> 驅動生成</p>
+            <p style="margin-top: 10px;">本報告由先進原生心靈引擎驅動生成</p>
         </footer>
     </div>
 
-    <!-- 底部固定療育音頻播放器 -->
+    <!-- 底部固定巨型療育音頻播放器 (心跳脈動效果) -->
     <div class="healing-player" id="healingPlayer">
         <button class="healing-close-btn" onclick="closeHealingPlayer()">✕</button>
         <div class="healing-player-content">
-            <div class="healing-player-icon">🎵</div>
+            <div class="healing-player-icon" style="animation: pulse-glow 2s ease-in-out infinite;">🎵</div>
             <div class="healing-player-info">
-                <div class="healing-player-title">✨ 您的專屬數位催眠療癒音頻已準備好</div>
-                <div class="healing-player-subtitle">閉上眼睛，讓艾瑞克森式催眠引導您進入深度放鬆與重建</div>
+                <div class="healing-player-title">✨ 開始您的專屬療癒引導</div>
+                <div class="healing-player-subtitle">閉上眼睛，讓艾瑞克森式催眠帶您進入深度放鬆</div>
                 <div class="audio-progress" onclick="seekAudio(event)">
                     <div class="audio-progress-bar" id="audioProgressBar"></div>
                 </div>
             </div>
-            <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()">▶</button>
+            <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, var(--accent-healing), #d946a8); box-shadow: 0 0 30px rgba(236,72,153,0.6); animation: pulse-button 1.5s ease-in-out infinite;">▶</button>
         </div>
         <audio id="healingAudio" style="display:none;"></audio>
     </div>
+
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.1); filter: brightness(1.3); }
+        }
+        @keyframes pulse-button {
+            0%, 100% { box-shadow: 0 0 20px rgba(236,72,153,0.4); }
+            50% { box-shadow: 0 0 40px rgba(236,72,153,0.8), 0 0 60px rgba(236,72,153,0.4); }
+        }
+    </style>
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="particles" id="particles"></div>
@@ -920,8 +932,11 @@ HTML_TEMPLATE = '''
                     // 填充簡報卡片數據（如果有 slides 數據）
                     if (data.slides && data.slides.length > 0) {
                         const stageKeys = ['1', '2', '3', '4'];
+                        const stageColors = ['#F59E0B', '#0891B2', '#22C55E', '#EC4899'];
+                        
                         data.slides.forEach((slide, i) => {
                             const num = stageKeys[i];
+                            const color = stageColors[i];
                             
                             // 更新標題
                             const titleEl = document.getElementById('slideTitle' + num);
@@ -931,11 +946,14 @@ HTML_TEMPLATE = '''
                             const insightEl = document.getElementById('slideInsight' + num);
                             if (insightEl && slide.core_insight) insightEl.textContent = slide.core_insight;
                             
-                            // 更新要點列表
+                            // 更新要點列表（新的格式）
                             const bulletsEl = document.getElementById('slideBullets' + num);
                             if (bulletsEl && slide.data_bullets && slide.data_bullets.length > 0) {
                                 bulletsEl.innerHTML = slide.data_bullets.map(bullet => 
-                                    `<li style="color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• ${bullet}</li>`
+                                    `<li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;">
+                                        <span style="color:${color}; margin-right:8px;">•</span>
+                                        <span>${bullet}</span>
+                                    </li>`
                                 ).join('');
                             }
                         });
@@ -1098,25 +1116,25 @@ HTML_TEMPLATE = '''
             document.getElementById('healingPlayBtn').textContent = '▶';
         }
         
-        // 三階分析完成後自動開始生成圖片和音頻
+        // 三階分析完成後自動**並行**生成圖片和音頻
         async function onAnalysisComplete() {
             // 重置進度
             document.getElementById('imageProgressBar').style.width = '0%';
             document.getElementById('audioGenProgressBar').style.width = '0%';
             document.getElementById('imageProgressText').textContent = '準備中...';
-            document.getElementById('audioProgressText').textContent = '等待圖像完成...';
+            document.getElementById('audioProgressText').textContent = '準備中...';
             document.getElementById('generatedImagesContainer').style.display = 'none';
             document.getElementById('audioReadyCard').style.display = 'none';
             
-            // 先生成圖片
-            console.log('📍 開始自動生成圖片...');
-            const imageSuccess = await generateImagesAuto();
+            // 並行生成圖片和音頻（不互相等待）
+            console.log('📍 開始並行生成圖像和音頻...');
             
-            // 然後生成音頻
-            console.log('📍 開始自動生成音頻...');
-            await generateHealingAudioAuto();
+            const [imageResult, audioResult] = await Promise.all([
+                generateImagesAuto(),
+                generateHealingAudioAuto()
+            ]);
             
-            console.log('📍 所有自動生成完成！');
+            console.log('📍 所有自動生成完成！', { imageResult, audioResult });
         }
     </script>
 </body>
@@ -1299,6 +1317,7 @@ def generate_audio():
             'audio_base64': result['audio_base64'],
             'duration_estimate': result['duration_estimate'],
             'voice': result['voice'],
+            'parts_count': result.get('parts_count', 1),
             'message': '療育音頻生成成功'
         })
         

@@ -49,6 +49,7 @@ from .prompts import (
 )
 from .healing_audio import HealingAudioGenerator, generate_healing_audio_from_analysis
 from .image_generator import ImageGenerator
+from .audio_mixer import AudioMixer, mix_audio
 
 __all__ = [
     # 核心類別
