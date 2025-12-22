@@ -1,0 +1,26 @@
+# Conflict Genesis - 依賴套件
+# Python 3.10+
+
+# Web 框架
+flask>=3.1.0
+Werkzeug>=3.1.0
+
+# Google GenAI SDK (2025 新版)
+google-genai>=1.56.0
+
+# 資料驗證
+pydantic>=2.12.0
+
+# 環境變數
+python-dotenv>=1.2.0
+
+# 音訊處理
+pydub>=0.25.1
+
+# PDF 報告生成
+fpdf2>=2.8.0
+
+# 開發工具 (可選)
+# pytest>=7.0.0
+# black>=23.0.0
+# mypy>=1.0.0
