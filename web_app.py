@@ -635,12 +635,107 @@ HTML_TEMPLATE = '''
                 </div>
             </div>
 
-            <div class="download-section" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <button class="btn-download" onclick="downloadPDF()" style="background: linear-gradient(135deg, var(--accent-gold), #c09b30); color: #000; border: none;">
-                    <span></span><span>下載 PDF 報告</span>
+            <!-- 高質感下載區塊 -->
+            <div class="download-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(13, 13, 13, 0.98)); border-radius: 20px; border: 1px solid rgba(201, 169, 98, 0.3); margin-top: 30px;">
+                <!-- PDF 報告下載 -->
+                <button id="downloadPdfBtn" class="download-card" onclick="downloadPDF()" disabled>
+                    <div class="download-icon">📄</div>
+                    <div class="download-info">
+                        <div class="download-title">PDF 分析報告</div>
+                        <div class="download-desc" id="pdfDownloadStatus">⏳ 等待生成...</div>
+                    </div>
+                    <div class="download-arrow">→</div>
                 </button>
-                <button class="btn-download" onclick="downloadJSON()"><span></span><span>下載 JSON 數據</span></button>
+                
+                <!-- PDF + 圖片完整版 -->
+                <button id="downloadFullBtn" class="download-card premium" onclick="downloadFullPackage()" disabled>
+                    <div class="download-badge">✨ 完整版</div>
+                    <div class="download-icon">📦</div>
+                    <div class="download-info">
+                        <div class="download-title">PDF + 視覺化圖像</div>
+                        <div class="download-desc" id="fullDownloadStatus">⏳ 等待圖片生成...</div>
+                    </div>
+                    <div class="download-arrow">→</div>
+                </button>
             </div>
+            
+            <style>
+                .download-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    padding: 25px 30px;
+                    background: linear-gradient(145deg, rgba(40, 35, 30, 0.9), rgba(26, 26, 26, 0.95));
+                    border: 2px solid rgba(201, 169, 98, 0.3);
+                    border-radius: 16px;
+                    cursor: pointer;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .download-card:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+                .download-card:not(:disabled):hover {
+                    border-color: #D4AF37;
+                    transform: translateY(-3px);
+                    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.25);
+                }
+                .download-card:not(:disabled):hover .download-arrow {
+                    transform: translateX(5px);
+                    color: #D4AF37;
+                }
+                .download-card.premium {
+                    background: linear-gradient(145deg, rgba(60, 45, 25, 0.95), rgba(40, 30, 15, 0.98));
+                    border-color: rgba(212, 175, 55, 0.5);
+                }
+                .download-card.premium:not(:disabled):hover {
+                    border-color: #F4D03F;
+                    box-shadow: 0 15px 50px rgba(244, 208, 63, 0.3);
+                }
+                .download-badge {
+                    position: absolute;
+                    top: -1px;
+                    right: -1px;
+                    background: linear-gradient(135deg, #D4AF37, #F4D03F);
+                    color: #1A1A1A;
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    padding: 5px 12px;
+                    border-radius: 0 14px 0 10px;
+                }
+                .download-icon {
+                    font-size: 2.5rem;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+                }
+                .download-info {
+                    flex: 1;
+                    text-align: left;
+                }
+                .download-title {
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                    color: #F5F2ED;
+                    margin-bottom: 5px;
+                    font-family: 'Playfair Display', serif;
+                }
+                .download-desc {
+                    font-size: 0.85rem;
+                    color: rgba(255, 255, 255, 0.6);
+                }
+                .download-card:not(:disabled) .download-desc {
+                    color: #D4AF37;
+                }
+                .download-arrow {
+                    font-size: 1.5rem;
+                    color: rgba(255, 255, 255, 0.3);
+                    transition: all 0.3s;
+                }
+                @media (max-width: 768px) {
+                    .download-section { grid-template-columns: 1fr !important; }
+                }
+            </style>
 
             <!-- 底部導航欄 (方便跳轉) -->
             <div class="stage-tabs bottom-nav" style="margin-top: 40px; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), rgba(139, 115, 85, 0.05)); border-radius: 12px; border: 1px solid var(--border-color);">
@@ -968,15 +1063,69 @@ HTML_TEMPLATE = '''
             switchStage(1);
             document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
             
+            // 分析完成，啟用 PDF 下載按鈕
+            updateDownloadButtons(true, false);
+            
             // 分析完成後自動開始生成療育音頻
             onAnalysisComplete();
         }
 
         function showError(msg) { document.getElementById('errorMessage').textContent = msg; document.getElementById('errorCard').style.display = 'block'; }
-        function downloadJSON() { if (!fullResult) return; const blob = new Blob([JSON.stringify(fullResult, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `衝突分析報告_${new Date().toISOString().slice(0, 10)}.json`; a.click(); }
+        
+        // 下載 PDF 報告
         function downloadPDF() { 
             if (!currentReportId) { alert('請先完成分析'); return; } 
             window.open(`/download-pdf/${currentReportId}`, '_blank'); 
+        }
+        
+        // 下載完整包（PDF + 圖片）
+        function downloadFullPackage() {
+            if (!currentReportId || !imagesReady) { 
+                alert('圖片尚未生成完成，請稍候'); 
+                return; 
+            }
+            // 下載 PDF
+            window.open(`/download-pdf/${currentReportId}`, '_blank');
+            
+            // 延遲下載圖片（避免瀏覽器阻擋多個下載）
+            setTimeout(() => {
+                // 下載所有生成的圖片
+                const imgIds = ['imgStage1', 'imgStage2', 'imgStage3', 'imgCombined'];
+                const stageNames = ['1_衝突演化', '2_深層溯源', '3_成長方案', '4_融合總覽'];
+                
+                imgIds.forEach((id, index) => {
+                    const img = document.getElementById(id);
+                    if (img && img.src && img.src.startsWith('data:image')) {
+                        const link = document.createElement('a');
+                        link.href = img.src;
+                        link.download = `Lumina心語_${stageNames[index]}.png`;
+                        setTimeout(() => link.click(), index * 500);
+                    }
+                });
+            }, 1000);
+        }
+        
+        // 按鈕狀態管理
+        let imagesReady = false;
+        
+        function updateDownloadButtons(pdfReady, imagesComplete) {
+            const pdfBtn = document.getElementById('downloadPdfBtn');
+            const fullBtn = document.getElementById('downloadFullBtn');
+            const pdfStatus = document.getElementById('pdfDownloadStatus');
+            const fullStatus = document.getElementById('fullDownloadStatus');
+            
+            if (pdfReady) {
+                pdfBtn.disabled = false;
+                pdfStatus.textContent = '✅ 點擊下載完整分析報告';
+            }
+            
+            if (imagesComplete) {
+                imagesReady = true;
+                fullBtn.disabled = false;
+                fullStatus.textContent = '✅ 包含 4 張視覺化圖像';
+            } else if (pdfReady) {
+                fullStatus.textContent = '⏳ 圖片生成中...';
+            }
         }
         
         let currentReportId = null;
@@ -1115,8 +1264,12 @@ HTML_TEMPLATE = '''
             
             if (successCount === 4) {
                 progressText.textContent = `✅ 視覺化簡報完成（4/4 張成功）`;
+                // 全部成功，啟用完整包下載按鈕
+                updateDownloadButtons(true, true);
             } else if (successCount > 0) {
                 progressText.innerHTML = `✅ 已完成 ${successCount}/4 張 <span style="color:#F59E0B;">（${4-successCount} 張失敗，可重試）</span>`;
+                // 部分成功也啟用（至少有圖）
+                updateDownloadButtons(true, true);
             } else {
                 progressText.innerHTML = `❌ 圖像生成失敗 <button onclick="generateImagesAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">全部重試</button>`;
             }
