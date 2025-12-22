@@ -87,7 +87,7 @@ HTML_TEMPLATE = '''
         header { text-align: center; margin-bottom: 50px; }
         .logo { font-size: 3rem; margin-bottom: 15px; color: var(--text-primary); font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: 4px; }
         .tagline { color: var(--text-secondary); font-size: 1.1rem; font-weight: 300; letter-spacing: 1px; }
-        .premium-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 20px; background: rgba(201, 169, 98, 0.1); border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; color: var(--accent-gold); }
+        .premium-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 10px 24px; background: rgba(139, 115, 85, 0.2); border: 1px solid rgba(139, 115, 85, 0.5); border-radius: 4px; font-size: 1rem; color: #5A4A3A; font-weight: 500; }
         .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 35px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(139, 115, 85, 0.08); }
         .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(139, 115, 85, 0.1); }
         .card-icon { font-size: 1.5rem; color: var(--accent-gold); }
@@ -733,6 +733,16 @@ HTML_TEMPLATE = '''
         function switchStage(stage) {
             document.querySelectorAll('.stage-tab').forEach((t, i) => t.classList.toggle('active', i === stage - 1));
             document.querySelectorAll('.stage-content').forEach((c, i) => c.classList.toggle('active', i === stage - 1));
+            
+            // 滾動到對應階段內容的開頭
+            const stageContentIds = ['stage1Content', 'stage2Content', 'stage3Content', 'stage4Content'];
+            const targetElement = document.getElementById(stageContentIds[stage - 1]);
+            if (targetElement) {
+                // 稍微延遲以確保內容切換完成
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
         }
 
         function createParticles() {
