@@ -1244,7 +1244,84 @@ HTML_TEMPLATE = '''
         // 療育音頻播放器功能
         let healingAudioReady = false;
         
-        // 自動生成音頻（帶進度）
+        // ============ Web Audio API 混音器 (AudioNarrator) ============
+        // 支援 BGM + 語音的即時混音，帶自動避讓 (Ducking) 效果
+        class AudioNarrator {
+            constructor() {
+                this.audioCtx = null;
+                this.bgmGain = null;
+                this.voiceGain = null;
+                this.bgmSource = null;
+                this.bgmVolume = 0.25;
+                this.duckingVolume = 0.08;
+            }
+            
+            async init() {
+                if (this.audioCtx) return;
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this.bgmGain = this.audioCtx.createGain();
+                this.voiceGain = this.audioCtx.createGain();
+                this.bgmGain.gain.value = this.bgmVolume;
+                this.bgmGain.connect(this.audioCtx.destination);
+                this.voiceGain.connect(this.audioCtx.destination);
+            }
+            
+            async loadBGM(url) {
+                await this.init();
+                try {
+                    const response = await fetch(url);
+                    const arrayBuffer = await response.arrayBuffer();
+                    const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                    
+                    this.bgmSource = this.audioCtx.createBufferSource();
+                    this.bgmSource.buffer = audioBuffer;
+                    this.bgmSource.loop = true;
+                    this.bgmSource.connect(this.bgmGain);
+                    this.bgmSource.start(0);
+                    console.log("🎵 BGM 已啟動");
+                } catch (err) {
+                    console.warn("🎵 BGM 加載失敗:", err);
+                }
+            }
+            
+            async playVoice(audioBlob) {
+                await this.init();
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                
+                // Ducking: 降低 BGM 音量
+                this.fadeBGM(this.duckingVolume);
+                
+                const source = this.audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(this.voiceGain);
+                
+                return new Promise(resolve => {
+                    source.onended = () => {
+                        this.fadeBGM(this.bgmVolume);  // 恢復 BGM 音量
+                        resolve();
+                    };
+                    source.start(0);
+                });
+            }
+            
+            fadeBGM(targetVolume) {
+                if (!this.bgmGain) return;
+                const now = this.audioCtx.currentTime;
+                this.bgmGain.gain.linearRampToValueAtTime(targetVolume, now + 0.5);
+            }
+            
+            stop() {
+                if (this.bgmSource) {
+                    this.bgmSource.stop();
+                    this.bgmSource = null;
+                }
+            }
+        }
+        
+        const audioNarrator = new AudioNarrator();
+        
+        // 自動生成音頻（帶自動重試 3 次）
         async function generateHealingAudioAuto() {
             if (!currentReportId) return false;
             
@@ -1256,18 +1333,18 @@ HTML_TEMPLATE = '''
             progressText.textContent = '正在生成分段療癒腳本...';
             progressBar.style.width = '5%';
             partsProgress.style.display = 'block';
-            partsProgress.textContent = ' 正在生成療育文稿...';
+            partsProgress.textContent = '🎭 正在生成療育文稿...';
             
             // 分段進度模擬
             let progress = 5;
             const progressSteps = [
-                { pct: 15, text: ' 正在生成療育文稿...' },
-                { pct: 25, text: '️ 拆分文稿為多個片段...' },
-                { pct: 40, text: '️ 正在生成 PART_1 音頻...' },
-                { pct: 55, text: '️ 正在生成 PART_2 音頻...' },
-                { pct: 65, text: '️ 正在生成 PART_3 音頻...' },
-                { pct: 75, text: '️ 正在生成更多片段...' },
-                { pct: 85, text: ' 正在編織您的專屬療癒能量...' },
+                { pct: 15, text: '🎭 正在生成療育文稿...' },
+                { pct: 25, text: '✂️ 拆分文稿為多個片段...' },
+                { pct: 40, text: '🎙️ 正在生成 PART_1 音頻...' },
+                { pct: 55, text: '🎙️ 正在生成 PART_2 音頻...' },
+                { pct: 65, text: '🎙️ 正在生成 PART_3 音頻...' },
+                { pct: 75, text: '🎙️ 正在生成更多片段...' },
+                { pct: 85, text: '🎶 正在編織您的專屬療癒能量...' },
             ];
             let stepIdx = 0;
             
@@ -1284,59 +1361,80 @@ HTML_TEMPLATE = '''
             
             const stage4Prompt = document.getElementById('stage4Prompt').value;
             
-            try {
-                const resp = await fetch('/generate-audio', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        report_id: currentReportId,
-                        stage4_prompt: stage4Prompt,
-                        voice: 'warm_female'
-                    })
-                });
-                
-                const data = await resp.json();
-                clearInterval(progressInterval);
-                
-                if (data.success && data.audio_base64) {
-                    progressBar.style.width = '100%';
-                    progressText.textContent = ' 音頻生成完成！';
-                    
-                    // 顯示 BGM 狀態
-                    const bgmStatus = data.bgm_status || {};
-                    if (bgmStatus.success) {
-                        partsProgress.textContent = ` 已成功串接 ${data.parts_count || 6} 個音頻片段 +  ${bgmStatus.method === 'lyria' ? 'Lyria原創BGM' : '本地BGM'}`;
-                    } else {
-                        partsProgress.innerHTML = ` 已成功串接 ${data.parts_count || 6} 個音頻片段<br><span style="color:#F59E0B;">️ 純語音模式（${bgmStatus.error || '無背景音樂'}）</span>`;
-                        console.warn('BGM 混音未成功:', bgmStatus);
-                    }
-                    
-                    // 設置音頻
-                    const audio = document.getElementById('healingAudio');
-                    audio.src = 'data:audio/wav;base64,' + data.audio_base64;
-                    
-                    // 設置進度條更新
-                    audio.addEventListener('timeupdate', updateAudioProgress);
-                    audio.addEventListener('ended', onAudioEnded);
-                    
-                    healingAudioReady = true;
-                    
-                    // 顯示就緒卡片
-                    audioReadyCard.style.display = 'block';
-                    
-                    // 彈出播放器
-                    document.getElementById('healingPlayer').classList.add('show');
-                    
-                    return true;
-                } else {
-                    progressText.textContent = ' 音頻生成失敗';
-                    console.error('音頻生成失敗:', data.error);
-                    return false;
+            // ⚠️ 自動重試 3 次
+            let success = false;
+            let lastError = null;
+            let data = null;
+            
+            for (let attempt = 1; attempt <= 3 && !success; attempt++) {
+                if (attempt > 1) {
+                    console.log(`🔄 音頻生成第 ${attempt} 次重試...`);
+                    progressText.textContent = `🔄 音頻生成重試中 (${attempt}/3)...`;
+                    await new Promise(r => setTimeout(r, 3000));  // 重試前等待 3 秒
                 }
-            } catch (err) {
-                clearInterval(progressInterval);
-                progressText.textContent = ' 網路錯誤';
-                console.error('音頻生成錯誤:', err);
+                
+                try {
+                    const resp = await fetch('/generate-audio', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            report_id: currentReportId,
+                            stage4_prompt: stage4Prompt,
+                            voice: 'warm_female'
+                        })
+                    });
+                    
+                    data = await resp.json();
+                    
+                    if (data.success && data.audio_base64) {
+                        success = true;
+                        console.log(`✅ 音頻生成成功！（第 ${attempt} 次嘗試）`);
+                    } else {
+                        lastError = data.error;
+                        console.warn(`❌ 音頻生成第 ${attempt} 次失敗:`, data.error);
+                    }
+                } catch (err) {
+                    lastError = err.message;
+                    console.error(`❌ 音頻生成第 ${attempt} 次請求錯誤:`, err);
+                }
+            }
+            
+            clearInterval(progressInterval);
+            
+            if (success && data) {
+                progressBar.style.width = '100%';
+                progressText.textContent = '✅ 音頻生成完成！';
+                
+                // 顯示 BGM 狀態
+                const bgmStatus = data.bgm_status || {};
+                if (bgmStatus.success) {
+                    partsProgress.textContent = `🎵 已成功串接 ${data.parts_count || 6} 個音頻片段 + 🎶 ${bgmStatus.method === 'lyria' ? 'Lyria原創BGM' : '本地BGM'}`;
+                } else {
+                    partsProgress.innerHTML = `🎵 已成功串接 ${data.parts_count || 6} 個音頻片段<br><span style="color:#F59E0B;">⚠️ 純語音模式（${bgmStatus.error || '無背景音樂'}）</span>`;
+                    console.warn('BGM 混音未成功:', bgmStatus);
+                }
+                
+                // 設置音頻
+                const audio = document.getElementById('healingAudio');
+                audio.src = 'data:audio/wav;base64,' + data.audio_base64;
+                
+                // 設置進度條更新
+                audio.addEventListener('timeupdate', updateAudioProgress);
+                audio.addEventListener('ended', onAudioEnded);
+                
+                healingAudioReady = true;
+                
+                // 顯示就緒卡片
+                audioReadyCard.style.display = 'block';
+                
+                // 彈出播放器
+                document.getElementById('healingPlayer').classList.add('show');
+                
+                return true;
+            } else {
+                progressText.innerHTML = `❌ 音頻生成失敗（重試 3 次）<button onclick="generateHealingAudioAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">重試</button>`;
+                partsProgress.textContent = `錯誤：${lastError || '未知錯誤'}`;
+                console.error('音頻生成失敗（3 次重試後）:', lastError);
                 return false;
             }
         }
