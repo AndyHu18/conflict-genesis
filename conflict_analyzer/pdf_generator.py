@@ -188,7 +188,7 @@ class LuminaReportPDF(FPDF):
         # 副標題
         if subtitle:
             self.set_font(self.font_name, '', 9)
-            self.set_text_color(255, 255, 255, 180)
+            self.set_text_color(220, 220, 220)  # 淺灰色代替透明白
             self.set_xy(18, 40)
             self.cell(0, 5, self.safe_text(subtitle), 0, 1)
         
