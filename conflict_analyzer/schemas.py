@@ -1,5 +1,5 @@
 """
-衝突基因 - Pydantic Schemas
+Lumina 心語 - Pydantic Schemas
 一階：衝突演化追蹤器
 二階：深層溯源與接納橋樑
 三階：個人成長行動方案

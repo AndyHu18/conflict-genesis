@@ -1,5 +1,5 @@
 """
-衝突基因 - 音頻混音模組 (Audio Mixer)
+Lumina 心語 - 音頻混音模組 (Audio Mixer)
 將療癒語音與背景音樂混合輸出
 
 核心功能：
@@ -386,9 +386,77 @@ class AudioMixer:
             return output_buffer.read()
             
         except Exception as e:
-            print(f"⚠️ Lyria 生成失敗: {e}")
+            print(f"\n⚠️ Lyria 生成失敗: {e}")
+            print("   錯誤類型:", type(e).__name__)
+            
+            # 嘗試 Replicate MusicGen 作為第二備用
+            print("   嘗試 Replicate MusicGen 備用方案...")
+            try:
+                from conflict_analyzer.replicate_music import ReplicateMusicGenerator, is_replicate_available
+                
+                if is_replicate_available():
+                    replicate_gen = ReplicateMusicGenerator()
+                    
+                    # 計算需要的時長
+                    voice = self.load_audio(voice_bytes, voice_format)
+                    voice_duration_sec = len(voice) // 1000 + 10
+                    
+                    # 使用 Replicate 生成並循環
+                    bgm_bytes = replicate_gen.generate_and_loop(emotion, voice_duration_sec)
+                    
+                    # 載入並處理 BGM
+                    bgm = AudioSegment.from_wav(BytesIO(bgm_bytes))
+                    
+                    # 調整音量
+                    volume_reduction = self.config["bgm_volume_reduction"]
+                    bgm = bgm + volume_reduction
+                    print(f"   🔊 Replicate BGM 音量降低 {abs(volume_reduction)}dB")
+                    
+                    # 裁切到語音長度
+                    total_duration = len(voice) + self.config["fade_out_duration"]
+                    bgm = self.prepare_bgm(bgm, total_duration)
+                    
+                    # 應用淡入淡出
+                    bgm = self.apply_effects(bgm)
+                    
+                    # 混音
+                    print("📍[AudioMixer] 執行 Replicate BGM 混音...")
+                    mixed = bgm.overlay(voice, position=0)
+                    
+                    # 輸出
+                    output_buffer = BytesIO()
+                    mixed.export(output_buffer, format="wav")
+                    output_buffer.seek(0)
+                    
+                    print("=" * 50)
+                    print(f"✅ Replicate 混音完成！總時長: {len(mixed)/1000:.1f} 秒")
+                    print("=" * 50 + "\n")
+                    
+                    return output_buffer.read()
+                else:
+                    print("   ⚠️ REPLICATE_API_TOKEN 未設定，跳過 Replicate")
+                    
+            except ImportError:
+                print("   ⚠️ Replicate 模組未找到")
+            except Exception as replicate_error:
+                print(f"   ⚠️ Replicate 也失敗了: {replicate_error}")
+            
+            # 降級使用本地 BGM
             print("   降級使用本地 BGM...")
-            return self.mix_voice_with_bgm(voice_bytes, emotion, voice_format)
+            try:
+                result = self.mix_voice_with_bgm(voice_bytes, emotion, voice_format)
+                return result
+            except Exception as fallback_error:
+                print(f"\n🚨 [AudioMixer] 完全失敗！無法進行混音")
+                print(f"   Lyria 失敗原因: {e}")
+                print(f"   本地 BGM 失敗原因: {fallback_error}")
+                print(f"   📍 診斷建議：")
+                print(f"      1. 設定 REPLICATE_API_TOKEN 使用 Replicate 備用方案")
+                print(f"      2. 檢查 GEMINI_API_KEY 是否有 Lyria 權限")
+                print(f"      3. 檢查 assets/bgm/ 資料夾是否有 MP3/WAV 檔案")
+                print(f"      4. 確認 FFmpeg 已正確安裝")
+                print("   將返回純語音（無背景音樂）")
+                return voice_bytes
 
 
 # 便捷函數

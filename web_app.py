@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-衝突基因 - 網頁介面 v3.0
+Lumina 心語 - 網頁介面 v3.0
 一階：衝突演化追蹤器
 二階：深層溯源與接納橋樑
 三階：個人成長行動方案
@@ -46,49 +46,61 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>衝突基因 - 專業衝突分析報告</title>
+    <title>Lumina 心語 - 專業衝突分析報告</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a12;
-            --bg-secondary: #12121c;
-            --bg-card: rgba(25, 25, 40, 0.9);
-            --accent-gold: #d4af37;
-            --accent-gold-light: #f4d03f;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-danger: #ef4444;
-            --accent-success: #22c55e;
-            --accent-warning: #f59e0b;
-            --accent-healing: #ec4899;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: rgba(212, 175, 55, 0.2);
+            /* 高端暖色系 Premium Warm Palette */
+            --bg-primary: #FAF8F5;           /* 象牙白 Ivory */
+            --bg-secondary: #F5F2ED;         /* 亞麻色 Linen */
+            --bg-card: rgba(255, 253, 250, 0.95);  /* 奶油白 Cream */
+            
+            /* 四階段主色 */
+            --accent-stage1: #C9A962;        /* 琥珀金 Amber Gold */
+            --accent-stage2: #B87351;        /* 赤陶褐 Terracotta */
+            --accent-stage3: #A3B899;        /* 鼠尾草綠 Sage Green */
+            --accent-stage4: #D4A5A5;        /* 珊瑚玫瑰 Coral Rose */
+            
+            /* 功能色 */
+            --accent-gold: #C9A962;
+            --accent-gold-light: #D4B87A;
+            --accent-primary: #8B7355;       /* 摩卡棕 Mocha */
+            --accent-secondary: #A69080;     /* 駝色 Taupe */
+            --accent-danger: #C17A6E;        /* 暖紅 Warm Red */
+            --accent-success: #A3B899;       /* 鼠尾草綠 */
+            --accent-warning: #D4A574;       /* 焦糖色 Caramel */
+            --accent-healing: #D4A5A5;       /* 珊瑚玫瑰 */
+            
+            /* 文字色 */
+            --text-primary: #3D3428;         /* 深棕色 Dark Brown */
+            --text-secondary: #6B5B4F;       /* 中棕色 Medium Brown */
+            --text-muted: #8B7D6B;           /* 淺棕色 Light Brown */
+            --border-color: rgba(201, 169, 98, 0.25);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
         .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
-            background: radial-gradient(ellipse at 20% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%); }
+            background: radial-gradient(ellipse at 20% 20%, rgba(201, 169, 98, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(184, 115, 81, 0.05) 0%, transparent 50%); }
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
         header { text-align: center; margin-bottom: 50px; }
-        .logo { font-size: 3.5rem; margin-bottom: 15px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; letter-spacing: 8px; }
-        .tagline { color: var(--text-secondary); font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; }
-        .premium-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 20px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05)); border: 1px solid var(--border-color); border-radius: 30px; font-size: 0.85rem; color: var(--accent-gold); }
-        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 35px; margin-bottom: 30px; backdrop-filter: blur(20px); }
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .card-icon { font-size: 1.8rem; }
-        .card-title { font-size: 1.3rem; font-weight: 600; background: linear-gradient(135deg, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .upload-zone { border: 2px dashed var(--border-color); border-radius: 16px; padding: 50px; text-align: center; cursor: pointer; transition: all 0.4s; background: linear-gradient(135deg, rgba(212, 175, 55, 0.02), rgba(99, 102, 241, 0.02)); }
-        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent-gold); background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(99, 102, 241, 0.05)); }
+        .logo { font-size: 3rem; margin-bottom: 15px; color: var(--text-primary); font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: 4px; }
+        .tagline { color: var(--text-secondary); font-size: 1.1rem; font-weight: 300; letter-spacing: 1px; }
+        .premium-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 20px; background: rgba(201, 169, 98, 0.1); border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; color: var(--accent-gold); }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 35px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(139, 115, 85, 0.08); }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(139, 115, 85, 0.1); }
+        .card-icon { font-size: 1.5rem; color: var(--accent-gold); }
+        .card-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); font-family: 'Playfair Display', serif; }
+        .upload-zone { border: 2px dashed var(--border-color); border-radius: 12px; padding: 50px; text-align: center; cursor: pointer; transition: all 0.4s; background: rgba(201, 169, 98, 0.03); }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent-gold); background: rgba(201, 169, 98, 0.08); }
         .upload-zone input[type="file"] { display: none; }
-        .upload-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.8; }
+        .upload-icon { font-size: 3rem; margin-bottom: 20px; color: var(--accent-gold); opacity: 0.8; }
         .upload-text { color: var(--text-primary); font-size: 1.1rem; margin-bottom: 10px; }
         .upload-hint { color: var(--text-muted); font-size: 0.9rem; }
-        .file-info { display: none; margin-top: 20px; padding: 18px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; }
+        .file-info { display: none; margin-top: 20px; padding: 18px; background: rgba(163, 184, 153, 0.15); border: 1px solid rgba(163, 184, 153, 0.4); border-radius: 8px; }
         .file-info.show { display: flex; align-items: center; gap: 12px; }
-        .context-textarea { width: 100%; padding: 18px; min-height: 100px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 1rem; resize: vertical; }
+        .context-textarea { width: 100%; padding: 18px; min-height: 100px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 1rem; resize: vertical; }
         .context-textarea:focus { outline: none; border-color: var(--accent-gold); }
         .context-textarea::placeholder { color: var(--text-muted); }
         
@@ -98,26 +110,26 @@ HTML_TEMPLATE = '''
         .advanced-toggle.open .arrow { transform: rotate(90deg); }
         .advanced-content { display: none; margin-top: 15px; }
         .advanced-content.show { display: block; }
-        .prompt-section { margin-bottom: 20px; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; }
+        .prompt-section { margin-bottom: 20px; padding: 20px; background: rgba(139, 115, 85, 0.05); border-radius: 8px; }
         .prompt-label { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        .stage-badge-1 { background: var(--accent-gold); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
-        .stage-badge-2 { background: var(--accent-healing); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
-        .stage-badge-3 { background: var(--accent-success); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
-        .stage-badge-4 { background: var(--accent-secondary); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .stage-badge-1 { background: var(--accent-stage1); color: #3D3428; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .stage-badge-2 { background: var(--accent-stage2); color: #FDF8F3; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .stage-badge-3 { background: var(--accent-stage3); color: #2D3A28; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .stage-badge-4 { background: var(--accent-stage4); color: #4A3535; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
         
-        /* 底部固定療育音頻播放器 */
+        /* 底部固定療育音頻播放器 - 黑金奢華配色 */
         .healing-player {
             position: fixed;
             bottom: -150px;
             left: 0;
             right: 0;
-            background: linear-gradient(180deg, rgba(20,20,35,0.98), rgba(15,15,25,1));
+            background: linear-gradient(180deg, #1A1A1A, #0D0D0D);
             backdrop-filter: blur(20px);
-            border-top: 2px solid var(--accent-secondary);
+            border-top: 1px solid rgba(201, 169, 98, 0.4);
             padding: 20px 30px;
             z-index: 9999;
             transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 -10px 50px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
         }
         .healing-player.show { bottom: 0; }
         .healing-player-content {
@@ -128,42 +140,84 @@ HTML_TEMPLATE = '''
             gap: 25px;
         }
         .healing-player-icon {
-            font-size: 3rem;
-            animation: pulse-glow 2s ease-in-out infinite;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #D4AF37, #8B7355);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(201, 169, 98, 0.3);
         }
-        @keyframes pulse-glow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5)); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8)); }
+        .healing-player-icon::before {
+            content: '🎵';
+            font-size: 1.5rem;
         }
         .healing-player-info { flex: 1; }
         .healing-player-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #F5F2ED;
             margin-bottom: 5px;
+            font-family: 'Playfair Display', serif;
         }
         .healing-player-subtitle {
             font-size: 0.85rem;
-            color: var(--accent-secondary);
+            color: rgba(255, 255, 255, 0.6);
         }
+        /* 播放按鈕 - 黑金奢華設計 */
         .healing-play-btn {
-            width: 70px;
-            height: 70px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, var(--accent-secondary), #6366f1);
-            color: #fff;
-            font-size: 2rem;
+            border: 2px solid #D4AF37;
+            background: linear-gradient(145deg, #1A1A1A, #0D0D0D);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 5px 30px rgba(139, 92, 246, 0.5);
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 20px rgba(201, 169, 98, 0.2),
+                inset 0 0 10px rgba(201, 169, 98, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .healing-play-btn::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 16px solid #D4AF37;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 4px;
+            transition: all 0.3s ease;
+        }
+        .healing-play-btn.playing::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border-left: 6px solid #D4AF37;
+            border-right: 6px solid #D4AF37;
+            border-top: none;
+            border-bottom: none;
+            margin-left: 0;
         }
         .healing-play-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 10px 50px rgba(139, 92, 246, 0.7);
+            background: linear-gradient(145deg, #D4AF37, #8B7355);
+            border-color: #F4D03F;
+            transform: scale(1.08);
+            box-shadow: 
+                0 0 30px rgba(201, 169, 98, 0.5),
+                0 0 60px rgba(201, 169, 98, 0.2);
+        }
+        .healing-play-btn:hover::before {
+            border-left-color: #0D0D0D;
+        }
+        .healing-play-btn.playing:hover::before {
+            border-left-color: #0D0D0D;
+            border-right-color: #0D0D0D;
         }
         .healing-close-btn {
             position: absolute;
@@ -171,24 +225,29 @@ HTML_TEMPLATE = '''
             right: 15px;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.4);
             font-size: 1.2rem;
             cursor: pointer;
+            transition: color 0.3s;
         }
-        .healing-close-btn:hover { color: var(--text-primary); }
+        .healing-close-btn::before {
+            content: '✕';
+        }
+        .healing-close-btn:hover { color: #D4AF37; }
         .audio-progress {
-            flex: 1;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
+            margin-top: 10px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
             overflow: hidden;
             cursor: pointer;
         }
         .audio-progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-healing));
+            background: linear-gradient(90deg, #D4AF37, #F4D03F);
             transition: width 0.1s linear;
+            border-radius: 2px;
         }
         .prompt-textarea { width: 100%; min-height: 200px; padding: 15px; background: #0d0d15; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-secondary); font-family: monospace; font-size: 0.8rem; resize: vertical; }
         .prompt-textarea:focus { outline: none; border-color: var(--accent-primary); }
@@ -275,37 +334,37 @@ HTML_TEMPLATE = '''
         .repair-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
         
         /* Stage 2 Styles */
-        .stage2-header { text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 20px; margin-bottom: 30px; }
-        .stage2-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; background: linear-gradient(135deg, var(--accent-healing), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stage2-header { text-align: center; padding: 40px; background: rgba(184, 115, 81, 0.1); border: 1px solid rgba(184, 115, 81, 0.3); border-radius: 20px; margin-bottom: 30px; }
+        .stage2-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; color: #6B4A35; }
         
-        .iceberg-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .iceberg-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(139, 115, 85, 0.3); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
         .iceberg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .iceberg-section { margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; }
-        .iceberg-label { font-size: 0.75rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .iceberg-section { margin-bottom: 15px; padding: 15px; background: rgba(139, 115, 85, 0.08); border-radius: 10px; border-left: 3px solid var(--accent-primary); }
+        .iceberg-label { font-size: 0.85rem; color: #4A3C2E; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         
-        .healing-card { background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.02)); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-        .healing-original { padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; margin-bottom: 15px; color: var(--accent-danger); }
-        .healing-arrow { text-align: center; font-size: 1.5rem; margin: 10px 0; color: var(--accent-healing); }
-        .healing-translation { padding: 15px; background: rgba(236, 72, 153, 0.1); border-radius: 10px; margin-bottom: 15px; color: var(--accent-healing); }
-        .healing-response { padding: 15px; background: rgba(34, 197, 94, 0.1); border-radius: 10px; color: var(--accent-success); border-left: 3px solid var(--accent-success); }
+        .healing-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(212, 165, 165, 0.4); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .healing-original { padding: 15px; background: rgba(193, 122, 110, 0.1); border-radius: 10px; margin-bottom: 15px; color: #8B4A40; border-left: 3px solid var(--accent-danger); }
+        .healing-arrow { text-align: center; font-size: 1.5rem; margin: 10px 0; color: #6B5048; }
+        .healing-translation { padding: 15px; background: rgba(212, 165, 165, 0.15); border-radius: 10px; margin-bottom: 15px; color: #6B4848; border-left: 3px solid var(--accent-healing); }
+        .healing-response { padding: 15px; background: rgba(163, 184, 153, 0.15); border-radius: 10px; color: #3D5A35; border-left: 3px solid var(--accent-success); }
         
-        .action-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
-        .action-header { font-weight: 600; color: var(--accent-warning); margin-bottom: 15px; }
-        .action-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .action-card { background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(212, 165, 116, 0.4); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .action-header { font-weight: 600; color: #6B4F2A; margin-bottom: 15px; }
+        .action-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; padding: 12px; background: rgba(212, 165, 116, 0.08); border-radius: 8px; }
         .action-icon { font-size: 1.2rem; }
-        .action-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px; }
+        .action-label { font-size: 0.85rem; color: #6B4F2A; font-weight: 600; margin-bottom: 5px; }
         
         .healing-message { text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(236, 72, 153, 0.1)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; margin-top: 30px; }
         .healing-message-text { font-size: 1.2rem; font-style: italic; line-height: 1.8; color: var(--text-primary); }
         
         /* Stage 3 Styles */
-        .stage3-header { text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 20px; margin-bottom: 30px; }
-        .stage3-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; background: linear-gradient(135deg, var(--accent-success), #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .growth-section { padding: 25px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; margin-bottom: 20px; }
-        .growth-title { font-size: 1.3rem; font-weight: 600; color: var(--accent-success); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .growth-item { padding: 20px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 15px; }
-        .growth-item .text-content { font-size: 1.1rem; line-height: 1.9; }
-        .growth-label { font-size: 0.9rem; color: var(--accent-success); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; }
+        .stage3-header { text-align: center; padding: 40px; background: rgba(163, 184, 153, 0.15); border: 1px solid rgba(163, 184, 153, 0.4); border-radius: 20px; margin-bottom: 30px; }
+        .stage3-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; color: #3D5A35; }
+        .growth-section { padding: 25px; background: rgba(255, 253, 250, 0.95); border: 1px solid rgba(139, 115, 85, 0.2); border-radius: 16px; margin-bottom: 20px; }
+        .growth-title { font-size: 1.3rem; font-weight: 600; color: #3D5A35; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .growth-item { padding: 20px; background: rgba(163, 184, 153, 0.1); border-radius: 10px; margin-bottom: 15px; border-left: 3px solid var(--accent-stage3); }
+        .growth-item .text-content { font-size: 1.1rem; line-height: 1.9; color: var(--text-primary); }
+        .growth-label { font-size: 0.9rem; color: #3D5A35; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .prompt-list { list-style: none; padding: 0; }
         .prompt-list li { padding: 18px 20px; margin-bottom: 12px; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--accent-success); border-radius: 0 12px 12px 0; font-size: 1.1rem; line-height: 1.7; }
         .closing-box { text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 16px; margin-top: 30px; }
@@ -322,30 +381,30 @@ HTML_TEMPLATE = '''
     <div class="bg-animation"></div>
     <div class="container">
         <header>
-            <div class="logo">衝突基因</div>
+            <div class="logo">Lumina 心語</div>
             <p class="tagline">極致中立的衝突演化追蹤器</p>
             <div class="premium-badge">
-                <span>👑</span><span>三階段專業分析</span><span>|</span><span>演化追蹤 + 深層溯源 + 成長方案</span>
+                <span></span><span>三階段專業分析</span><span>|</span><span>演化追蹤 + 深層溯源 + 成長方案</span>
             </div>
         </header>
 
         <div class="card" id="uploadCard">
-            <div class="card-header"><span class="card-icon">🎙️</span><span class="card-title">上傳音訊檔案</span></div>
+            <div class="card-header"><span class="card-icon">️</span><span class="card-title">上傳音訊檔案</span></div>
             <div class="upload-zone" id="uploadZone">
                 <input type="file" id="audioFile" accept=".wav,.mp3,.aiff,.aac,.ogg,.flac,.m4a">
-                <div class="upload-icon">📁</div>
+                <div class="upload-icon"></div>
                 <div class="upload-text">點擊或拖放音訊檔案至此處</div>
                 <div class="upload-hint">支援格式：WAV、MP3、AAC、FLAC、M4A</div>
             </div>
-            <div class="file-info" id="fileInfo"><span>✅</span><span id="fileName"></span><span id="fileSize" style="color: var(--text-muted);"></span></div>
+            <div class="file-info" id="fileInfo"><span></span><span id="fileName"></span><span id="fileSize" style="color: var(--text-muted);"></span></div>
         </div>
 
         <div class="card">
-            <div class="card-header"><span class="card-icon">💬</span><span class="card-title">情境說明（選填）</span></div>
+            <div class="card-header"><span class="card-icon"></span><span class="card-title">情境說明（選填）</span></div>
             <textarea class="context-textarea" id="contextInput" placeholder="請描述對話雙方的關係，例如：&#10;• 這是一對夫妻關於家庭財務的討論&#10;• 這是主管與員工關於專案進度的對話"></textarea>
             
             <div class="advanced-toggle" onclick="toggleAdvanced()">
-                <span class="arrow">▶</span>
+                <span class="arrow"></span>
                 <span>Advanced Settings (System Prompts)</span>
             </div>
             <div class="advanced-content" id="advancedContent">
@@ -384,20 +443,20 @@ HTML_TEMPLATE = '''
             </div>
         </div>
 
-        <button class="btn-primary" id="analyzeBtn" disabled><span>🔬</span><span>開始四階段專業分析</span></button>
+        <button class="btn-primary" id="analyzeBtn" disabled><span></span><span>開始四階段專業分析</span></button>
 
         <div class="result-container" id="resultContainer">
             <div class="stage-tabs">
-                <button class="stage-tab active" onclick="switchStage(1)">📊 一階：衝突演化</button>
-                <button class="stage-tab" onclick="switchStage(2)">💡 二階：深層溯源</button>
-                <button class="stage-tab" onclick="switchStage(3)">🌱 三階：成長方案</button>
-                <button class="stage-tab" onclick="switchStage(4)">🎨 總結與圖像</button>
+                <button class="stage-tab active" onclick="switchStage(1)"> 一階：衝突演化</button>
+                <button class="stage-tab" onclick="switchStage(2)"> 二階：深層溯源</button>
+                <button class="stage-tab" onclick="switchStage(3)"> 三階：成長方案</button>
+                <button class="stage-tab" onclick="switchStage(4)"> 總結與圖像</button>
             </div>
 
             <!-- Stage 1 Content -->
             <div class="stage-content active" id="stage1Content">
                 <div class="report-header">
-                    <div class="report-title">📊 衝突演化分析報告</div>
+                    <div class="report-title"> 衝突演化分析報告</div>
                     <div class="report-meta">分析時間：<span id="reportTime"></span> | 報告編號：<span id="reportId"></span></div>
                     <div class="report-summary" id="overallDynamic"></div>
                 </div>
@@ -408,16 +467,16 @@ HTML_TEMPLATE = '''
                     <div class="metric-card"><div class="metric-value" id="intensityScore"></div><div class="metric-label">衝突烈度指數</div></div>
                 </div>
 
-                <div class="card"><div class="card-header"><span class="card-icon">📍</span><span class="card-title">衝突演化階段</span></div><div id="evolutionMap"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">⚡</span><span class="card-title">關鍵轉折點</span></div><div id="turningPoints"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">衝突演化階段</span></div><div id="evolutionMap"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">關鍵轉折點</span></div><div id="turningPoints"></div></div>
                 <div class="card">
-                    <div class="card-header"><span class="card-icon">👁️</span><span class="card-title">雙方視角分析</span></div>
+                    <div class="card-header"><span class="card-icon">️</span><span class="card-title">雙方視角分析</span></div>
                     <div class="perspective-grid" id="dualPerspective"></div>
-                    <div class="mismatch-box"><div class="mismatch-title">🔄 核心落差</div><div id="coreMismatch" class="text-content"></div></div>
+                    <div class="mismatch-box"><div class="mismatch-title"> 核心落差</div><div id="coreMismatch" class="text-content"></div></div>
                 </div>
                 <div class="card">
                     <div class="repair-section">
-                        <div class="repair-title"><span>💡</span><span>修復嘗試分析</span></div>
+                        <div class="repair-title"><span></span><span>修復嘗試分析</span></div>
                         <div id="repairAnalysis"></div>
                     </div>
                 </div>
@@ -426,56 +485,56 @@ HTML_TEMPLATE = '''
             <!-- Stage 2 Content -->
             <div class="stage-content" id="stage2Content">
                 <div class="stage2-header">
-                    <div class="stage2-title">💡 深層溯源與接納橋樑</div>
+                    <div class="stage2-title"> 深層溯源與接納橋樑</div>
                     <div class="report-meta">將行為轉化為未滿足的內心需求</div>
                     <div class="report-summary" id="deepInsight" style="border-left-color: var(--accent-healing);"></div>
                 </div>
 
-                <div class="card"><div class="card-header"><span class="card-icon">🧊</span><span class="card-title">冰山下方分析</span></div><div id="icebergAnalysis"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">🔗</span><span class="card-title">依附動態 & 認知風格</span></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">冰山下方分析</span></div><div id="icebergAnalysis"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">依附動態 & 認知風格</span></div>
                     <div class="phase-card"><div class="phase-name">依附動態</div><div class="text-content" id="attachmentDynamic"></div></div>
                     <div class="phase-card"><div class="phase-name">認知風格差異</div><div class="text-content" id="cognitiveClash"></div></div>
                 </div>
-                <div class="card"><div class="card-header"><span class="card-icon">🔄</span><span class="card-title">視角轉換練習</span></div><div id="perspectiveShifts"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">💕</span><span class="card-title">療癒性重構</span></div><div id="healingReframes"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">🛠️</span><span class="card-title">可執行的微小改變</span></div><div id="actionableChanges"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">⚖️</span><span class="card-title">共同責任重構</span></div><div class="text-content" id="sharedResponsibility"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">視角轉換練習</span></div><div id="perspectiveShifts"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">療癒性重構</span></div><div id="healingReframes"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon">️</span><span class="card-title">可執行的微小改變</span></div><div id="actionableChanges"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon">️</span><span class="card-title">共同責任重構</span></div><div class="text-content" id="sharedResponsibility"></div></div>
                 <div class="healing-message"><div class="healing-message-text" id="healingMessage"></div></div>
             </div>
 
             <!-- Stage 3 Content -->
             <div class="stage-content" id="stage3Content">
                 <div class="stage3-header">
-                    <div class="stage3-title">🌱 個人成長行動方案</div>
+                    <div class="stage3-title"> 個人成長行動方案</div>
                     <div class="report-meta">專注「我能做什麼」而非「如何讓對方改變」</div>
                     <div class="report-summary" id="positioning" style="border-left-color: var(--accent-success);"></div>
                 </div>
 
-                <div class="card"><div class="card-header"><span class="card-icon">💖</span><span class="card-title">我能做的修復</span></div><div id="repairSelfLed"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">📝</span><span class="card-title">認識我的模式</span></div><div id="knowMyPatterns"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">🧰</span><span class="card-title">我的調節工具箱</span></div><div id="myToolkit"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">🚧</span><span class="card-title">替代路徑</span></div><div id="alternatives"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">🛡️</span><span class="card-title">我的邊界與底線</span></div><div id="myBoundaries"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">✨</span><span class="card-title">意義重構</span></div><div id="meaningMaking"></div></div>
-                <div class="card"><div class="card-header"><span class="card-icon">❓</span><span class="card-title">反思提問</span></div><ul class="prompt-list" id="reflectionPrompts"></ul></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">我能做的修復</span></div><div id="repairSelfLed"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">認識我的模式</span></div><div id="knowMyPatterns"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">我的調節工具箱</span></div><div id="myToolkit"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">替代路徑</span></div><div id="alternatives"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon">️</span><span class="card-title">我的邊界與底線</span></div><div id="myBoundaries"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">意義重構</span></div><div id="meaningMaking"></div></div>
+                <div class="card"><div class="card-header"><span class="card-icon"></span><span class="card-title">反思提問</span></div><ul class="prompt-list" id="reflectionPrompts"></ul></div>
                 <div class="closing-box"><div class="closing-text" id="closingMessage"></div></div>
             </div>
 
             <!-- Stage 4: Summary & Images -->
             <div class="stage-content" id="stage4Content">
                 <div class="stage3-header" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.05)); border-color: rgba(139, 92, 246, 0.3);">
-                    <div class="stage3-title" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); -webkit-background-clip: text;">🎨 分析總結與視覺化</div>
+                    <div class="stage3-title" style="background: linear-gradient(135deg, #8b5cf6, #6366f1); -webkit-background-clip: text;"> 分析總結與視覺化</div>
                     <div class="report-meta">自動提取三階段核心洞見，生成視覺化圖像與催眠療癒音頻</div>
                 </div>
 
                 <!-- 生成進度區塊 -->
                 <div class="card" id="generationProgressCard">
-                    <div class="card-header"><span class="card-icon">⚙️</span><span class="card-title">自動生成進度</span></div>
+                    <div class="card-header"><span class="card-icon">️</span><span class="card-title">自動生成進度</span></div>
                     <div style="padding: 20px;">
                         <!-- 圖片生成進度 -->
                         <div style="margin-bottom: 25px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span style="color: var(--accent-gold); font-weight: 600;">🖼️ 視覺化圖像</span>
+                                <span style="color: var(--accent-gold); font-weight: 600;">️ 視覺化圖像</span>
                                 <span id="imageProgressText" style="color: var(--text-muted);">準備中...</span>
                             </div>
                             <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
@@ -485,7 +544,7 @@ HTML_TEMPLATE = '''
                         <!-- 音頻生成進度 -->
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span style="color: var(--accent-secondary); font-weight: 600;">🎵 數位催眠療癒音頻（分段生成）</span>
+                                <span style="color: var(--accent-secondary); font-weight: 600;"> 數位催眠療癒音頻（分段生成）</span>
                                 <span id="audioProgressText" style="color: var(--text-muted);">等待圖像完成...</span>
                             </div>
                             <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
@@ -498,70 +557,66 @@ HTML_TEMPLATE = '''
                     </div>
                 </div>
 
-                <!-- 視覺化簡報卡片展示區 (圖上文下，2x2 格子) -->
+                <!-- 視覺化簡報卡片展示區（單列大圖） -->
                 <div id="generatedImagesContainer" style="display:none;">
                     <div class="card" style="background: transparent; padding: 0; border: none;">
-                        <div class="card-header" style="padding: 20px 0;"><span class="card-icon">✨</span><span class="card-title">四大分析洞察</span></div>
+                        <div class="card-header" style="padding: 20px 0;"><span class="card-icon"></span><span class="card-title">四大分析視覺簡報</span></div>
                         
-                        <!-- 2x2 Grid -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- 單列排列 -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
                             
-                            <!-- Card 1: 衝突演化 -->
-                            <div class="insight-card" id="slideCard1" style="background: linear-gradient(180deg, rgba(245,158,11,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(245,158,11,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                            <!-- Card 1: 覺察時刻 (琥珀金) -->
+                            <div class="insight-card" id="slideCard1" style="background: #FDF8F3; border: 1px solid #C9A962; border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 20px rgba(201,169,98,0.15);">
                                 <div style="position: relative;">
-                                    <img id="imgStage1" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 1">
-                                    <div style="position:absolute; top:12px; left:12px; background:rgba(245,158,11,0.9); color:#000; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 1</div>
+                                    <img id="imgStage1" style="width:100%; aspect-ratio:16/9; object-fit:cover; display:block; min-height: 320px;" alt="Stage 1 - 覺察時刻">
+                                    <div style="position:absolute; top:16px; left:16px; background:#C9A962; color:#3D3428; padding:6px 16px; border-radius:4px; font-size:0.75rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;">Stage 1</div>
                                 </div>
-                                <div style="padding: 20px;">
-                                    <h3 id="slideTitle1" style="color: #F59E0B; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">衝突演化</h3>
-                                    <p id="slideInsight1" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">每一場衝突都是一面鏡子。</p>
+                                <div style="padding: 20px 24px; background: linear-gradient(180deg, #FDF8F3 0%, #FAF6F1 100%);">
+                                    <h3 id="slideTitle1" style="color: #3D3428; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">覺察時刻</h3>
                                     <ul id="slideBullets1" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#F59E0B; margin-right:8px;">•</span><span>載入中...</span></li>
+                                        <li style="color: #6B5B4F; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#C9A962; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
                             
-                            <!-- Card 2: 深層溯源 -->
-                            <div class="insight-card" id="slideCard2" style="background: linear-gradient(180deg, rgba(8,145,178,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(8,145,178,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                            <!-- Card 2: 深層對話 (赤陶褐) -->
+                            <div class="insight-card" id="slideCard2" style="background: #FAF5F2; border: 1px solid #B87351; border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 20px rgba(184,115,81,0.15);">
                                 <div style="position: relative;">
-                                    <img id="imgStage2" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 2">
-                                    <div style="position:absolute; top:12px; left:12px; background:rgba(8,145,178,0.9); color:#fff; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 2</div>
+                                    <img id="imgStage2" style="width:100%; aspect-ratio:16/9; object-fit:cover; display:block; min-height: 320px;" alt="Stage 2 - 深層對話">
+                                    <div style="position:absolute; top:16px; left:16px; background:#B87351; color:#FDF8F3; padding:6px 16px; border-radius:4px; font-size:0.75rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;">Stage 2</div>
                                 </div>
-                                <div style="padding: 20px;">
-                                    <h3 id="slideTitle2" style="color: #0891B2; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">深層溯源</h3>
-                                    <p id="slideInsight2" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">憤怒的表面之下，往往藏著最柔軟的渴望。</p>
+                                <div style="padding: 20px 24px; background: linear-gradient(180deg, #FAF5F2 0%, #F7F2EF 100%);">
+                                    <h3 id="slideTitle2" style="color: #4A3C35; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">深層對話</h3>
                                     <ul id="slideBullets2" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#0891B2; margin-right:8px;">•</span><span>載入中...</span></li>
+                                        <li style="color: #6B5B4F; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#B87351; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
                             
-                            <!-- Card 3: 成長方案 -->
-                            <div class="insight-card" id="slideCard3" style="background: linear-gradient(180deg, rgba(34,197,94,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(34,197,94,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                            <!-- Card 3: 成長蛻變 (鼠尾草綠) -->
+                            <div class="insight-card" id="slideCard3" style="background: #F7FAF6; border: 1px solid #A3B899; border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 20px rgba(163,184,153,0.15);">
                                 <div style="position: relative;">
-                                    <img id="imgStage3" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Stage 3">
-                                    <div style="position:absolute; top:12px; left:12px; background:rgba(34,197,94,0.9); color:#000; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 3</div>
+                                    <img id="imgStage3" style="width:100%; aspect-ratio:16/9; object-fit:cover; display:block; min-height: 320px;" alt="Stage 3 - 成長蛻變">
+                                    <div style="position:absolute; top:16px; left:16px; background:#A3B899; color:#2D3A28; padding:6px 16px; border-radius:4px; font-size:0.75rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;">Stage 3</div>
                                 </div>
-                                <div style="padding: 20px;">
-                                    <h3 id="slideTitle3" style="color: #22C55E; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">成長方案</h3>
-                                    <p id="slideInsight3" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">改變不是背叛自己，而是給自己更多選擇。</p>
+                                <div style="padding: 20px 24px; background: linear-gradient(180deg, #F7FAF6 0%, #F4F7F3 100%);">
+                                    <h3 id="slideTitle3" style="color: #3A4A35; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">成長蛻變</h3>
                                     <ul id="slideBullets3" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#22C55E; margin-right:8px;">•</span><span>載入中...</span></li>
+                                        <li style="color: #5A6B55; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#A3B899; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
                             
-                            <!-- Card 4: 療癒旅程 -->
-                            <div class="insight-card" id="slideCard4" style="background: linear-gradient(180deg, rgba(236,72,153,0.06), rgba(20,20,25,0.95)); border: 1px solid rgba(236,72,153,0.25); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                            <!-- Card 4: 和諧共處 (珊瑚玫瑰) -->
+                            <div class="insight-card" id="slideCard4" style="background: #FDF8F8; border: 1px solid #D4A5A5; border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 20px rgba(212,165,165,0.15);">
                                 <div style="position: relative;">
-                                    <img id="imgCombined" style="width:100%; height:200px; object-fit:cover; display:block;" alt="Combined">
-                                    <div style="position:absolute; top:12px; left:12px; background:rgba(236,72,153,0.9); color:#fff; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">STAGE 4</div>
+                                    <img id="imgCombined" style="width:100%; aspect-ratio:16/9; object-fit:cover; display:block; min-height: 320px;" alt="Stage 4 - 和諧共處">
+                                    <div style="position:absolute; top:16px; left:16px; background:#D4A5A5; color:#4A3535; padding:6px 16px; border-radius:4px; font-size:0.75rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;">Stage 4</div>
                                 </div>
-                                <div style="padding: 20px;">
-                                    <h3 id="slideTitle4" style="color: #EC4899; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 700;">療癒旅程</h3>
-                                    <p id="slideInsight4" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin: 0 0 12px 0; min-height: 40px;">修復不是回到從前，而是創造更美好的未來。</p>
+                                <div style="padding: 20px 24px; background: linear-gradient(180deg, #FDF8F8 0%, #FAF5F5 100%);">
+                                    <h3 id="slideTitle4" style="color: #4A3535; font-size: 1.2rem; margin: 0 0 8px 0; font-weight: 600; font-family: Georgia, serif;">和諧共處</h3>
                                     <ul id="slideBullets4" style="list-style: none; padding: 0; margin: 0;">
-                                        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;"><span style="color:#EC4899; margin-right:8px;">•</span><span>載入中...</span></li>
+                                        <li style="color: #6B5555; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;"><span style="color:#D4A5A5; margin-right:10px;">—</span><span>載入中...</span></li>
                                     </ul>
                                 </div>
                             </div>
@@ -572,9 +627,9 @@ HTML_TEMPLATE = '''
 
                 <!-- 音頻就緒提示 -->
                 <div class="card" id="audioReadyCard" style="display:none;">
-                    <div class="card-header"><span class="card-icon">🎵</span><span class="card-title">數位催眠療癒音頻已就緒</span></div>
+                    <div class="card-header"><span class="card-icon"></span><span class="card-title">數位催眠療癒音頻已就緒</span></div>
                     <div style="padding: 20px; text-align: center;">
-                        <p style="color: var(--accent-secondary); font-size: 1.1rem; margin-bottom: 15px;">✨ 您的專屬療癒音頻已準備完成</p>
+                        <p style="color: var(--accent-secondary); font-size: 1.1rem; margin-bottom: 15px;"> 您的專屬療癒音頻已準備完成</p>
                         <p style="color: var(--text-muted);">點擊下方巨型按鈕開始您的療癒之旅</p>
                     </div>
                 </div>
@@ -582,33 +637,41 @@ HTML_TEMPLATE = '''
 
             <div class="download-section" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                 <button class="btn-download" onclick="downloadPDF()" style="background: linear-gradient(135deg, var(--accent-gold), #c09b30); color: #000; border: none;">
-                    <span>📑</span><span>下載 PDF 報告</span>
+                    <span></span><span>下載 PDF 報告</span>
                 </button>
-                <button class="btn-download" onclick="downloadJSON()"><span>📄</span><span>下載 JSON 數據</span></button>
+                <button class="btn-download" onclick="downloadJSON()"><span></span><span>下載 JSON 數據</span></button>
+            </div>
+
+            <!-- 底部導航欄 (方便跳轉) -->
+            <div class="stage-tabs bottom-nav" style="margin-top: 40px; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), rgba(139, 115, 85, 0.05)); border-radius: 12px; border: 1px solid var(--border-color);">
+                <button class="stage-tab" onclick="switchStage(1)"> 一階：衝突演化</button>
+                <button class="stage-tab" onclick="switchStage(2)"> 二階：深層溯源</button>
+                <button class="stage-tab" onclick="switchStage(3)"> 三階：成長方案</button>
+                <button class="stage-tab" onclick="switchStage(4)"> 總結與圖像</button>
             </div>
         </div>
 
-        <div class="card" id="errorCard" style="display: none;"><div class="error-box"><strong>❌ 分析失敗</strong><p id="errorMessage" style="margin-top: 15px;"></p></div></div>
+        <div class="card" id="errorCard" style="display: none;"><div class="error-box"><strong> 分析失敗</strong><p id="errorMessage" style="margin-top: 15px;"></p></div></div>
 
         <footer>
-            <p>衝突基因 © 2024 | 四階段分析：演化追蹤 + 深層溯源 + 成長方案 + 數位催眠療癒</p>
+            <p>Lumina 心語  2024 | 四階段分析：演化追蹤 + 深層溯源 + 成長方案 + 數位催眠療癒</p>
             <p style="margin-top: 10px;">本報告由先進原生心靈引擎驅動生成</p>
         </footer>
     </div>
 
     <!-- 底部固定巨型療育音頻播放器 (心跳脈動效果) -->
     <div class="healing-player" id="healingPlayer">
-        <button class="healing-close-btn" onclick="closeHealingPlayer()">✕</button>
+        <button class="healing-close-btn" onclick="closeHealingPlayer()"></button>
         <div class="healing-player-content">
-            <div class="healing-player-icon" style="animation: pulse-glow 2s ease-in-out infinite;">🎵</div>
+            <div class="healing-player-icon" style="animation: pulse-glow 2s ease-in-out infinite;"></div>
             <div class="healing-player-info">
-                <div class="healing-player-title">✨ 開始您的專屬療癒引導</div>
+                <div class="healing-player-title"> 開始您的專屬療癒引導</div>
                 <div class="healing-player-subtitle">閉上眼睛，讓艾瑞克森式催眠帶您進入深度放鬆</div>
                 <div class="audio-progress" onclick="seekAudio(event)">
                     <div class="audio-progress-bar" id="audioProgressBar"></div>
                 </div>
             </div>
-            <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, var(--accent-healing), #d946a8); box-shadow: 0 0 30px rgba(236,72,153,0.6); animation: pulse-button 1.5s ease-in-out infinite;">▶</button>
+            <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()"></button>
         </div>
         <audio id="healingAudio" style="display:none;"></audio>
     </div>
@@ -616,11 +679,7 @@ HTML_TEMPLATE = '''
     <style>
         @keyframes pulse-glow {
             0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.1); filter: brightness(1.3); }
-        }
-        @keyframes pulse-button {
-            0%, 100% { box-shadow: 0 0 20px rgba(236,72,153,0.4); }
-            50% { box-shadow: 0 0 40px rgba(236,72,153,0.8), 0 0 60px rgba(236,72,153,0.4); }
+            50% { transform: scale(1.05); filter: brightness(1.1); }
         }
     </style>
 
@@ -638,13 +697,13 @@ HTML_TEMPLATE = '''
             <div class="loading-title" id="loadingTitle">正在深度分析中...</div>
             <div class="loading-stage" id="loadingStage">準備分析環境</div>
             <div class="stage-list">
-                <div class="stage-item" id="s1"><span class="stage-icon">⏳</span>上傳音訊檔案</div>
-                <div class="stage-item" id="s2"><span class="stage-icon">⏳</span>一階：建立聲學基線</div>
-                <div class="stage-item" id="s3"><span class="stage-icon">⏳</span>一階：追蹤演化軌跡</div>
-                <div class="stage-item" id="s4"><span class="stage-icon">⏳</span>一階：識別轉折點</div>
-                <div class="stage-item" id="s5"><span class="stage-icon">⏳</span>二階：冰山下方溯源</div>
-                <div class="stage-item" id="s6"><span class="stage-icon">⏳</span>二階：療癒橋樑建構</div>
-                <div class="stage-item" id="s7"><span class="stage-icon">⏳</span>三階：個人成長行動方案</div>
+                <div class="stage-item" id="s1"><span class="stage-icon"></span>上傳音訊檔案</div>
+                <div class="stage-item" id="s2"><span class="stage-icon"></span>一階：建立聲學基線</div>
+                <div class="stage-item" id="s3"><span class="stage-icon"></span>一階：追蹤演化軌跡</div>
+                <div class="stage-item" id="s4"><span class="stage-icon"></span>一階：識別轉折點</div>
+                <div class="stage-item" id="s5"><span class="stage-icon"></span>二階：冰山下方溯源</div>
+                <div class="stage-item" id="s6"><span class="stage-icon"></span>二階：療癒橋樑建構</div>
+                <div class="stage-item" id="s7"><span class="stage-icon"></span>三階：個人成長行動方案</div>
             </div>
         </div>
     </div>
@@ -715,8 +774,8 @@ HTML_TEMPLATE = '''
                     if (idx >= 4 && idx < 6) document.getElementById('loadingTitle').textContent = '正在深層溯源...';
                     if (idx >= 6) document.getElementById('loadingTitle').textContent = '正在建構成長方案...';
                     const el = document.getElementById(stages[idx].id);
-                    el.classList.add('active'); el.querySelector('.stage-icon').textContent = '🔄';
-                    if (idx > 0) { const prev = document.getElementById(stages[idx - 1].id); prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.stage-icon').textContent = '✅'; }
+                    el.classList.add('active'); el.querySelector('.stage-icon').textContent = '';
+                    if (idx > 0) { const prev = document.getElementById(stages[idx - 1].id); prev.classList.remove('active'); prev.classList.add('done'); prev.querySelector('.stage-icon').textContent = ''; }
                     idx++;
                 }
             }, 100);
@@ -725,7 +784,7 @@ HTML_TEMPLATE = '''
             clearInterval(progressInterval);
             document.getElementById('progressPercent').textContent = '100%';
             document.getElementById('progressRing').style.strokeDashoffset = 0;
-            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.stage-icon').textContent = '✅'; });
+            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.stage-icon').textContent = ''; });
         }
 
         analyzeBtn.addEventListener('click', async () => {
@@ -735,7 +794,7 @@ HTML_TEMPLATE = '''
             document.getElementById('loadingOverlay').classList.add('show');
             document.getElementById('loadingTitle').textContent = '正在深度分析中...';
             analyzeBtn.disabled = true;
-            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active', 'done'); el.querySelector('.stage-icon').textContent = '⏳'; });
+            document.querySelectorAll('.stage-item').forEach(el => { el.classList.remove('active', 'done'); el.querySelector('.stage-icon').textContent = ''; });
             document.getElementById('progressRing').style.strokeDashoffset = 502;
             document.getElementById('progressPercent').textContent = '0%';
             startProgress();
@@ -771,10 +830,10 @@ HTML_TEMPLATE = '''
             document.getElementById('intensityScore').textContent = (s1.intensity_score || 5) + '/10';
 
             const evo = document.getElementById('evolutionMap'); evo.innerHTML = '';
-            if (s1.evolution_map) s1.evolution_map.forEach((p, i) => { evo.innerHTML += `<div class="phase-card"><div class="phase-header"><div class="phase-name">階段 ${i + 1}：${p.phase}</div></div><div class="phase-desc">${p.description}</div><div class="contribution-grid"><div class="contribution-box"><div class="contribution-label">A 的貢獻</div><div class="text-content">${p.speaker_a_contribution}</div></div><div class="contribution-box"><div class="contribution-label">B 的貢獻</div><div class="text-content">${p.speaker_b_contribution}</div></div></div><div style="margin-top:15px;padding:12px;background:rgba(99,102,241,0.1);border-radius:8px;"><strong style="color:var(--accent-primary);">🔑 關鍵觀察：</strong> ${p.key_observation}</div></div>`; });
+            if (s1.evolution_map) s1.evolution_map.forEach((p, i) => { evo.innerHTML += `<div class="phase-card"><div class="phase-header"><div class="phase-name">階段 ${i + 1}：${p.phase}</div></div><div class="phase-desc">${p.description}</div><div class="contribution-grid"><div class="contribution-box"><div class="contribution-label">A 的貢獻</div><div class="text-content">${p.speaker_a_contribution}</div></div><div class="contribution-box"><div class="contribution-label">B 的貢獻</div><div class="text-content">${p.speaker_b_contribution}</div></div></div><div style="margin-top:15px;padding:12px;background:rgba(99,102,241,0.1);border-radius:8px;"><strong style="color:var(--accent-primary);"> 關鍵觀察：</strong> ${p.key_observation}</div></div>`; });
 
             const tp = document.getElementById('turningPoints'); tp.innerHTML = '';
-            if (s1.turning_points) s1.turning_points.forEach(t => { tp.innerHTML += `<div class="turning-point"><div class="turning-moment">⚡ ${t.moment}</div><div class="turning-why"><strong>為什麼關鍵：</strong> ${t.why_critical}</div><div class="turning-alt"><strong>💡 錯失的替代：</strong> ${t.missed_alternative}</div></div>`; });
+            if (s1.turning_points) s1.turning_points.forEach(t => { tp.innerHTML += `<div class="turning-point"><div class="turning-moment"> ${t.moment}</div><div class="turning-why"><strong>為什麼關鍵：</strong> ${t.why_critical}</div><div class="turning-alt"><strong> 錯失的替代：</strong> ${t.missed_alternative}</div></div>`; });
 
             if (s1.dual_perspective) { document.getElementById('dualPerspective').innerHTML = `<div class="perspective-box"><div class="perspective-header"><div class="speaker-avatar">A</div><div style="font-weight:600;">A 的體驗</div></div><div class="text-content">${s1.dual_perspective.speaker_a_experience}</div></div><div class="perspective-box"><div class="perspective-header"><div class="speaker-avatar">B</div><div style="font-weight:600;">B 的體驗</div></div><div class="text-content">${s1.dual_perspective.speaker_b_experience}</div></div>`; document.getElementById('coreMismatch').textContent = s1.dual_perspective.core_mismatch; }
 
@@ -790,13 +849,13 @@ HTML_TEMPLATE = '''
             document.getElementById('cognitiveClash').textContent = s2.cognitive_style_clash;
 
             const ps = document.getElementById('perspectiveShifts'); ps.innerHTML = '';
-            if (s2.perspective_shifts) s2.perspective_shifts.forEach(p => { ps.innerHTML += `<div class="phase-card"><div class="phase-name">給 ${p.for_speaker} 的練習</div><div style="padding:15px;background:rgba(139,92,246,0.1);border-radius:10px;margin-bottom:10px;"><strong>🤔 ${p.prompt}</strong></div><div class="text-content">${p.insight}</div></div>`; });
+            if (s2.perspective_shifts) s2.perspective_shifts.forEach(p => { ps.innerHTML += `<div class="phase-card"><div class="phase-name">給 ${p.for_speaker} 的練習</div><div style="padding:15px;background:rgba(139,92,246,0.1);border-radius:10px;margin-bottom:10px;"><strong> ${p.prompt}</strong></div><div class="text-content">${p.insight}</div></div>`; });
 
             const hr = document.getElementById('healingReframes'); hr.innerHTML = '';
-            if (s2.healing_reframes) s2.healing_reframes.forEach(h => { hr.innerHTML += `<div class="healing-card"><div class="healing-original">❌ ${h.original_statement}</div><div class="healing-arrow">↓ 翻譯成 ↓</div><div class="healing-translation">💕 ${h.vulnerable_translation}</div><div class="healing-response">✅ 對方可以這樣回應：${h.compassionate_response}</div></div>`; });
+            if (s2.healing_reframes) s2.healing_reframes.forEach(h => { hr.innerHTML += `<div class="healing-card"><div class="healing-original"> ${h.original_statement}</div><div class="healing-arrow">↓ 翻譯成 ↓</div><div class="healing-translation"> ${h.vulnerable_translation}</div><div class="healing-response"> 對方可以這樣回應：${h.compassionate_response}</div></div>`; });
 
             const ac = document.getElementById('actionableChanges'); ac.innerHTML = '';
-            if (s2.actionable_changes) s2.actionable_changes.forEach(a => { ac.innerHTML += `<div class="action-card"><div class="action-header">給 ${a.for_speaker} 的建議</div><div class="action-item"><span class="action-icon">🎯</span><div><div class="action-label">觸發情境</div><div>${a.trigger_situation}</div></div></div><div class="action-item"><span class="action-icon">❌</span><div><div class="action-label">舊模式</div><div>${a.old_pattern}</div></div></div><div class="action-item"><span class="action-icon">✅</span><div><div class="action-label">新做法</div><div>${a.new_approach}</div></div></div><div class="action-item" style="background:rgba(34,197,94,0.1);"><span class="action-icon">🛑</span><div><div class="action-label">降溫用語</div><div style="color:var(--accent-success);font-weight:600;">${a.cooling_phrase}</div></div></div></div>`; });
+            if (s2.actionable_changes) s2.actionable_changes.forEach(a => { ac.innerHTML += `<div class="action-card"><div class="action-header">給 ${a.for_speaker} 的建議</div><div class="action-item"><span class="action-icon"></span><div><div class="action-label">觸發情境</div><div>${a.trigger_situation}</div></div></div><div class="action-item"><span class="action-icon"></span><div><div class="action-label">舊模式</div><div>${a.old_pattern}</div></div></div><div class="action-item"><span class="action-icon"></span><div><div class="action-label">新做法</div><div>${a.new_approach}</div></div></div><div class="action-item" style="background:rgba(34,197,94,0.1);"><span class="action-icon"></span><div><div class="action-label">降溫用語</div><div style="color:var(--accent-success);font-weight:600;">${a.cooling_phrase}</div></div></div></div>`; });
 
             document.getElementById('sharedResponsibility').textContent = s2.shared_responsibility;
             document.getElementById('healingMessage').textContent = s2.healing_message;
@@ -834,7 +893,7 @@ HTML_TEMPLATE = '''
                 <div class="growth-item"><div class="growth-label">這次我做的</div><div class="text-content">${alt.what_i_did}</div></div>
                 <div class="growth-item"><div class="growth-label">我可以嘗試的</div><div class="text-content">${alt.what_i_could_try}</div></div>
                 <div class="growth-item"><div class="growth-label">為什麼對我比較好</div><div class="text-content">${alt.why_better_for_me}</div></div>
-                <div class="growth-item" style="background:rgba(34,197,94,0.15);"><div class="growth-label">🧪 這週的微小實驗</div><div class="text-content" style="font-weight:600;">${alt.micro_experiment}</div></div>`;
+                <div class="growth-item" style="background:rgba(34,197,94,0.15);"><div class="growth-label"> 這週的微小實驗</div><div class="text-content" style="font-weight:600;">${alt.micro_experiment}</div></div>`;
 
             // 我的邊界
             const mb = s3.my_boundaries;
@@ -849,12 +908,12 @@ HTML_TEMPLATE = '''
             document.getElementById('meaningMaking').innerHTML = `
                 <div class="growth-item"><div class="growth-label">這次照見了什麼</div><div class="text-content">${mm.what_this_reveals}</div></div>
                 <div class="growth-item"><div class="growth-label">我正在學習的功課</div><div class="text-content">${mm.lesson_learning}</div></div>
-                <div class="growth-item" style="background:rgba(34,197,94,0.15);"><div class="growth-label">💌 送給自己的話</div><div class="text-content" style="font-style:italic;">${mm.message_to_self}</div></div>`;
+                <div class="growth-item" style="background:rgba(34,197,94,0.15);"><div class="growth-label"> 送給自己的話</div><div class="text-content" style="font-style:italic;">${mm.message_to_self}</div></div>`;
 
             // 反思提問
             const rp = document.getElementById('reflectionPrompts');
             rp.innerHTML = '';
-            if (s3.reflection_prompts) s3.reflection_prompts.forEach(q => { rp.innerHTML += `<li>🤔 ${q}</li>`; });
+            if (s3.reflection_prompts) s3.reflection_prompts.forEach(q => { rp.innerHTML += `<li> ${q}</li>`; });
 
             // 結語
             document.getElementById('closingMessage').textContent = s3.closing;
@@ -876,100 +935,239 @@ HTML_TEMPLATE = '''
         
         let currentReportId = null;
         
-        // 自動生成圖片（帶進度）- 整合 VisualArchitect 簡報
+        // 自動生成圖片（逐張請求模式 + 容錯設計）
+        // ⚠️ 實現「增量渲染」：成功的立即顯示，失敗的顯示佔位符 + 重試按鈕
+        let failedStages = [];  // 記錄失敗的階段，供重試使用
+        
         async function generateImagesAuto() {
-            if (!currentReportId) return;
+            if (!currentReportId) return false;
             
             const progressBar = document.getElementById('imageProgressBar');
             const progressText = document.getElementById('imageProgressText');
             const container = document.getElementById('generatedImagesContainer');
             
-            progressText.textContent = '🎨 VisualArchitect 正在設計簡報...';
-            progressBar.style.width = '10%';
+            // 配色系統
+            const stageKeys = ['stage1', 'stage2', 'stage3', 'combined'];
+            const stageNames = ['衝突演化', '深層溯源', '成長方案', '融合總覽'];
+            const imgIds = ['imgStage1', 'imgStage2', 'imgStage3', 'imgCombined'];
+            const stageColors = ['#C9A962', '#B87351', '#A3B899', '#D4A5A5'];
+            const textColors = ['#6B5B4F', '#6B5B4F', '#5A6B55', '#6B5555'];
             
-            // 模擬進度
-            let progress = 10;
-            const progressSteps = [
-                { pct: 20, text: '🎨 VisualArchitect 分析中...' },
-                { pct: 35, text: '📊 設計 Stage 1 簡報...' },
-                { pct: 50, text: '💡 設計 Stage 2 簡報...' },
-                { pct: 65, text: '🌱 設計 Stage 3 簡報...' },
-                { pct: 80, text: '🎵 渲染高質量圖像...' },
-            ];
-            let stepIdx = 0;
+            let successCount = 0;
+            failedStages = [];  // 重置失敗清單
             
-            const progressInterval = setInterval(() => {
-                if (stepIdx < progressSteps.length && progress >= progressSteps[stepIdx].pct - 5) {
-                    progressText.textContent = progressSteps[stepIdx].text;
-                    stepIdx++;
-                }
-                if (progress < 85) {
-                    progress += Math.random() * 3;
-                    progressBar.style.width = Math.min(progress, 85) + '%';
-                }
-            }, 800);
+            // 先顯示容器和佔位符
+            container.style.display = 'block';
             
-            try {
-                const resp = await fetch('/generate-images', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ report_id: currentReportId })
-                });
+            console.log('📍 開始逐張生成圖像（增量渲染模式）...');
+            
+            // ============ 逐張請求：每張圖獨立連線 ============
+            for (let i = 0; i < 4; i++) {
+                const key = stageKeys[i];
+                const name = stageNames[i];
+                const imgId = imgIds[i];
+                const pct = ((i + 1) / 4) * 85 + 10;
                 
-                const data = await resp.json();
-                clearInterval(progressInterval);
+                progressText.textContent = `🎨 [${i+1}/4] 正在渲染「${name}」...`;
+                progressBar.style.width = `${10 + i * 20}%`;
                 
-                if (data.success && data.images) {
-                    progressBar.style.width = '100%';
-                    progressText.textContent = '✅ 視覺化簡報生成完成！';
+                console.log(`📍[${i+1}/4] 請求生成：${key}`);
+                
+                try {
+                    const resp = await fetch('/generate-single-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            report_id: currentReportId,
+                            stage_index: i
+                        })
+                    });
                     
-                    // 顯示圖片
-                    if (data.images.stage1) document.getElementById('imgStage1').src = 'data:image/png;base64,' + data.images.stage1;
-                    if (data.images.stage2) document.getElementById('imgStage2').src = 'data:image/png;base64,' + data.images.stage2;
-                    if (data.images.stage3) document.getElementById('imgStage3').src = 'data:image/png;base64,' + data.images.stage3;
-                    if (data.images.combined) document.getElementById('imgCombined').src = 'data:image/png;base64,' + data.images.combined;
+                    const data = await resp.json();
                     
-                    // 填充簡報卡片數據（如果有 slides 數據）
-                    if (data.slides && data.slides.length > 0) {
-                        const stageKeys = ['1', '2', '3', '4'];
-                        const stageColors = ['#F59E0B', '#0891B2', '#22C55E', '#EC4899'];
+                    if (data.success && data.image_base64) {
+                        console.log(`✅[${i+1}/4] ${key} 生成成功！`);
+                        successCount++;
                         
-                        data.slides.forEach((slide, i) => {
-                            const num = stageKeys[i];
+                        // 即時顯示圖片
+                        const imgEl = document.getElementById(imgId);
+                        if (imgEl) {
+                            imgEl.src = 'data:image/png;base64,' + data.image_base64;
+                            imgEl.style.opacity = '1';
+                            // 移除可能存在的重試按鈕
+                            const retryBtn = imgEl.parentElement.querySelector('.retry-btn');
+                            if (retryBtn) retryBtn.remove();
+                        }
+                        
+                        // 填充簡報卡片數據
+                        if (data.slide) {
+                            const num = i < 3 ? (i + 1).toString() : '4';
                             const color = stageColors[i];
+                            const textColor = textColors[i];
                             
-                            // 更新標題
                             const titleEl = document.getElementById('slideTitle' + num);
-                            if (titleEl && slide.slide_title) titleEl.textContent = slide.slide_title;
+                            if (titleEl && data.slide.slide_title) titleEl.textContent = data.slide.slide_title;
                             
-                            // 更新引言
                             const insightEl = document.getElementById('slideInsight' + num);
-                            if (insightEl && slide.core_insight) insightEl.textContent = slide.core_insight;
+                            if (insightEl && data.slide.core_insight) insightEl.textContent = data.slide.core_insight;
                             
-                            // 更新要點列表（新的格式）
                             const bulletsEl = document.getElementById('slideBullets' + num);
-                            if (bulletsEl && slide.data_bullets && slide.data_bullets.length > 0) {
-                                bulletsEl.innerHTML = slide.data_bullets.map(bullet => 
-                                    `<li style="color: var(--text-muted); font-size: 0.85rem; padding: 5px 0; display: flex; align-items: flex-start;">
-                                        <span style="color:${color}; margin-right:8px;">•</span>
+                            if (bulletsEl && data.slide.data_bullets && data.slide.data_bullets.length > 0) {
+                                bulletsEl.innerHTML = data.slide.data_bullets.map(bullet => 
+                                    `<li style="color: ${textColor}; font-size: 0.9rem; padding: 6px 0; display: flex; align-items: flex-start;">
+                                        <span style="color:${color}; margin-right:10px;">—</span>
                                         <span>${bullet}</span>
                                     </li>`
                                 ).join('');
                             }
-                        });
+                        }
+                        
+                        progressBar.style.width = `${pct}%`;
+                    } else {
+                        console.warn(`❌[${i+1}/4] ${key} 生成失敗:`, data.error);
+                        failedStages.push(i);
+                        showFailedPlaceholder(imgId, i, name);
+                    }
+                } catch (err) {
+                    console.error(`❌[${i+1}/4] ${key} 請求錯誤:`, err);
+                    failedStages.push(i);
+                    showFailedPlaceholder(imgId, i, name);
+                }
+                
+                // 每張圖之間等待一小段時間
+                await new Promise(r => setTimeout(r, 300));
+            }
+            
+            // 顯示最終結果
+            progressBar.style.width = '100%';
+            
+            if (successCount === 4) {
+                progressText.textContent = `✅ 視覺化簡報完成（4/4 張成功）`;
+            } else if (successCount > 0) {
+                progressText.innerHTML = `✅ 已完成 ${successCount}/4 張 <span style="color:#F59E0B;">（${4-successCount} 張失敗，可重試）</span>`;
+            } else {
+                progressText.innerHTML = `❌ 圖像生成失敗 <button onclick="generateImagesAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">全部重試</button>`;
+            }
+            
+            console.log(`✅ 圖像處理完成！成功：${successCount}/4`);
+            return successCount > 0;
+        }
+        
+        // 顯示失敗佔位符 + 重試按鈕
+        function showFailedPlaceholder(imgId, stageIndex, stageName) {
+            const imgEl = document.getElementById(imgId);
+            if (!imgEl) return;
+            
+            // 設置佔位符樣式
+            imgEl.src = 'data:image/svg+xml,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                    <rect fill="#2A2A2A" width="400" height="300" rx="12"/>
+                    <text x="200" y="140" fill="#888" font-size="14" text-anchor="middle" font-family="sans-serif">圖像生成失敗</text>
+                    <text x="200" y="165" fill="#666" font-size="12" text-anchor="middle" font-family="sans-serif">點擊下方按鈕重試</text>
+                </svg>
+            `);
+            imgEl.style.opacity = '0.6';
+            
+            // 添加重試按鈕（如果還沒有）
+            if (!imgEl.parentElement.querySelector('.retry-btn')) {
+                const retryBtn = document.createElement('button');
+                retryBtn.className = 'retry-btn';
+                retryBtn.innerHTML = `🔄 重試「${stageName}」`;
+                retryBtn.style.cssText = 'position:absolute;bottom:10px;left:50%;transform:translateX(-50%);padding:8px 16px;background:linear-gradient(135deg,#C9A962,#B87351);color:white;border:none;border-radius:20px;cursor:pointer;font-size:12px;z-index:10;';
+                retryBtn.onclick = () => retrySingleImage(stageIndex);
+                imgEl.parentElement.style.position = 'relative';
+                imgEl.parentElement.appendChild(retryBtn);
+            }
+        }
+        
+        // 單張圖像重試
+        async function retrySingleImage(stageIndex) {
+            const stageKeys = ['stage1', 'stage2', 'stage3', 'combined'];
+            const stageNames = ['衝突演化', '深層溯源', '成長方案', '融合總覽'];
+            const imgIds = ['imgStage1', 'imgStage2', 'imgStage3', 'imgCombined'];
+            const stageColors = ['#C9A962', '#B87351', '#A3B899', '#D4A5A5'];
+            const textColors = ['#6B5B4F', '#6B5B4F', '#5A6B55', '#6B5555'];
+            
+            const key = stageKeys[stageIndex];
+            const name = stageNames[stageIndex];
+            const imgId = imgIds[stageIndex];
+            
+            console.log(`🔄 重試生成：${key}`);
+            
+            // 顯示載入中
+            const imgEl = document.getElementById(imgId);
+            if (imgEl) {
+                imgEl.src = 'data:image/svg+xml,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                        <rect fill="#2A2A2A" width="400" height="300" rx="12"/>
+                        <text x="200" y="150" fill="#C9A962" font-size="14" text-anchor="middle" font-family="sans-serif">⏳ 正在重新生成...</text>
+                    </svg>
+                `);
+                // 暫時隱藏重試按鈕
+                const retryBtn = imgEl.parentElement.querySelector('.retry-btn');
+                if (retryBtn) retryBtn.style.display = 'none';
+            }
+            
+            try {
+                const resp = await fetch('/generate-single-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        report_id: currentReportId,
+                        stage_index: stageIndex
+                    })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.success && data.image_base64) {
+                    console.log(`✅ ${key} 重試成功！`);
+                    
+                    // 更新圖片
+                    if (imgEl) {
+                        imgEl.src = 'data:image/png;base64,' + data.image_base64;
+                        imgEl.style.opacity = '1';
+                        const retryBtn = imgEl.parentElement.querySelector('.retry-btn');
+                        if (retryBtn) retryBtn.remove();
                     }
                     
-                    container.style.display = 'block';
+                    // 更新簡報卡片
+                    if (data.slide) {
+                        const num = stageIndex < 3 ? (stageIndex + 1).toString() : '4';
+                        const color = stageColors[stageIndex];
+                        const textColor = textColors[stageIndex];
+                        
+                        const titleEl = document.getElementById('slideTitle' + num);
+                        if (titleEl && data.slide.slide_title) titleEl.textContent = data.slide.slide_title;
+                        
+                        const insightEl = document.getElementById('slideInsight' + num);
+                        if (insightEl && data.slide.core_insight) insightEl.textContent = data.slide.core_insight;
+                    }
+                    
+                    // 從失敗清單移除
+                    failedStages = failedStages.filter(s => s !== stageIndex);
+                    
+                    // 更新進度文字
+                    const progressText = document.getElementById('imageProgressText');
+                    if (failedStages.length === 0) {
+                        progressText.textContent = `✅ 視覺化簡報完成（4/4 張成功）`;
+                    } else {
+                        progressText.innerHTML = `✅ 已完成 ${4 - failedStages.length}/4 張 <span style="color:#F59E0B;">（${failedStages.length} 張失敗，可重試）</span>`;
+                    }
+                    
                     return true;
                 } else {
-                    progressText.textContent = '❌ 圖像生成失敗';
-                    console.error('圖像生成失敗:', data.error);
+                    console.warn(`❌ ${key} 重試失敗:`, data.error);
+                    showFailedPlaceholder(imgId, stageIndex, name);
+                    const retryBtn = imgEl?.parentElement.querySelector('.retry-btn');
+                    if (retryBtn) retryBtn.style.display = 'block';
                     return false;
                 }
             } catch (err) {
-                clearInterval(progressInterval);
-                progressText.textContent = '❌ 網路錯誤';
-                console.error('圖像生成錯誤:', err);
+                console.error(`❌ ${key} 重試請求錯誤:`, err);
+                showFailedPlaceholder(imgId, stageIndex, name);
+                const retryBtn = imgEl?.parentElement.querySelector('.retry-btn');
+                if (retryBtn) retryBtn.style.display = 'block';
                 return false;
             }
         }
@@ -989,18 +1187,18 @@ HTML_TEMPLATE = '''
             progressText.textContent = '正在生成分段療癒腳本...';
             progressBar.style.width = '5%';
             partsProgress.style.display = 'block';
-            partsProgress.textContent = '📝 正在生成療育文稿...';
+            partsProgress.textContent = ' 正在生成療育文稿...';
             
             // 分段進度模擬
             let progress = 5;
             const progressSteps = [
-                { pct: 15, text: '📝 正在生成療育文稿...' },
-                { pct: 25, text: '✂️ 拆分文稿為多個片段...' },
-                { pct: 40, text: '🎙️ 正在生成 PART_1 音頻...' },
-                { pct: 55, text: '🎙️ 正在生成 PART_2 音頻...' },
-                { pct: 65, text: '🎙️ 正在生成 PART_3 音頻...' },
-                { pct: 75, text: '🎙️ 正在生成更多片段...' },
-                { pct: 85, text: '🧵 正在編織您的專屬療癒能量...' },
+                { pct: 15, text: ' 正在生成療育文稿...' },
+                { pct: 25, text: '️ 拆分文稿為多個片段...' },
+                { pct: 40, text: '️ 正在生成 PART_1 音頻...' },
+                { pct: 55, text: '️ 正在生成 PART_2 音頻...' },
+                { pct: 65, text: '️ 正在生成 PART_3 音頻...' },
+                { pct: 75, text: '️ 正在生成更多片段...' },
+                { pct: 85, text: ' 正在編織您的專屬療癒能量...' },
             ];
             let stepIdx = 0;
             
@@ -1033,8 +1231,16 @@ HTML_TEMPLATE = '''
                 
                 if (data.success && data.audio_base64) {
                     progressBar.style.width = '100%';
-                    progressText.textContent = '✅ 音頻生成完成！';
-                    partsProgress.textContent = `🎵 已成功串接 ${data.parts_count || 6} 個音頻片段`;
+                    progressText.textContent = ' 音頻生成完成！';
+                    
+                    // 顯示 BGM 狀態
+                    const bgmStatus = data.bgm_status || {};
+                    if (bgmStatus.success) {
+                        partsProgress.textContent = ` 已成功串接 ${data.parts_count || 6} 個音頻片段 +  ${bgmStatus.method === 'lyria' ? 'Lyria原創BGM' : '本地BGM'}`;
+                    } else {
+                        partsProgress.innerHTML = ` 已成功串接 ${data.parts_count || 6} 個音頻片段<br><span style="color:#F59E0B;">️ 純語音模式（${bgmStatus.error || '無背景音樂'}）</span>`;
+                        console.warn('BGM 混音未成功:', bgmStatus);
+                    }
                     
                     // 設置音頻
                     const audio = document.getElementById('healingAudio');
@@ -1054,13 +1260,13 @@ HTML_TEMPLATE = '''
                     
                     return true;
                 } else {
-                    progressText.textContent = '❌ 音頻生成失敗';
+                    progressText.textContent = ' 音頻生成失敗';
                     console.error('音頻生成失敗:', data.error);
                     return false;
                 }
             } catch (err) {
                 clearInterval(progressInterval);
-                progressText.textContent = '❌ 網路錯誤';
+                progressText.textContent = ' 網路錯誤';
                 console.error('音頻生成錯誤:', err);
                 return false;
             }
@@ -1075,7 +1281,7 @@ HTML_TEMPLATE = '''
         }
         
         function onAudioEnded() {
-            document.getElementById('healingPlayBtn').textContent = '▶';
+            document.getElementById('healingPlayBtn').classList.remove('playing');
             document.getElementById('audioProgressBar').style.width = '0%';
         }
         
@@ -1084,16 +1290,15 @@ HTML_TEMPLATE = '''
             const btn = document.getElementById('healingPlayBtn');
             
             if (!healingAudioReady) {
-                btn.textContent = '⏳';
                 return;
             }
             
             if (audio.paused) {
                 audio.play();
-                btn.textContent = '⏸';
+                btn.classList.add('playing');
             } else {
                 audio.pause();
-                btn.textContent = '▶';
+                btn.classList.remove('playing');
             }
         }
         
@@ -1113,28 +1318,36 @@ HTML_TEMPLATE = '''
             const audio = document.getElementById('healingAudio');
             audio.pause();
             document.getElementById('healingPlayer').classList.remove('show');
-            document.getElementById('healingPlayBtn').textContent = '▶';
+            document.getElementById('healingPlayBtn').textContent = '';
         }
         
-        // 三階分析完成後自動**並行**生成圖片和音頻
+        // 三階分析完成後自動**序列化**生成圖片和音頻
+        // ⚠️ 重要：不要使用 Promise.all！這會觸發 API 並行限制導致連線重置
         async function onAnalysisComplete() {
             // 重置進度
             document.getElementById('imageProgressBar').style.width = '0%';
             document.getElementById('audioGenProgressBar').style.width = '0%';
             document.getElementById('imageProgressText').textContent = '準備中...';
-            document.getElementById('audioProgressText').textContent = '準備中...';
+            document.getElementById('audioProgressText').textContent = '等待圖像完成...';
             document.getElementById('generatedImagesContainer').style.display = 'none';
             document.getElementById('audioReadyCard').style.display = 'none';
             
-            // 並行生成圖片和音頻（不互相等待）
-            console.log('📍 開始並行生成圖像和音頻...');
+            // ============ 序列化生成：避免 API 限流 ============
+            // 原因：Tier 1 API 限制並行數為 2，同時發送 4 張圖 + 1 個音頻會崩潰
+            console.log('📍 開始序列化生成（圖像 → 音頻）...');
             
-            const [imageResult, audioResult] = await Promise.all([
-                generateImagesAuto(),
-                generateHealingAudioAuto()
-            ]);
+            // Step 1: 先生成圖像（內部已經序列化）
+            console.log('📍[Step 1/2] 正在生成圖像...');
+            const imageResult = await generateImagesAuto();
+            console.log('📍[Step 1/2] 圖像生成完成！', imageResult);
             
-            console.log('📍 所有自動生成完成！', { imageResult, audioResult });
+            // Step 2: 圖像完成後，再生成音頻
+            console.log('📍[Step 2/2] 正在生成音頻...');
+            document.getElementById('audioProgressText').textContent = '正在生成...';
+            const audioResult = await generateHealingAudioAuto();
+            console.log('📍[Step 2/2] 音頻生成完成！', audioResult);
+            
+            console.log('✅ 所有自動生成完成！', { imageResult, audioResult });
         }
     </script>
 </body>
@@ -1221,7 +1434,9 @@ def analyze():
 
 @app.route('/generate-images', methods=['POST'])
 def generate_images():
-    """生成四張視覺化圖像"""
+    """生成四張視覺化圖像（傳統模式，不推薦）"""
+    # ⚠️ 此端點可能因長時間運行而超時
+    # 建議使用 /generate-images-stream SSE 端點
     try:
         data = request.get_json()
         report_id = data.get('report_id')
@@ -1255,17 +1470,29 @@ def generate_images():
             output_dir=image_folder
         )
         
-        # 轉換圖像為 base64
+        # 轉換圖像為 base64，並追蹤失敗的圖像
         images = {}
+        failed_images = []
         for key, img_bytes in result["images"].items():
             if img_bytes:
                 images[key] = ImageGenerator.bytes_to_base64(img_bytes)
+            else:
+                failed_images.append(key)
+        
+        # 檢查是否有圖像生成成功
+        if len(images) == 0:
+            return jsonify({
+                'success': False, 
+                'error': '所有圖像生成失敗。請檢查 GEMINI_API_KEY 是否有效，以及網路連線狀態。',
+                'failed_images': failed_images
+            })
         
         return jsonify({
             'success': True,
             'images': images,
-            'slides': result.get("slides", []),  # 返回簡報數據
-            'message': f'成功生成 {len(images)} 張高質量圖像'
+            'slides': result.get("slides", []),
+            'failed_images': failed_images,
+            'message': f'成功生成 {len(images)}/{len(result["images"])} 張圖像' + (f'（{len(failed_images)} 張失敗）' if failed_images else '')
         })
         
     except Exception as e:
@@ -1273,14 +1500,27 @@ def generate_images():
         return jsonify({'success': False, 'error': f'圖像生成錯誤：{str(e)}'})
 
 
-@app.route('/generate-audio', methods=['POST'])
-def generate_audio():
-    """生成療育音頻"""
+@app.route('/generate-single-image', methods=['POST'])
+def generate_single_image():
+    """
+    生成單張視覺化圖像（推薦模式）
+    
+    ⚠️ 解決連線超時問題的最佳實踐：
+    - 前端逐張請求，每張圖獨立連線
+    - 每個請求只處理一張圖，避免長時間阻塞
+    - 請求完成後立即返回，不累積記憶體
+    
+    Request JSON:
+    {
+        "report_id": "xxx",
+        "stage_index": 0-3,  // 0=stage1, 1=stage2, 2=stage3, 3=combined
+        "slide_data": {...}  // 可選，預先生成的 slide 數據
+    }
+    """
     try:
         data = request.get_json()
         report_id = data.get('report_id')
-        stage4_prompt = data.get('stage4_prompt', DEFAULT_STAGE4_PROMPT)
-        voice = data.get('voice', 'warm_female')
+        stage_index = data.get('stage_index', 0)
         
         if not report_id:
             return jsonify({'success': False, 'error': '缺少報告編號'})
@@ -1297,12 +1537,156 @@ def generate_audio():
         stage2 = report_data.get('stage2', {})
         stage3 = report_data.get('stage3', {})
         
+        stage_keys = ["stage1", "stage2", "stage3", "combined"]
+        stage_key = stage_keys[stage_index] if stage_index < 4 else "stage1"
+        
+        print(f"\n📍[Single Image] 生成單張圖像：{stage_key} (index={stage_index})")
+        
+        # 初始化生成器
+        generator = ImageGenerator()
+        
+        # 生成單張 slide 的 prompt
+        slides = generator.visual_architect.generate_all_slides(stage1, stage2, stage3)
+        
+        if stage_index >= len(slides):
+            return jsonify({'success': False, 'error': f'無效的 stage_index: {stage_index}'})
+        
+        slide = slides[stage_index]
+        is_stage4 = (stage_index == 3)
+        
+        print(f"   📋 Slide: {slide.slide_title}")
+        print(f"   🎯 Prompt 長度: {len(slide.image_prompt)} 字元")
+        
+        # 生成單張圖像
+        image_bytes = generator.generate_image_from_prompt(
+            slide.image_prompt,
+            slide.stage_id,
+            is_summary=is_stage4
+        )
+        
+        # 儲存圖像
+        image_folder = app.config['IMAGES_FOLDER'] / report_id
+        image_folder.mkdir(exist_ok=True)
+        
+        if image_bytes:
+            output_path = image_folder / f"{stage_key}_visualization.png"
+            with open(output_path, "wb") as f:
+                f.write(image_bytes)
+            print(f"   ✅ 生成成功！({len(image_bytes)} bytes)")
+            
+            return jsonify({
+                'success': True,
+                'stage_key': stage_key,
+                'stage_index': stage_index,
+                'image_base64': ImageGenerator.bytes_to_base64(image_bytes),
+                'slide': slide.to_dict(),
+                'message': f'{stage_key} 圖像生成成功'
+            })
+        else:
+            print(f"   ❌ 生成失敗")
+            return jsonify({
+                'success': False,
+                'stage_key': stage_key,
+                'stage_index': stage_index,
+                'error': f'{stage_key} 圖像生成失敗'
+            })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'單張圖像生成錯誤：{str(e)}'})
+
+
+@app.route('/prepare-slides', methods=['POST'])
+def prepare_slides():
+    """
+    預先生成 Slide 結構（不生成圖像）
+    
+    這個端點快速返回 4 張 slide 的結構，
+    讓前端可以先顯示佔位符，再逐張請求圖像。
+    """
+    try:
+        data = request.get_json()
+        report_id = data.get('report_id')
+        
+        if not report_id:
+            return jsonify({'success': False, 'error': '缺少報告編號'})
+        
+        report_path = app.config['REPORTS_FOLDER'] / f"{report_id}.json"
+        if not report_path.exists():
+            return jsonify({'success': False, 'error': '找不到報告'})
+        
+        with open(report_path, 'r', encoding='utf-8') as f:
+            report_data = json.load(f)
+        
+        stage1 = report_data.get('stage1', {})
+        stage2 = report_data.get('stage2', {})
+        stage3 = report_data.get('stage3', {})
+        
+        # 只生成 slide 結構，不生成圖像
+        from conflict_analyzer.visual_architect import VisualArchitect
+        architect = VisualArchitect()
+        slides = architect.generate_all_slides(stage1, stage2, stage3)
+        
+        slides_dict = [slide.to_dict() for slide in slides]
+        
+        return jsonify({
+            'success': True,
+            'slides': slides_dict,
+            'total': len(slides_dict),
+            'message': f'已準備 {len(slides_dict)} 張 Slide 結構'
+        })
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'Slide 準備錯誤：{str(e)}'})
+
+@app.route('/generate-audio', methods=['POST'])
+def generate_audio():
+    """生成療育音頻"""
+    print("\n" + "=" * 60)
+    print("🎵 [Audio API] 收到音頻生成請求")
+    print("=" * 60)
+    
+    try:
+        data = request.get_json()
+        report_id = data.get('report_id')
+        stage4_prompt = data.get('stage4_prompt', DEFAULT_STAGE4_PROMPT)
+        voice = data.get('voice', 'warm_female')
+        
+        print(f"📍[Audio API] report_id: {report_id}")
+        print(f"📍[Audio API] voice: {voice}")
+        
+        if not report_id:
+            print("❌ [Audio API] 缺少 report_id")
+            return jsonify({'success': False, 'error': '缺少報告編號'})
+        
+        # 讀取報告
+        report_path = app.config['REPORTS_FOLDER'] / f"{report_id}.json"
+        print(f"📍[Audio API] 報告路徑: {report_path}")
+        
+        if not report_path.exists():
+            print(f"❌ [Audio API] 報告不存在: {report_path}")
+            return jsonify({'success': False, 'error': '找不到報告'})
+        
+        with open(report_path, 'r', encoding='utf-8') as f:
+            report_data = json.load(f)
+        
+        stage1 = report_data.get('stage1', {})
+        stage2 = report_data.get('stage2', {})
+        stage3 = report_data.get('stage3', {})
+        
+        print(f"📍[Audio API] stage1 keys: {list(stage1.keys())[:5]}...")
+        print(f"📍[Audio API] stage2 keys: {list(stage2.keys())[:5]}...")
+        print(f"📍[Audio API] stage3 keys: {list(stage3.keys())[:5]}...")
+        
         # 生成療育音頻
+        print("📍[Audio API] 初始化 HealingAudioGenerator...")
         generator = HealingAudioGenerator()
         
         audio_folder = app.config['IMAGES_FOLDER'] / report_id
         audio_folder.mkdir(exist_ok=True)
         
+        print("📍[Audio API] 開始生成療育音頻...")
         result = generator.generate_healing_audio(
             stage1_result=stage1,
             stage2_result=stage2,
@@ -1318,6 +1702,7 @@ def generate_audio():
             'duration_estimate': result['duration_estimate'],
             'voice': result['voice'],
             'parts_count': result.get('parts_count', 1),
+            'bgm_status': result.get('bgm_status', {'success': False, 'method': 'unknown', 'error': None, 'voice_only': True}),
             'message': '療育音頻生成成功'
         })
         
@@ -1359,14 +1744,14 @@ def download_pdf(report_id):
 
 if __name__ == '__main__':
     print("\n" + "=" * 60)
-    print("👑 衝突基因 - 四階段專業分析系統 v4.0")
+    print(" Lumina 心語 - 四階段專業分析系統 v4.0")
     print("=" * 60)
-    print("🔬 一階：衝突演化追蹤器")
-    print("💡 二階：深層溯源與接納橋樑")
-    print("🌱 三階：個人成長行動方案")
-    print("🎵 四階：數位催眠療癒")
+    print(" 一階：衝突演化追蹤器")
+    print(" 二階：深層溯源與接納橋樑")
+    print(" 三階：個人成長行動方案")
+    print(" 四階：數位催眠療癒")
     print("=" * 60)
-    print("🌐 請在瀏覽器開啟：http://localhost:5000")
+    print(" 請在瀏覽器開啟：http://localhost:5000")
     print("=" * 60 + "\n")
     
     app.run(host='0.0.0.0', port=5000, debug=True)

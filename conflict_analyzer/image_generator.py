@@ -1,68 +1,132 @@
 """
-衝突基因 - 圖像生成模組 v2.0
-整合 VisualArchitect 生成高質量、基於上下文的視覺化圖像
+Lumina 心語 - 圖像生成模組 v5.0
+使用 Gemini 3 Pro Image Preview (Nano Banana Pro) 生成高質量視覺化圖像
+改用 google-genai SDK 調用（經測試驗證可用）
 """
 
 import os
 import base64
+import time
+import random
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+
 from google import genai
 from google.genai import types
 
 from conflict_analyzer.visual_architect import VisualArchitect, SlideContent, generate_visual_slides
 
-# 模型常量
-IMAGE_MODEL = "imagen-4.0-generate-001"
+# 模型常量 - Gemini 3 Pro Image Preview (Nano Banana Pro)
+IMAGE_MODEL = "gemini-3-pro-image-preview"
 
 
 class ImageGenerator:
-    """使用 Imagen + VisualArchitect 生成高質量分析視覺化圖像"""
+    """使用 Gemini 3 Pro Image + VisualArchitect 生成高質量分析視覺化圖像"""
     
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         if not self.api_key:
             raise ValueError("需要 GEMINI_API_KEY 環境變數")
+        
+        # 使用 google-genai SDK
         self.client = genai.Client(api_key=self.api_key)
         self.visual_architect = VisualArchitect(api_key=self.api_key)
+        
+        print(f"📍[ImageGenerator] 已初始化，使用模型: {IMAGE_MODEL}")
     
     def generate_image_from_prompt(
         self,
         prompt: str,
-        stage_num: int = 0
+        stage_num: int = 0,
+        resolution: str = "2048x2048",  # 預設 2K
+        aspect_ratio: str = "16:9",
+        max_retries: int = 3,
+        is_summary: bool = False
     ) -> Optional[bytes]:
         """
-        根據英文 prompt 生成圖像
+        使用 Gemini 3 Pro Image Preview 生成圖像（透過 SDK）
         
         Args:
-            prompt: 英文視覺意向指令
+            prompt: 視覺意向指令（含繁體中文）
             stage_num: 階段編號（用於日誌）
+            resolution: 解析度
+            aspect_ratio: 寬高比
+            max_retries: 最大重試次數
+            is_summary: 是否為 Stage 4 總結圖
             
         Returns:
             PNG 圖像的 bytes，失敗時返回 None
         """
-        try:
-            print(f"   🎨 正在渲染 Stage {stage_num} 圖像...")
-            
-            response = self.client.models.generate_images(
-                model=IMAGE_MODEL,
-                prompt=prompt,
-                config=types.GenerateImagesConfig(
-                    number_of_images=1,
-                )
-            )
-            
-            if response.generated_images:
-                image = response.generated_images[0].image
-                print(f"   ✅ Stage {stage_num} 圖像渲染成功！")
-                return image.image_bytes
-            else:
-                print(f"   ⚠️ Stage {stage_num} 圖像渲染無結果")
-                return None
+        print(f"   [Stage {stage_num}] 正在使用 Gemini 3 Pro Image SDK 渲染...")
+        print(f"   [Stage {stage_num}] 🔍 Prompt 長度: {len(prompt)} 字元")
+        print(f"   [Stage {stage_num}]    is_summary: {is_summary}")
+        
+        last_error = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                print(f"   [Stage {stage_num}] 正在發送 SDK 請求... (嘗試 {attempt + 1}/{max_retries + 1})")
                 
-        except Exception as e:
-            print(f"   ❌ 渲染圖像錯誤 (Stage {stage_num}): {e}")
-            return None
+                # 使用 SDK 調用
+                response = self.client.models.generate_content(
+                    model=IMAGE_MODEL,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE"]
+                    )
+                )
+                
+                print(f"   [Stage {stage_num}] 📥 收到 SDK 回應")
+                
+                # 檢查回應
+                if not response.candidates:
+                    print(f"   [Stage {stage_num}] ⚠️ 無 candidates")
+                    last_error = "無 candidates"
+                    continue
+                
+                candidate = response.candidates[0]
+                if not hasattr(candidate, 'content') or not candidate.content:
+                    print(f"   [Stage {stage_num}] ⚠️ 無 content")
+                    last_error = "無 content"
+                    continue
+                
+                if not candidate.content.parts:
+                    print(f"   [Stage {stage_num}] ⚠️ 無 parts")
+                    last_error = "無 parts"
+                    continue
+                
+                print(f"   [Stage {stage_num}]    parts 數量: {len(candidate.content.parts)}")
+                
+                # 提取圖像數據
+                for idx, part in enumerate(candidate.content.parts):
+                    if hasattr(part, 'inline_data') and part.inline_data:
+                        image_data = part.inline_data.data
+                        if image_data:
+                            # SDK 返回的是 bytes，不需要 base64 解碼
+                            print(f"   [Stage {stage_num}] ✅ 圖像渲染成功 ({len(image_data)} bytes)")
+                            return image_data
+                    elif hasattr(part, 'text') and part.text:
+                        text_preview = part.text[:100] if part.text else "(空)"
+                        print(f"   [Stage {stage_num}] ⚠️ 收到文字回應: {text_preview}...")
+                
+                print(f"   [Stage {stage_num}] ❌ 回應中無圖像數據")
+                last_error = "回應中無圖像數據"
+                
+            except Exception as e:
+                last_error = str(e)
+                print(f"   [Stage {stage_num}] ❌ 錯誤類型: {type(e).__name__}")
+                print(f"   [Stage {stage_num}] ❌ 錯誤訊息: {e}")
+                
+                if attempt < max_retries:
+                    # 指數退避 + 隨機抖動
+                    delay = (2 ** attempt) + random.uniform(0, 1)
+                    print(f"   [Stage {stage_num}] 等待 {delay:.1f} 秒後重試...")
+                    time.sleep(delay)
+                else:
+                    print(f"   [Stage {stage_num}] 重試 {max_retries} 次後仍失敗")
+        
+        print(f"   [Stage {stage_num}] 最終失敗: {last_error}")
+        return None
     
     def generate_all_images_with_slides(
         self,
@@ -74,64 +138,88 @@ class ImageGenerator:
         """
         使用 VisualArchitect 生成高質量圖像和簡報內容
         
+        ⚠️ 採用「序列化隊列」模式，避免 API 並行限制：
+        - 每張圖之間加入冷卻時間
+        - 限制並發數為 1（Tier 1 建議）
+        - 指數退避重試機制
+        
         流程：
         1. VisualArchitect 分析數據並生成結構化簡報內容
-        2. 使用簡報中的 image_prompt 呼叫 Imagen
+        2. 序列化使用簡報中的 image_prompt 呼叫 Gemini Image
         3. 返回圖像和簡報數據
-        
-        Args:
-            stage1_data: 一階分析結果
-            stage2_data: 二階分析結果
-            stage3_data: 三階分析結果
-            output_dir: 可選的輸出目錄
-            
-        Returns:
-            {
-                "images": {"stage1": bytes, "stage2": bytes, "stage3": bytes, "combined": bytes},
-                "slides": [SlideContent dict x 4]
-            }
         """
         print("\n" + "=" * 60)
-        print("🎨 開始生成視覺化簡報（VisualArchitect 模式）")
+        print("🎨 開始生成視覺化簡報（序列化隊列模式）")
         print("=" * 60)
         
         # Step 1: VisualArchitect 生成結構化簡報內容
+        print("\n📍[Step 1/2] VisualArchitect 正在分析數據...")
         slides = self.visual_architect.generate_all_slides(
             stage1_data, 
             stage2_data, 
             stage3_data
         )
+        print(f"   ✅ 已生成 {len(slides)} 張簡報結構")
         
-        # Step 2: 使用 slide.image_prompt 生成圖像
-        print("\n📍[ImageGenerator] 開始渲染圖像...")
+        # Step 2: 序列化生成圖像（避免並行限制）
+        print("\n📍[Step 2/2] 開始序列化渲染圖像...")
+        print("   ⚠️ 為避免 API 限流，每張圖之間會有冷卻時間")
+        
         images = {}
         stage_keys = ["stage1", "stage2", "stage3", "combined"]
+        total_slides = len(slides)
         
+        # ============ 序列化隊列：逐張生成 ============
         for i, slide in enumerate(slides):
             key = stage_keys[i]
-            print(f"\n   📋 Slide {i+1}: {slide.slide_title}")
-            print(f"   🎯 Prompt: {slide.image_prompt[:100]}...")
+            is_stage4 = (i == 3)
+            progress = f"[{i+1}/{total_slides}]"
             
+            print(f"\n   {progress} 📋 正在處理：{slide.slide_title}")
+            print(f"   {progress} 🎯 Prompt 長度：{len(slide.image_prompt)} 字元")
+            
+            if is_stage4:
+                print(f"   {progress} 🧠 Stage 4 融合圖 - 較長處理時間")
+            
+            # 生成圖像
             image_bytes = self.generate_image_from_prompt(
                 slide.image_prompt, 
-                slide.stage_id
+                slide.stage_id,
+                is_summary=is_stage4
             )
             images[key] = image_bytes
             
-            # 儲存圖像（如果指定目錄）
-            if output_dir and image_bytes:
-                output_path = output_dir / f"{key}_visualization.png"
-                with open(output_path, "wb") as f:
-                    f.write(image_bytes)
-                print(f"   💾 已儲存：{output_path}")
+            if image_bytes:
+                print(f"   {progress} ✅ 生成成功！({len(image_bytes)} bytes)")
+                
+                # 儲存圖像
+                if output_dir:
+                    output_path = output_dir / f"{key}_visualization.png"
+                    with open(output_path, "wb") as f:
+                        f.write(image_bytes)
+                    print(f"   {progress} 💾 已儲存：{output_path.name}")
+            else:
+                print(f"   {progress} ❌ 生成失敗")
+            
+            # ============ 冷卻時間：避免 API 限流 ============
+            # Tier 1 限制很嚴格，每次請求後等待一段時間
+            if i < total_slides - 1:  # 最後一張不需要等
+                cooldown = 3 + random.uniform(0, 2)  # 3-5 秒冷卻
+                print(f"   {progress} ⏳ 冷卻中... ({cooldown:.1f}s)")
+                time.sleep(cooldown)
+        
+        slides_dict = [slide.to_dict() for slide in slides]
+        
+        # 統計結果
+        success_count = sum(1 for v in images.values() if v is not None)
         
         print("\n" + "=" * 60)
-        print("✅ 視覺化簡報生成完成！")
+        print(f"✅ 視覺化簡報生成完成！成功：{success_count}/{total_slides}")
         print("=" * 60 + "\n")
         
         return {
             "images": images,
-            "slides": [slide.to_dict() for slide in slides]
+            "slides": slides_dict
         }
     
     def generate_all_images(

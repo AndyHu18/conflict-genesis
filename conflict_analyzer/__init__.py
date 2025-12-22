@@ -1,5 +1,5 @@
-"""
-衝突基因 - 極致中立的衝突演化追蹤器
+﻿"""
+Lumina 心語 - 極致中立的衝突演化追蹤器
 四階段完整分析：
   一階：衝突演化追蹤
   二階：深層溯源與接納橋樑
@@ -49,6 +49,7 @@ from .prompts import (
 )
 from .healing_audio import HealingAudioGenerator, generate_healing_audio_from_analysis
 from .image_generator import ImageGenerator
+from .slide_composer import SlideComposer, compose_slide_cards
 from .audio_mixer import AudioMixer, mix_audio
 
 __all__ = [
@@ -93,8 +94,10 @@ __all__ = [
     "HealingAudioGenerator",
     "generate_healing_audio_from_analysis",
     "ImageGenerator",
+    "SlideComposer",
+    "compose_slide_cards",
     # 錯誤
     "AnalysisError"
 ]
 
-__version__ = "4.0.0"
+__version__ = "4.1.0"  # 新增圖文合成功能

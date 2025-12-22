@@ -1,5 +1,5 @@
 """
-衝突基因 - BGM 資源管理器
+Lumina 心語 - BGM 資源管理器
 自動下載免費的背景音樂素材
 
 支援來源：
@@ -141,7 +141,7 @@ class BGMResourceManager:
 4. 添加淡入淡出效果
 
 ---
-衝突基因 v4.1.0
+Lumina 心語 v4.1.0
 """
             with open(readme_path, "w", encoding="utf-8") as f:
                 f.write(content)
@@ -156,19 +156,40 @@ class BGMResourceManager:
         下載免費的示範 BGM
         
         使用公開可用的免費音樂 URL 下載療癒風格的背景音樂
+        支援多個備用來源，確保至少一個可用
         
         Returns:
             是否成功下載至少一個文件
         """
-        # 公開可用的免費音樂 URL（需確保持續可用）
-        # 這些是免費、無版權的音頻來源
+        # 公開可用的免費音樂 URL（多個備用來源）
+        # 使用 Internet Archive 和其他公開域音樂
         sample_urls = [
             {
                 "name": "healing_ambient.mp3",
-                # Internet Archive 上的公開域音樂
-                "url": "https://archive.org/download/relaxing-piano-music/Relaxing%20Piano%20Music.mp3",
-                "fallback": None
+                "urls": [
+                    # Internet Archive - Public Domain Music
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/01_Peaceful_Forest.mp3",
+                    "https://archive.org/download/relaxing-sleep-music-219/relaxing-sleep-music-219.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3",
+                ],
+                "mood": ["calm", "healing", "default"]
             },
+            {
+                "name": "calm_piano.mp3",
+                "urls": [
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/02_Sunset_Dreams.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-thejazzpiano.mp3",
+                ],
+                "mood": ["sad", "ambient", "vulnerability"]
+            },
+            {
+                "name": "meditation_432hz.mp3",
+                "urls": [
+                    "https://ia800500.us.archive.org/4/items/MeditationMusic_936/03_Deep_Relaxation.mp3",
+                    "https://www.bensound.com/bensound-music/bensound-dreams.mp3",
+                ],
+                "mood": ["soothing", "fear", "anxiety"]
+            }
         ]
         
         print("\n" + "=" * 50)
@@ -185,31 +206,56 @@ class BGMResourceManager:
                 downloaded += 1
                 continue
             
-            try:
-                print(f"   ⏬ 下載中: {item['name']}...")
-                
-                # 嘗試下載
-                resp = requests.get(
-                    item["url"],
-                    timeout=60,
-                    headers={"User-Agent": "ConflictGenesis/4.1"}
-                )
-                
-                if resp.status_code == 200 and len(resp.content) > 10000:
-                    with open(file_path, "wb") as f:
-                        f.write(resp.content)
-                    print(f"   ✅ 下載成功: {item['name']} ({len(resp.content)//1024} KB)")
-                    downloaded += 1
-                else:
-                    print(f"   ⚠️ 下載失敗: HTTP {resp.status_code}")
+            # 嘗試多個 URL
+            success = False
+            for url in item["urls"]:
+                try:
+                    print(f"   ⏬ 嘗試下載: {item['name']}...")
+                    print(f"      來源: {url[:50]}...")
                     
-            except Exception as e:
-                print(f"   ❌ 下載錯誤: {e}")
+                    resp = requests.get(
+                        url,
+                        timeout=120,
+                        headers={
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                        },
+                        stream=True
+                    )
+                    
+                    if resp.status_code == 200:
+                        # 流式下載以支援大文件
+                        total_size = 0
+                        with open(file_path, "wb") as f:
+                            for chunk in resp.iter_content(chunk_size=8192):
+                                if chunk:
+                                    f.write(chunk)
+                                    total_size += len(chunk)
+                        
+                        if total_size > 10000:  # 至少 10KB
+                            print(f"   ✅ 下載成功: {item['name']} ({total_size//1024} KB)")
+                            downloaded += 1
+                            success = True
+                            break
+                        else:
+                            print(f"   ⚠️ 文件太小，嘗試下一個來源...")
+                            file_path.unlink(missing_ok=True)
+                    else:
+                        print(f"   ⚠️ HTTP {resp.status_code}，嘗試下一個來源...")
+                        
+                except requests.exceptions.Timeout:
+                    print(f"   ⚠️ 下載超時，嘗試下一個來源...")
+                except Exception as e:
+                    print(f"   ⚠️ 下載錯誤: {e}")
+            
+            if not success:
+                print(f"   ❌ 無法下載: {item['name']}（所有來源都失敗）")
         
         # 如果沒有成功下載任何文件，生成靜音備用
         if downloaded == 0:
             print("\n📍 無法從網路下載，嘗試生成本地備用音軌...")
-            self._generate_ambient_bgm()
+            generated = self._generate_ambient_bgm()
+            if generated:
+                downloaded = 1
         
         print("=" * 50)
         print(f"✅ BGM 準備完成！可用數量: {downloaded}")

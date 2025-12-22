@@ -1,5 +1,5 @@
 """
-衝突基因 - Lyria 音樂生成模組
+Lumina 心語 - Lyria 音樂生成模組
 使用 Google Lyria RealTime API 生成療癒背景音樂
 
 核心功能：
@@ -198,8 +198,31 @@ class LyriaMusicGenerator:
             return wav_data
             
         except Exception as e:
-            print(f"❌ Lyria 生成失敗: {e}")
-            print("   將使用備用方案...")
+            error_msg = str(e)
+            error_type = type(e).__name__
+            
+            print(f"\n❌ Lyria 生成失敗!")
+            print(f"   錯誤類型: {error_type}")
+            print(f"   錯誤訊息: {error_msg}")
+            
+            # 診斷常見錯誤
+            if "403" in error_msg or "PERMISSION_DENIED" in error_msg:
+                print("   📍 診斷: API 權限不足")
+                print("      建議: 確認 GEMINI_API_KEY 有 Lyria 音樂生成權限")
+            elif "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                print("   📍 診斷: API 配額超出")
+                print("      建議: 等待配額重置或升級方案")
+            elif "UNAVAILABLE" in error_msg or "INTERNAL" in error_msg:
+                print("   📍 診斷: Lyria 服務暫時不可用")
+                print("      建議: 稍後重試")
+            elif "models/lyria" in error_msg:
+                print("   📍 診斷: Lyria 模型可能需要特殊權限")
+                print("      建議: 確認 API Key 已啟用 Lyria 音樂功能")
+            else:
+                print("   📍 診斷: 未知錯誤")
+                print("      建議: 檢查網路連線和 API Key 有效性")
+            
+            print("   將使用備用方案（本地 BGM 或純語音）...")
             raise
     
     def generate_bgm_sync(

@@ -1,5 +1,5 @@
 """
-衝突基因 - 療育音頻生成模組 v2.0
+Lumina 心語 - 療育音頻生成模組 v2.0
 實作「分段生成與自動串接」邏輯，解決 TTS API 輸出長度限制
 
 核心功能：
@@ -138,67 +138,112 @@ class HealingAudioGenerator:
         self,
         text: str,
         voice: str = "warm_female",
-        part_name: str = ""
+        part_name: str = "",
+        max_retries: int = 3  # 新增：最大重試次數
     ) -> bytes:
         """
-        將單一片段文字轉換為語音
+        將單一片段文字轉換為語音（帶指數退避重試機制）
         
         Args:
             text: 要轉換的文字（應控制在 200 字以內）
             voice: 聲音選項
             part_name: 片段名稱（用於日誌）
+            max_retries: 最大重試次數（預設 3 次）
             
         Returns:
             WAV 音頻的 bytes
         """
+        import time
+        import random
+        
         voice_name = VOICE_OPTIONS.get(voice, "Kore")
         
-        print(f"   🎙️ 正在生成 {part_name}... ({len(text)} 字)")
+        # ============ 除錯：顯示請求資訊 ============
+        print(f"   [TTS] 🔍 除錯資訊:")
+        print(f"   [TTS]    片段: {part_name}")
+        print(f"   [TTS]    文字長度: {len(text)} 字")
+        print(f"   [TTS]    聲音: {voice_name}")
+        print(f"   [TTS]    模型: {TTS_MODEL}")
         
-        try:
-            response = self.client.models.generate_content(
-                model=TTS_MODEL,
-                contents=f"用溫柔、舒緩、療癒的語調緩慢朗讀以下文字。每個「...」處自然停頓。語速放慢，讓聽眾能感受到被包裹的安全感：\n\n{text}",
-                config=types.GenerateContentConfig(
-                    response_modalities=["AUDIO"],
-                    speech_config=types.SpeechConfig(
-                        voice_config=types.VoiceConfig(
-                            prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                voice_name=voice_name,
-                            )
+        last_error = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                print(f"   [TTS] 正在發送 TTS 請求... (嘗試 {attempt + 1}/{max_retries + 1})")
+                
+                # ============ 關鍵修正 ============
+                # TTS 模型只接受純文字，不能包含任何指令！
+                # 錯誤：contents="用溫柔的語調朗讀：{text}" ❌
+                # 正確：contents=text ✅
+                response = self.client.models.generate_content(
+                    model=TTS_MODEL,
+                    contents=text,  # 只傳純文字，不加任何指令
+                    config=types.GenerateContentConfig(
+                        response_modalities=["AUDIO"],
+                        speech_config=types.SpeechConfig(
+                            voice_config=types.VoiceConfig(
+                                prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                                    voice_name=voice_name,
+                                )
+                            ),
                         ),
-                    ),
+                    )
                 )
-            )
-            
-            # 安全獲取 PCM 數據
-            if not response.candidates:
-                raise ValueError("TTS 回應沒有 candidates")
-            
-            candidate = response.candidates[0]
-            if not hasattr(candidate, 'content') or not candidate.content:
-                raise ValueError("TTS 回應沒有 content")
-            
-            if not candidate.content.parts:
-                raise ValueError("TTS 回應沒有 parts")
-            
-            part = candidate.content.parts[0]
-            if not hasattr(part, 'inline_data') or not part.inline_data:
-                raise ValueError("TTS 回應沒有 inline_data")
-            
-            pcm_data = part.inline_data.data
-            if not pcm_data:
-                raise ValueError("TTS 回應的音頻數據為空")
-            
-            # 轉換為 WAV
-            wav_data = self._pcm_to_wav(pcm_data)
-            
-            print(f"   ✅ {part_name} 生成完成 ({len(wav_data)} bytes)")
-            return wav_data
-            
-        except Exception as e:
-            print(f"   ❌ {part_name} 生成錯誤: {e}")
-            raise
+                
+                print(f"   [TTS] 📥 收到回應")
+                
+                # 安全獲取 PCM 數據
+                if not response.candidates:
+                    raise ValueError("TTS 回應沒有 candidates")
+                
+                print(f"   [TTS]    候選者數量: {len(response.candidates)}")
+                
+                candidate = response.candidates[0]
+                if not hasattr(candidate, 'content') or not candidate.content:
+                    raise ValueError("TTS 回應沒有 content")
+                
+                if not candidate.content.parts:
+                    raise ValueError("TTS 回應沒有 parts")
+                
+                print(f"   [TTS]    parts 數量: {len(candidate.content.parts)}")
+                
+                part = candidate.content.parts[0]
+                if not hasattr(part, 'inline_data') or not part.inline_data:
+                    # 檢查是否有文字回應（錯誤情況）
+                    if hasattr(part, 'text') and part.text:
+                        print(f"   [TTS] ⚠️ 收到文字回應而非音頻: {part.text[:100]}...")
+                    raise ValueError("TTS 回應沒有 inline_data")
+                
+                pcm_data = part.inline_data.data
+                if not pcm_data:
+                    raise ValueError("TTS 回應的音頻數據為空")
+                
+                # 轉換為 WAV
+                wav_data = self._pcm_to_wav(pcm_data)
+                
+                print(f"   [TTS] ✅ {part_name} 生成完成 ({len(wav_data)} bytes)")
+                return wav_data
+                
+            except Exception as e:
+                last_error = e
+                
+                print(f"   [TTS] ❌ 錯誤類型: {type(e).__name__}")
+                print(f"   [TTS] ❌ 錯誤訊息: {e}")
+                
+                if attempt < max_retries:
+                    # 指數退避 + 隨機抖動
+                    base_delay = 2 ** attempt  # 1, 2, 4 秒
+                    jitter = random.uniform(0, 0.5)  # 0-0.5 秒隨機抖動
+                    delay = base_delay + jitter
+                    
+                    print(f"   [TTS] {part_name} 第 {attempt + 1} 次失敗")
+                    print(f"   [TTS] 等待 {delay:.1f} 秒後重試...")
+                    time.sleep(delay)
+                else:
+                    print(f"   [TTS] {part_name} 重試 {max_retries} 次後仍失敗")
+        
+        # 所有重試都失敗後才拋出異常
+        raise last_error
     
     def _pcm_to_wav(
         self, 
@@ -314,7 +359,7 @@ class HealingAudioGenerator:
         self, 
         voice_audio: bytes,
         stage2_result: Dict[str, Any]
-    ) -> bytes:
+    ) -> Tuple[bytes, Dict[str, Any]]:
         """
         將語音與背景音樂混合
         
@@ -323,8 +368,21 @@ class HealingAudioGenerator:
             stage2_result: 二階分析結果（用於提取情緒）
             
         Returns:
-            混合後的音頻 bytes（如果無 BGM 則返回原語音）
+            Tuple of:
+            - 混合後的音頻 bytes（如果無 BGM 則返回原語音）
+            - BGM 狀態字典 {"success": bool, "method": str, "error": str|None}
         """
+        print("\n" + "=" * 50)
+        print("🎵 開始 BGM 混音流程")
+        print("=" * 50)
+        
+        bgm_status = {
+            "success": False,
+            "method": "none",
+            "error": None,
+            "voice_only": True
+        }
+        
         try:
             from conflict_analyzer.audio_mixer import AudioMixer
             
@@ -347,6 +405,7 @@ class HealingAudioGenerator:
                         emotion = "vulnerability"
             
             print(f"📍[BGM Mixing] 情緒標籤: {emotion}")
+            print(f"📍[BGM Mixing] 語音大小: {len(voice_audio)} bytes")
             
             # 初始化混音器（不需要自動下載，因為會使用 Lyria）
             mixer = AudioMixer(auto_download=False)
@@ -361,14 +420,56 @@ class HealingAudioGenerator:
                 voice_format="wav"
             )
             
-            return mixed_audio
+            # 檢查混音是否真的成功（比較大小）
+            if len(mixed_audio) > len(voice_audio) * 1.1:  # 混入 BGM 後應該更大
+                bgm_status = {
+                    "success": True,
+                    "method": "lyria",
+                    "error": None,
+                    "voice_only": False
+                }
+                print(f"✅ [BGM Mixing] 混音完成！輸出大小: {len(mixed_audio)} bytes")
+            else:
+                bgm_status = {
+                    "success": False,
+                    "method": "fallback",
+                    "error": "混音輸出大小異常，可能使用純語音",
+                    "voice_only": True
+                }
+                print(f"⚠️ [BGM Mixing] 混音可能未成功（輸出大小: {len(mixed_audio)} vs 原始: {len(voice_audio)}）")
+            
+            return mixed_audio, bgm_status
             
         except ImportError as e:
-            print(f"⚠️ AudioMixer 不可用: {e}，返回純語音")
-            return voice_audio
+            error_msg = f"AudioMixer 模組載入失敗: {e}"
+            print(f"⚠️ {error_msg}")
+            print("   這可能是因為 pydub 未安裝")
+            print("   返回純語音（無背景音樂）")
+            bgm_status = {
+                "success": False,
+                "method": "none",
+                "error": error_msg,
+                "voice_only": True
+            }
+            return voice_audio, bgm_status
         except Exception as e:
-            print(f"⚠️ BGM 混音失敗: {e}，返回純語音")
-            return voice_audio
+            error_msg = f"{type(e).__name__}: {e}"
+            print(f"\n🚨 [BGM Mixing] 混音過程失敗!")
+            print(f"   錯誤類型: {type(e).__name__}")
+            print(f"   錯誤訊息: {e}")
+            print("   📍 診斷建議：")
+            print("      1. 查看上方的 Lyria API 錯誤訊息")
+            print("      2. 確認 GEMINI_API_KEY 有 Lyria 音樂生成權限")
+            print("      3. 檢查 assets/bgm/ 資料夾是否有 MP3/WAV 檔案")
+            print("      4. 檢查網路連線是否正常")
+            print("   返回純語音（無背景音樂）")
+            bgm_status = {
+                "success": False,
+                "method": "none",
+                "error": error_msg,
+                "voice_only": True
+            }
+            return voice_audio, bgm_status
     
     def generate_healing_audio(
         self,
@@ -413,7 +514,7 @@ class HealingAudioGenerator:
         
         # 1. 生成文稿
         if progress_callback:
-            progress_callback(1, 4, "正在生成療育文稿...")
+            progress_callback(1, 6, "正在生成療育文稿...")
         
         script = self.generate_healing_script(
             stage1_result,
@@ -424,27 +525,48 @@ class HealingAudioGenerator:
         
         # 2. 拆分文稿
         if progress_callback:
-            progress_callback(2, 4, "正在拆分文稿片段...")
+            progress_callback(2, 6, "正在拆分文稿片段...")
         
         parts = split_script_by_parts(script)
+        total_parts = len(parts)
         
-        # 3. 順序生成每個片段的音頻
-        if progress_callback:
-            progress_callback(3, 5, f"正在生成 {len(parts)} 個音頻片段...")
+        # 3. 順序生成每個片段的音頻（帶斷點續傳和狀態追蹤）
+        print(f"\n[Sequential TTS] 開始順序生成 {total_parts} 個音頻片段（含自動重試）...")
         
-        print(f"\n📍[Sequential TTS] 開始順序生成 {len(parts)} 個音頻片段...")
         audio_clips = []
+        failed_parts = []
+        successful_parts = []
         
         for i, (part_name, content) in enumerate(parts, 1):
+            # 更新進度（每個片段獨立追蹤）
+            if progress_callback:
+                progress_callback(
+                    2 + i, 
+                    2 + total_parts + 2,  # 文稿 + 拆分 + 每個片段 + 縫合 + 混音
+                    f"正在生成音頻片段 {i}/{total_parts}..."
+                )
+            
             try:
                 audio_data = self.text_to_speech_single(content, voice, part_name)
                 audio_clips.append(audio_data)
+                successful_parts.append(part_name)
+                print(f"   [進度] 已完成 {len(successful_parts)}/{total_parts} 個片段")
             except Exception as e:
-                print(f"   ⚠️ {part_name} 生成失敗，跳過: {e}")
+                failed_parts.append({"part": part_name, "error": str(e)})
+                print(f"   [跳過] {part_name} 最終生成失敗: {e}")
+                # 繼續處理下一個片段（斷點續傳原則）
                 continue
         
+        # 統計結果
+        success_rate = len(successful_parts) / total_parts * 100 if total_parts > 0 else 0
+        print(f"\n[TTS 統計] 成功: {len(successful_parts)}/{total_parts} ({success_rate:.0f}%)")
+        
+        if failed_parts:
+            print(f"[TTS 統計] 失敗片段: {[p['part'] for p in failed_parts]}")
+        
+        # 局部可用性：即使部分失敗也返回已完成的部分
         if not audio_clips:
-            raise Exception("所有音頻片段生成失敗")
+            raise Exception("所有音頻片段生成失敗，無法產生任何音頻")
         
         # 4. 縫合音頻
         if progress_callback:
@@ -456,7 +578,7 @@ class HealingAudioGenerator:
         if progress_callback:
             progress_callback(5, 5, "正在融合療癒氛圍音樂...")
         
-        final_audio = self._apply_bgm_mixing(stitched_audio, stage2_result)
+        final_audio, bgm_status = self._apply_bgm_mixing(stitched_audio, stage2_result)
         
         # 儲存（如果指定了目錄）
         if output_dir:
@@ -465,12 +587,20 @@ class HealingAudioGenerator:
             output_path = output_dir / "healing_audio.wav"
             with open(output_path, "wb") as f:
                 f.write(final_audio)
-            print(f"💾 已儲存: {output_path}")
+            print(f"[儲存] 已儲存: {output_path}")
+        
+        # 計算完成度
+        is_complete = len(failed_parts) == 0
+        completion_rate = len(successful_parts) / total_parts * 100 if total_parts > 0 else 0
         
         print("\n" + "=" * 50)
-        print("✅ 療育音頻生成完成！")
-        print(f"   - 片段數量: {len(audio_clips)}")
+        if is_complete:
+            print("[完成] 療育音頻生成完成（100%）")
+        else:
+            print(f"[部分完成] 療育音頻生成 {completion_rate:.0f}%（{len(failed_parts)} 個片段失敗）")
+        print(f"   - 成功片段: {len(successful_parts)}/{total_parts}")
         print(f"   - 總長度: {len(final_audio)} bytes")
+        print(f"   - BGM 狀態: {bgm_status.get('method', 'unknown')}")
         print("=" * 50 + "\n")
         
         return {
@@ -478,7 +608,12 @@ class HealingAudioGenerator:
             "audio_base64": base64.b64encode(final_audio).decode("utf-8"),
             "duration_estimate": len(script) * 0.12,  # 估算時長（秒）
             "voice": voice,
-            "parts_count": len(audio_clips)
+            "parts_count": len(successful_parts),
+            "total_parts": total_parts,
+            "failed_parts": failed_parts,  # 新增：失敗片段詳情
+            "is_complete": is_complete,     # 新增：是否完整
+            "completion_rate": completion_rate,  # 新增：完成率
+            "bgm_status": bgm_status
         }
 
 
