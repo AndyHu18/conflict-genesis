@@ -368,8 +368,8 @@ def generate_pdf_report(
     pdf.ln(35)
     
     # 報告資訊區塊 - 使用固定 Y 位置避免重疊
-    info_y = 165  # 固定位置，確保不會與其他元素重疊
-    info_height = 80  # 區塊高度
+    info_y = 165  # 調整位置
+    info_height = 85  # 調整高度
     
     pdf.set_fill_color(30, 30, 30)  # 深色背景
     pdf.rect(30, info_y, pdf.w - 60, info_height, 'F')
@@ -379,37 +379,50 @@ def generate_pdf_report(
     pdf.set_line_width(0.5)
     pdf.rect(30, info_y, pdf.w - 60, info_height, 'D')
     
-    pdf.set_y(info_y + 10)
+    pdf.set_y(info_y + 8)
     pdf.set_font(pdf.font_name, 'B' if pdf.font_name == "Helvetica" else '', 11)
     pdf.set_text_color(*DesignSystem.PRIMARY_GOLD)
-    pdf.cell(0, 8, pdf.safe_text("報告資訊"), 0, 1, 'C')
+    pdf.cell(0, 6, pdf.safe_text("報告資訊"), 0, 1, 'C')
     
-    pdf.ln(4)
     pdf.set_font(pdf.font_name, '', 10)
     pdf.set_text_color(*DesignSystem.TEXT_LIGHT)
     
     now = datetime.now()
-    pdf.cell(0, 7, pdf.safe_text(f"報告編號：{report_id}"), 0, 1, 'C')
-    pdf.cell(0, 7, pdf.safe_text(f"分析日期：{now.strftime('%Y年%m月%d日')}"), 0, 1, 'C')
-    pdf.cell(0, 7, pdf.safe_text(f"生成時間：{now.strftime('%H:%M:%S')}"), 0, 1, 'C')
+    pdf.cell(0, 5, pdf.safe_text(f"報告編號：{report_id[:8]}..."), 0, 1, 'C')
+    pdf.cell(0, 5, pdf.safe_text(f"分析日期：{now.strftime('%Y年%m月%d日')} {now.strftime('%H:%M')}"), 0, 1, 'C')
     
-    # 分析統計摘要 - 在資訊區塊內
-    pdf.ln(2)
-    pdf.set_font(pdf.font_name, '', 9)
+    # 從 stage1 提取事件簡介
+    stage1 = report_data.get('stage1', {})
+    stage2 = report_data.get('stage2', {})
+    stage3 = report_data.get('stage3', {})
+    
+    event_summary = stage1.get('overall_dynamic', '')
+    if event_summary:
+        # 截取前 35 個字作為事件簡介（縮短以確保不超出）
+        short_summary = event_summary[:35] + ('...' if len(event_summary) > 35 else '')
+        pdf.ln(3)
+        pdf.set_font(pdf.font_name, '', 8)
+        pdf.set_text_color(*DesignSystem.SECONDARY_GOLD)
+        pdf.cell(0, 4, pdf.safe_text("— 事件簡介 —"), 0, 1, 'C')
+        pdf.set_text_color(*DesignSystem.TEXT_LIGHT)
+        pdf.set_font(pdf.font_name, '', 9)
+        # 使用 cell 而非 multi_cell 避免換行問題
+        pdf.cell(0, 5, pdf.safe_text(short_summary), 0, 1, 'C')
+    
+    # 分析統計摘要 - 固定在區塊底部
+    pdf.set_y(info_y + info_height - 12)  # 固定在邊框底部內側
+    pdf.set_font(pdf.font_name, '', 7)
     pdf.set_text_color(*DesignSystem.TEXT_MUTED)
-    stage_count = sum(1 for k in ['stage1', 'stage2', 'stage3'] if report_data.get(k))
-    pdf.cell(0, 5, pdf.safe_text(f"四階段深度分析"), 0, 1, 'C')
-    pdf.cell(0, 5, pdf.safe_text(f"衝突演化 • 深層溯源 • 成長方案 • 數位療癒"), 0, 1, 'C')
+    pdf.cell(0, 4, pdf.safe_text("衝突演化 • 深層溯源 • 成長方案 • 數位療癒"), 0, 1, 'C')
     
     # 涵蓋統計 - 在區塊下方
-    pdf.set_y(info_y + info_height + 10)
+    stage_count = sum(1 for k in ['stage1', 'stage2', 'stage3'] if report_data.get(k))
+    pdf.set_y(info_y + info_height + 8)
     pdf.set_font(pdf.font_name, '', 9)
     pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 5, pdf.safe_text(f"涵蓋 {stage_count} 個深度分析階段 + 數位催眠療癒"), 0, 1, 'C')
     
-    stage1 = report_data.get('stage1', {})
-    stage2 = report_data.get('stage2', {})
-    stage3 = report_data.get('stage3', {})
+    # stage1/stage2/stage3 已在上方定義
     
     # ========== 第一階段：衝突演化追蹤 ==========
     pdf.add_page()

@@ -40,6 +40,54 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def extract_event_topic(report_data: dict) -> str:
+    """
+    從分析結果中提取事件主題，用於 PDF 檔名和簡介
+    
+    提取優先順序：
+    1. stage1.overall_dynamic 的前 15 個字
+    2. stage1.energy_pattern 的前 15 個字
+    3. stage2.deep_insight_summary 的前 15 個字
+    4. 預設返回 None
+    """
+    import re
+    
+    stage1 = report_data.get('stage1', {})
+    stage2 = report_data.get('stage2', {})
+    
+    # 嘗試從不同欄位提取主題
+    candidates = [
+        stage1.get('overall_dynamic'),
+        stage1.get('energy_pattern'),
+        stage2.get('deep_insight_summary'),
+    ]
+    
+    for text in candidates:
+        if text and isinstance(text, str) and len(text) > 3:
+            # 清理並截取前 15 個字
+            cleaned = re.sub(r'[^\w\u4e00-\u9fff]', '', text)[:15]
+            if len(cleaned) >= 2:
+                return cleaned
+    
+    return None
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    清理檔名中的非法字符，保留中文
+    """
+    import re
+    if not filename:
+        return "衝突分析"
+    
+    # 移除或替換非法字符
+    sanitized = re.sub(r'[<>:"/\\|?*]', '', filename)
+    sanitized = re.sub(r'\s+', '_', sanitized)
+    sanitized = sanitized[:30]  # 限制長度
+    
+    return sanitized if sanitized else "衝突分析"
+
+
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -310,19 +358,21 @@ HTML_TEMPLATE = '''
         }
         .audio-progress {
             flex: 1;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
+            height: 60px;  /* 增加高度以容納聲波可視化 */
+            background: linear-gradient(180deg, rgba(13, 13, 13, 0.9), rgba(26, 26, 26, 0.8));
+            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             position: relative;
+            border: 1px solid rgba(201, 169, 98, 0.2);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         .audio-progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.3), rgba(244, 208, 63, 0.4));
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.15), rgba(244, 208, 63, 0.25));
             transition: width 0.1s linear;
-            border-radius: 6px;
+            border-radius: 12px;
             position: absolute;
             top: 0;
             left: 0;
@@ -338,6 +388,40 @@ HTML_TEMPLATE = '''
         }
         .audio-time span:first-child {
             color: #D4AF37;
+        }
+        /* 控制按鈕組 */
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .audio-ctrl-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(201, 169, 98, 0.4);
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.9), rgba(13, 13, 13, 0.9));
+            color: #D4AF37;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .audio-ctrl-btn:hover {
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.2), rgba(139, 115, 85, 0.2));
+            border-color: #D4AF37;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(201, 169, 98, 0.3);
+        }
+        .audio-ctrl-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .audio-ctrl-btn svg {
+            width: 18px;
+            height: 18px;
         }
         .prompt-textarea { width: 100%; min-height: 200px; padding: 15px; background: #0d0d15; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-secondary); font-family: monospace; font-size: 0.8rem; resize: vertical; }
         .prompt-textarea:focus { outline: none; border-color: var(--accent-primary); }
@@ -1797,13 +1881,13 @@ HTML_TEMPLATE = '''
             <div class="healing-player-icon" style="animation: pulse-glow 2s ease-in-out infinite;"></div>
             <div class="healing-player-info">
                 <div class="healing-player-title">🎵 開始您的專屬療癒引導</div>
-                <div class="healing-player-subtitle">閉上眼睛，讓艾瑞克森式催眠帶您進入深度放鬆</div>
+                <div class="healing-player-subtitle" id="playerSubtitle">閉上眼睛，讓艾瑞克森式催眠帶您進入深度放鬆</div>
                 <!-- 進度條和時間 -->
                 <div class="audio-progress-wrapper">
                     <div class="audio-progress" onclick="seekAudio(event)">
                         <div class="audio-progress-bar" id="audioProgressBar"></div>
                         <!-- 嵌入式波形視覺化 -->
-                        <canvas id="audioVisualizer" width="300" height="30" style="display:none;"></canvas>
+                        <canvas id="audioVisualizer" width="300" height="60" style="display:none;"></canvas>
                     </div>
                     <div class="audio-time">
                         <span id="audioCurrentTime">0:00</span>
@@ -1812,7 +1896,20 @@ HTML_TEMPLATE = '''
                     </div>
                 </div>
             </div>
-            <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()"></button>
+            <!-- 控制按鈕組 -->
+            <div class="audio-controls">
+                <button class="audio-ctrl-btn" id="prevBtn" onclick="prevTrack()" title="上一段">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                    </svg>
+                </button>
+                <button class="healing-play-btn" id="healingPlayBtn" onclick="toggleHealingAudio()"></button>
+                <button class="audio-ctrl-btn" id="nextBtn" onclick="nextTrack()" title="下一段">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         <audio id="healingAudio" style="display:none;"></audio>
     </div>
@@ -1844,19 +1941,36 @@ HTML_TEMPLATE = '''
         .healing-player.ready {
             animation: ready-flash 1s ease-in-out 3;
         }
-        /* 音頻波形可視化 - 嵌入進度條內部 */
+        /* 音頻波形可視化 - 嵌入進度條內部，更大更鮮豔 */
         #audioVisualizer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 6px;
+            border-radius: 12px;
             background: transparent;
             pointer-events: none;
+            z-index: 2;
         }
         .healing-player.playing #audioVisualizer {
             display: block !important;
+        }
+        /* 静止狀態的裝飾波紋 */
+        .audio-progress::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.3), transparent);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        /* 播放時隱藏裝飾線 */
+        .healing-player.playing .audio-progress::before {
+            display: none;
         }
     </style>
 
@@ -2111,12 +2225,33 @@ HTML_TEMPLATE = '''
         const fileInput = document.getElementById('audioFile');
         const analyzeBtn = document.getElementById('analyzeBtn');
         
-        uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-        uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
-        uploadZone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', e => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
-        function handleFile(file) { selectedFile = file; document.getElementById('fileName').textContent = file.name; document.getElementById('fileSize').textContent = `(${(file.size / 1048576).toFixed(1)} MB)`; document.getElementById('fileInfo').classList.add('show'); analyzeBtn.disabled = false; }
+        console.log('📍 上傳區域初始化:', { uploadZone: !!uploadZone, fileInput: !!fileInput, analyzeBtn: !!analyzeBtn });
+        
+        if (uploadZone && fileInput) {
+            uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+            uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
+            uploadZone.addEventListener('click', (e) => { 
+                console.log('📍 上傳區域點擊'); 
+                e.stopPropagation();
+                fileInput.click(); 
+            });
+            fileInput.addEventListener('change', e => { 
+                console.log('📍 檔案選擇變更:', e.target.files);
+                if (e.target.files.length > 0) handleFile(e.target.files[0]); 
+            });
+        } else {
+            console.error('❌ 上傳區域元素未找到');
+        }
+        
+        function handleFile(file) { 
+            console.log('📍 處理檔案:', file.name);
+            selectedFile = file; 
+            document.getElementById('fileName').textContent = file.name; 
+            document.getElementById('fileSize').textContent = `(${(file.size / 1048576).toFixed(1)} MB)`; 
+            document.getElementById('fileInfo').classList.add('show'); 
+            if (analyzeBtn) analyzeBtn.disabled = false; 
+        }
 
         let progressInterval;
         let waterFillInterval = null;
@@ -2346,8 +2481,8 @@ HTML_TEMPLATE = '''
             }
 
             const toast = document.createElement('div');
-            const bgColor = type === 'audio' ? '#C9A962' : (type === 'image' ? '#B87351' : '#6366F1'); // Gold for audio, Terra for image
-            const icon = type === 'audio' ? '🎵' : (type === 'image' ? '🎨' : 'ℹ️');
+            const bgColor = type === 'audio' ? '#C9A962' : (type === 'image' ? '#B87351' : (type === 'pdf' ? '#22C55E' : '#6366F1')); // Gold for audio, Terra for image, Green for PDF
+            const icon = type === 'audio' ? '🎵' : (type === 'image' ? '🎨' : (type === 'pdf' ? '📄' : 'ℹ️'));
             
             toast.style.cssText = `
                 background: rgba(255, 255, 255, 0.95);
@@ -2371,7 +2506,7 @@ HTML_TEMPLATE = '''
             toast.innerHTML = `
                 <div style="font-size: 1.4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${icon}</div>
                 <div style="display: flex; flex-direction: column;">
-                    <span style="color: #333; font-weight: 600; font-size: 0.95rem;">${type === 'audio' ? '音頻播放' : (type === 'image' ? '圖像生成' : '系統通知')}</span>
+                    <span style="color: #333; font-weight: 600; font-size: 0.95rem;">${type === 'audio' ? '音頻播放' : (type === 'image' ? '圖像生成' : (type === 'pdf' ? 'PDF 報告' : '系統通知'))}</span>
                     <span style="color: #666; font-size: 0.85rem; margin-top: 2px;">${message}</span>
                 </div>
             `;
@@ -2596,7 +2731,8 @@ HTML_TEMPLATE = '''
         
         // 下載 PDF 報告
         function downloadPDF() { 
-            if (!currentReportId) { alert('請先完成分析'); return; } 
+            if (!currentReportId) { alert('請先完成分析'); return; }
+            showToast('正在生成 PDF 分析報告，請稍候...', 'pdf');
             window.open(`/download-pdf/${currentReportId}`, '_blank'); 
         }
         
@@ -2607,6 +2743,7 @@ HTML_TEMPLATE = '''
                 return; 
             }
             
+            showToast('正在生成完整版 PDF（含視覺化圖像），請稍候...', 'pdf');
             const btn = document.getElementById('downloadFullBtn');
             const status = document.getElementById('fullDownloadStatus');
             btn.disabled = true;
@@ -2735,14 +2872,14 @@ HTML_TEMPLATE = '''
                 
                 console.log(`📍[${i+1}/4] 請求生成：${key}`);
                 
-                // ⚠️ 自動重試 6 次
+                // ⚠️ 自動重試 20 次
                 let imageSuccess = false;
                 let lastError = null;
                 
-                for (let attempt = 1; attempt <= 6 && !imageSuccess; attempt++) {
+                for (let attempt = 1; attempt <= 20 && !imageSuccess; attempt++) {
                     if (attempt > 1) {
                         console.log(`🔄[${i+1}/4] ${key} 第 ${attempt} 次重試...`);
-                        progressText.textContent = `🔄 [${i+1}/4]「${name}」重試中 (${attempt}/6)...`;
+                        progressText.textContent = `🔄 [${i+1}/4]「${name}」重試中 (${attempt}/20)...`;
                         await new Promise(r => setTimeout(r, 2000));  // 重試前等待 2 秒
                     }
                     
@@ -2812,9 +2949,9 @@ HTML_TEMPLATE = '''
                     }
                 }
                 
-                // 6 次都失敗後才顯示手動重試
+                // 20 次都失敗後才顯示手動重試
                 if (!imageSuccess) {
-                    console.error(`❌[${i+1}/4] ${key} 自動重試 6 次失敗，顯示手動重試按鈕`);
+                    console.error(`❌[${i+1}/4] ${key} 自動重試 20 次失敗，顯示手動重試按鈕`);
                     failedStages.push(i);
                     showFailedPlaceholder(imgId, i, name);
                 }
@@ -3173,6 +3310,11 @@ HTML_TEMPLATE = '''
                 if (this.audioQueue.length === 1 && !this.isPlaying) {
                     this.startPlaying();
                 }
+                
+                // 每次添加新片段時更新按鈕狀態
+                if (typeof updateControlButtons === 'function') {
+                    updateControlButtons();
+                }
             }
             
             startPlaying() {
@@ -3211,6 +3353,14 @@ HTML_TEMPLATE = '''
                 if (this.onStatusUpdate) {
                     this.onStatusUpdate(`🎵 正在播放 ${part.part}/${this.totalParts}...`);
                 }
+                
+                // 更新控制按鈕和片段信息
+                if (typeof updateControlButtons === 'function') {
+                    updateControlButtons();
+                }
+                if (typeof updateTrackInfo === 'function') {
+                    updateTrackInfo();
+                }
             }
             
             playNext() {
@@ -3228,6 +3378,17 @@ HTML_TEMPLATE = '''
                     this.onStatusUpdate('✅ 療癒音頻播放完成');
                 }
                 console.log('✅ 所有音頻片段播放完成');
+                
+                // 更新 UI 狀態
+                if (typeof updatePlayingState === 'function') {
+                    updatePlayingState(false);
+                }
+                if (typeof stopVisualizer === 'function') {
+                    stopVisualizer();
+                }
+                if (typeof updateControlButtons === 'function') {
+                    updateControlButtons();
+                }
             }
             
             pause() {
@@ -3242,6 +3403,49 @@ HTML_TEMPLATE = '''
                     this.audioElement.play();
                     this.isPlaying = true;
                 }
+            }
+            
+            // 播放上一段
+            playPrev() {
+                if (this.currentIndex > 0) {
+                    // 扣除當前片段的時長
+                    if (this.currentIndex > 0 && this.currentIndex <= this.partDurations.length) {
+                        this.elapsedBeforeCurrent -= this.partDurations[this.currentIndex - 1] || 0;
+                    }
+                    this.currentIndex--;
+                    this.playCurrentPart();
+                    return true;
+                }
+                return false;
+            }
+            
+            // 手動跳到下一段
+            skipNext() {
+                if (this.currentIndex < this.audioQueue.length - 1) {
+                    this.playNext();
+                    return true;
+                }
+                return false;
+            }
+            
+            // 獲取當前片段索引
+            getCurrentPart() {
+                return this.currentIndex + 1;
+            }
+            
+            // 獲取總片段數
+            getTotalParts() {
+                return this.totalParts;
+            }
+            
+            // 判斷是否有上一段
+            hasPrev() {
+                return this.currentIndex > 0;
+            }
+            
+            // 判斷是否有下一段
+            hasNext() {
+                return this.currentIndex < this.audioQueue.length - 1;
             }
         }
         
@@ -3454,15 +3658,15 @@ HTML_TEMPLATE = '''
             
             const stage4Prompt = document.getElementById('stage4Prompt').value;
             
-            // ⚠️ 自動重試 6 次
+            // ⚠️ 自動重試 20 次
             let success = false;
             let lastError = null;
             let data = null;
             
-            for (let attempt = 1; attempt <= 6 && !success; attempt++) {
+            for (let attempt = 1; attempt <= 20 && !success; attempt++) {
                 if (attempt > 1) {
                     console.log(`🔄 音頻生成第 ${attempt} 次重試...`);
-                    progressText.textContent = `🔄 音頻生成重試中 (${attempt}/6)...`;
+                    progressText.textContent = `🔄 音頻生成重試中 (${attempt}/20)...`;
                     await new Promise(r => setTimeout(r, 3000));  // 重試前等待 3 秒
                 }
                 
@@ -3536,9 +3740,9 @@ HTML_TEMPLATE = '''
                 
                 return true;
             } else {
-                progressText.innerHTML = `❌ 音頻生成失敗（重試 3 次）<button onclick="generateHealingAudioAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">重試</button>`;
+                progressText.innerHTML = `❌ 音頻生成失敗（重試 20 次）<button onclick="generateHealingAudioAuto()" style="margin-left:10px;padding:4px 12px;background:#C9A962;color:white;border:none;border-radius:4px;cursor:pointer;">重試</button>`;
                 partsProgress.textContent = `錯誤：${lastError || '未知錯誤'}`;
-                console.error('音頻生成失敗（3 次重試後）:', lastError);
+                console.error('音頻生成失敗（20 次重試後）:', lastError);
                 return false;
             }
         }
@@ -3597,54 +3801,185 @@ HTML_TEMPLATE = '''
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
                 
-                const source = audioContext.createMediaElementSource(audioElement);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 64;
-                
-                source.connect(analyser);
-                analyser.connect(audioContext.destination);
+                // 避免重複連接
+                if (!analyser) {
+                    const source = audioContext.createMediaElementSource(audioElement);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 128;
+                    
+                    source.connect(analyser);
+                    analyser.connect(audioContext.destination);
+                }
                 
                 console.log('🎵 音頻波形可視化已初始化');
             } catch (err) {
-                console.warn('🎵 波形可視化初始化失敗:', err);
+                console.warn('🎵 波形可視化初始化失敗，使用模擬波形:', err);
             }
         }
         
-        function startVisualizer() {
-            if (!analyser) return;
-            
+        // 模擬波形動畫（用於串流模式或初始化失敗時）
+        function startSimulatedVisualizer() {
             const canvas = document.getElementById('audioVisualizer');
             const container = canvas.parentElement;
             
-            // 動態調整 canvas 尺寸以匹配進度條
-            canvas.width = container.offsetWidth;
-            canvas.height = container.offsetHeight;
+            canvas.width = container.offsetWidth * 2;
+            canvas.height = container.offsetHeight * 2;
+            canvas.style.width = container.offsetWidth + 'px';
+            canvas.style.height = container.offsetHeight + 'px';
             canvas.style.display = 'block';
             
             const ctx = canvas.getContext('2d');
+            const barCount = 64;
+            const barWidth = (canvas.width / barCount) * 0.85;
+            const barGap = (canvas.width / barCount) * 0.15;
+            
+            // 模擬數據
+            const simulatedData = new Array(barCount).fill(0);
+            
+            function draw() {
+                visualizerAnimationId = requestAnimationFrame(draw);
+                
+                // 更新模擬數據（隨機波動）
+                const time = Date.now() / 1000;
+                for (let i = 0; i < barCount; i++) {
+                    const wave1 = Math.sin(time * 2 + i * 0.2) * 0.3;
+                    const wave2 = Math.sin(time * 3.5 + i * 0.15) * 0.2;
+                    const wave3 = Math.sin(time * 1.2 + i * 0.3) * 0.2;
+                    const random = (Math.random() - 0.5) * 0.1;
+                    simulatedData[i] = 0.3 + wave1 + wave2 + wave3 + random;
+                }
+                
+                // 透明背景
+                ctx.fillStyle = 'rgba(13, 13, 13, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const centerY = canvas.height / 2;
+                let x = barGap;
+                
+                for (let i = 0; i < barCount; i++) {
+                    const value = Math.max(0.05, Math.min(1, simulatedData[i]));
+                    const barHeight = value * canvas.height * 0.45;
+                    
+                    const alpha = 0.4 + value * 0.4;
+                    ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x, centerY - barHeight, barWidth, barHeight, 3);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = `rgba(212, 175, 55, ${alpha * 0.3})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x, centerY, barWidth, barHeight * 0.5, 3);
+                    ctx.fill();
+                    
+                    x += barWidth + barGap;
+                }
+                
+                // 呼吸中心線
+                const breathe = Math.sin(time * 2) * 0.3 + 0.7;
+                ctx.strokeStyle = `rgba(201, 169, 98, ${0.25 * breathe})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(canvas.width, centerY);
+                ctx.stroke();
+            }
+            
+            draw();
+        }
+        
+        function startVisualizer() {
+            // 先停止之前的動畫（避免多個動畫同時運行）
+            if (visualizerAnimationId) {
+                cancelAnimationFrame(visualizerAnimationId);
+                visualizerAnimationId = null;
+            }
+            
+            // 立即顯示 canvas
+            const canvas = document.getElementById('audioVisualizer');
+            if (canvas) {
+                canvas.style.display = 'block';
+            }
+            
+            // 如果沒有真實的音頻分析器，使用模擬波形
+            if (!analyser) {
+                console.log('🎵 使用模擬波形動畫');
+                startSimulatedVisualizer();
+                return;
+            }
+            
+            // canvas 已在上方宣告，直接使用
+            const container = canvas.parentElement;
+            
+            // 動態調整 canvas 尺寸以匹配進度條
+            canvas.width = container.offsetWidth * 2;  // 高解析度
+            canvas.height = container.offsetHeight * 2;
+            canvas.style.width = container.offsetWidth + 'px';
+            canvas.style.height = container.offsetHeight + 'px';
+            canvas.style.display = 'block';
+            
+            const ctx = canvas.getContext('2d');
+            analyser.fftSize = 128;  // 更多頻段
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
-            const barWidth = canvas.width / bufferLength;
+            const barWidth = (canvas.width / bufferLength) * 0.85;
+            const barGap = (canvas.width / bufferLength) * 0.15;
+            
+            // 創建金色漸變
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(244, 208, 63, 0.9)');    // 亮金色
+            gradient.addColorStop(0.3, 'rgba(212, 175, 55, 0.8)');  // 標準金色
+            gradient.addColorStop(0.7, 'rgba(184, 115, 81, 0.6)');  // 赤陶色
+            gradient.addColorStop(1, 'rgba(139, 115, 85, 0.4)');    // 暗棕色
             
             function draw() {
                 visualizerAnimationId = requestAnimationFrame(draw);
                 
                 analyser.getByteFrequencyData(dataArray);
                 
-                // 透明背景
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // 透明背景（帶輕微拖影效果）
+                ctx.fillStyle = 'rgba(13, 13, 13, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                let x = 0;
+                const centerY = canvas.height / 2;
+                let x = barGap;
+                
                 for (let i = 0; i < bufferLength; i++) {
-                    const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+                    // 平滑化數據
+                    const value = dataArray[i] / 255;
+                    const barHeight = value * canvas.height * 0.45;
                     
-                    // 金色漸變帶透明度
-                    const alpha = 0.4 + (dataArray[i] / 255) * 0.5;
+                    // 上方波形
+                    const alpha = 0.5 + value * 0.5;
                     ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x, centerY - barHeight, barWidth, barHeight, 3);
+                    ctx.fill();
                     
-                    ctx.fillRect(x, (canvas.height - barHeight) / 2, barWidth - 1, barHeight);
-                    x += barWidth;
+                    // 下方鏡像（較淡）
+                    ctx.fillStyle = `rgba(212, 175, 55, ${alpha * 0.4})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x, centerY, barWidth, barHeight * 0.6, 3);
+                    ctx.fill();
+                    
+                    // 高亮點（頂部發光）
+                    if (value > 0.5) {
+                        ctx.fillStyle = `rgba(255, 223, 128, ${(value - 0.5) * 2})`;
+                        ctx.beginPath();
+                        ctx.arc(x + barWidth / 2, centerY - barHeight, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    x += barWidth + barGap;
                 }
+                
+                // 中心線（帶呼吸效果）
+                const breathe = Math.sin(Date.now() / 500) * 0.3 + 0.7;
+                ctx.strokeStyle = `rgba(201, 169, 98, ${0.3 * breathe})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(canvas.width, centerY);
+                ctx.stroke();
             }
             
             draw();
@@ -3661,33 +3996,55 @@ HTML_TEMPLATE = '''
         
         function toggleHealingAudio() {
             const audio = document.getElementById('healingAudio');
-            const btn = document.getElementById('healingPlayBtn');
             const player = document.getElementById('healingPlayer');
-            const embeddedBtn = document.getElementById('embeddedPlayBtn');
             
-            if (!healingAudioReady) {
+            // 判斷當前模式
+            const isStreamingMode = streamingPlayer.audioQueue.length > 0;
+            const isTraditionalMode = healingAudioReady && audio.src;
+            
+            console.log('📍 toggleHealingAudio:', { isStreamingMode, isTraditionalMode, healingAudioReady });
+            
+            // ⚠️ 串流模式控制
+            if (isStreamingMode) {
+                if (streamingPlayer.isPlaying) {
+                    streamingPlayer.pause();
+                    updatePlayingState(false);
+                    stopVisualizer();
+                } else {
+                    streamingPlayer.resume();
+                    updatePlayingState(true);
+                    updateTrackInfo();
+                    updateControlButtons();
+                    startVisualizer(); 
+                }
                 return;
             }
             
-            // 確保 AudioContext 已恢復（用戶交互後）
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
+            // ⚠️ 傳統模式控制
+            if (isTraditionalMode) {
+                // 確保 AudioContext 已恢復（用戶交互後）
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                if (audio.paused) {
+                    audio.play().then(() => {
+                        updatePlayingState(true);
+                        player.classList.remove('ready');
+                        startVisualizer();
+                    }).catch(e => {
+                        console.error('播放錯誤:', e);
+                    });
+                } else {
+                    audio.pause();
+                    updatePlayingState(false);
+                    stopVisualizer();
+                }
+                return;
             }
             
-            if (audio.paused) {
-                audio.play();
-                btn.classList.add('playing');
-                player.classList.add('playing');
-                player.classList.remove('ready');
-                if (embeddedBtn) embeddedBtn.classList.add('playing');
-                startVisualizer();
-            } else {
-                audio.pause();
-                btn.classList.remove('playing');
-                player.classList.remove('playing');
-                if (embeddedBtn) embeddedBtn.classList.remove('playing');
-                stopVisualizer();
-            }
+            // 沒有可播放的音頻
+            console.warn('⚠️ 沒有可播放的音頻');
         }
         
         function seekAudio(event) {
@@ -3707,7 +4064,112 @@ HTML_TEMPLATE = '''
             audio.pause();
             document.getElementById('healingPlayer').classList.remove('show');
             document.getElementById('healingPlayBtn').textContent = '';
+            stopVisualizer();
+            updatePlayingState(false);
         }
+        
+        // ============ 播放控制函數 ============
+        
+        // 上一段
+        function prevTrack() {
+            const isStreamingMode = streamingPlayer.audioQueue.length > 0;
+            console.log('📍 prevTrack:', { isStreamingMode, currentIndex: streamingPlayer.currentIndex, queueLength: streamingPlayer.audioQueue.length });
+            
+            if (isStreamingMode) {
+                // 串流模式
+                if (streamingPlayer.playPrev()) {
+                    updateTrackInfo();
+                    updateControlButtons();
+                    console.log('✅ 切換到上一段');
+                } else {
+                    console.log('⚠️ 已經是第一段');
+                }
+            } else {
+                // 傳統模式：跳到開頭
+                const audio = document.getElementById('healingAudio');
+                if (audio && audio.src) {
+                    audio.currentTime = 0;
+                }
+            }
+        }
+        
+        // 下一段
+        function nextTrack() {
+            const isStreamingMode = streamingPlayer.audioQueue.length > 0;
+            console.log('📍 nextTrack:', { isStreamingMode, currentIndex: streamingPlayer.currentIndex, queueLength: streamingPlayer.audioQueue.length });
+            
+            if (isStreamingMode) {
+                // 串流模式
+                if (streamingPlayer.skipNext()) {
+                    updateTrackInfo();
+                    updateControlButtons();
+                    console.log('✅ 切換到下一段');
+                } else {
+                    console.log('⚠️ 已經是最後一段');
+                }
+            } else {
+                // 傳統模式：跳到結尾
+                const audio = document.getElementById('healingAudio');
+                if (audio && audio.src && audio.duration) {
+                    audio.currentTime = audio.duration;
+                }
+            }
+        }
+        
+        // 更新播放狀態 UI
+        function updatePlayingState(isPlaying) {
+            const btn = document.getElementById('healingPlayBtn');
+            const player = document.getElementById('healingPlayer');
+            const embeddedBtn = document.getElementById('embeddedPlayBtn');
+            
+            if (isPlaying) {
+                btn.classList.add('playing');
+                player.classList.add('playing');
+                if (embeddedBtn) embeddedBtn.classList.add('playing');
+            } else {
+                btn.classList.remove('playing');
+                player.classList.remove('playing');
+                if (embeddedBtn) embeddedBtn.classList.remove('playing');
+            }
+        }
+        
+        // 更新當前片段信息
+        function updateTrackInfo() {
+            const subtitle = document.getElementById('playerSubtitle');
+            if (subtitle && !healingAudioReady && streamingPlayer.totalParts > 0) {
+                const current = streamingPlayer.getCurrentPart();
+                const total = streamingPlayer.getTotalParts();
+                subtitle.textContent = `正在播放第 ${current} 段 / 共 ${total} 段`;
+            }
+        }
+        
+        // 更新控制按鈕狀態（啟用/禁用）
+        function updateControlButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (!prevBtn || !nextBtn) return;
+            
+            const isStreamingMode = streamingPlayer.audioQueue.length > 0;
+            
+            if (isStreamingMode) {
+                // 串流模式：根據當前位置啟用/禁用
+                const hasPrev = streamingPlayer.hasPrev();
+                const hasNext = streamingPlayer.hasNext();
+                prevBtn.disabled = !hasPrev;
+                nextBtn.disabled = !hasNext;
+                console.log('📍 updateControlButtons (串流模式):', { hasPrev, hasNext, currentIndex: streamingPlayer.currentIndex });
+            } else {
+                // 傳統模式或無音頻：禁用
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            }
+        }
+        
+        // 初始化時禁用控制按鈕
+        document.addEventListener('DOMContentLoaded', () => {
+            updateControlButtons();
+        });
         
         // 三階分析完成後自動生成圖片和音頻
         // ⚠️ 修正：圖像和音頻「並行」生成（各自獨立，不互相等待）
@@ -4217,12 +4679,12 @@ def generate_audio_stream():
                 audio_data = None
                 last_error = None
                 
-                # 額外重試機制
-                for extra_retry in range(3):
+                # 額外重試機制（最多 20 次）
+                for extra_retry in range(20):
                     try:
                         if extra_retry > 0:
-                            yield f"data: {json.dumps({'type': 'status', 'message': f'{part_name} 重試中... (第 {extra_retry + 1} 次)'})}\n\n"
-                            time_module.sleep(2 * extra_retry)
+                            yield f"data: {json.dumps({'type': 'status', 'message': f'{part_name} 重試中... (第 {extra_retry + 1}/20 次)'})}\n\n"
+                            time_module.sleep(min(2 * extra_retry, 10))  # 最多等待 10 秒
                         
                         audio_data = generator.text_to_speech_single(content, voice, part_name)
                         break
@@ -4297,6 +4759,9 @@ def download_pdf(report_id):
         with open(report_path, 'r', encoding='utf-8') as f:
             report_data = json.load(f)
         
+        # 從分析結果中提取事件主題
+        event_topic = extract_event_topic(report_data)
+        
         # 生成 PDF
         pdf_bytes = generate_pdf_report(report_data, report_id)
         
@@ -4304,11 +4769,15 @@ def download_pdf(report_id):
         from io import BytesIO
         pdf_buffer = BytesIO(pdf_bytes)
         
+        # 動態檔名
+        safe_topic = sanitize_filename(event_topic) if event_topic else "衝突分析"
+        download_filename = f"Lumina心語_{safe_topic}_{report_id[:8]}.pdf"
+        
         return send_file(
             pdf_buffer,
             mimetype='application/pdf',
             as_attachment=True,
-            download_name=f"衝突分析報告_{report_id}.pdf"
+            download_name=download_filename
         )
         
     except Exception as e:
@@ -4335,6 +4804,9 @@ def download_pdf_with_images():
         with open(report_path, 'r', encoding='utf-8') as f:
             report_data = json.load(f)
         
+        # 從分析結果中提取事件主題
+        event_topic = extract_event_topic(report_data)
+        
         # 生成內嵌圖片的 PDF
         pdf_bytes = generate_pdf_report(report_data, report_id, images=images)
         
@@ -4342,11 +4814,15 @@ def download_pdf_with_images():
         from io import BytesIO
         pdf_buffer = BytesIO(pdf_bytes)
         
+        # 動態檔名（完整版）
+        safe_topic = sanitize_filename(event_topic) if event_topic else "衝突分析"
+        download_filename = f"Lumina心語_{safe_topic}_完整版_{report_id[:8]}.pdf"
+        
         return send_file(
             pdf_buffer,
             mimetype='application/pdf',
             as_attachment=True,
-            download_name=f"衝突分析報告_完整版_{report_id}.pdf"
+            download_name=download_filename
         )
         
     except Exception as e:
