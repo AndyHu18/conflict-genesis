@@ -3323,6 +3323,14 @@ HTML_TEMPLATE = '''
                 this.isPlaying = true;
                 this.currentIndex = 0;
                 this.playCurrentPart();
+                
+                // 啟動波形可視化和 UI 更新
+                if (typeof startVisualizer === 'function') {
+                    startVisualizer();
+                }
+                if (typeof updatePlayingState === 'function') {
+                    updatePlayingState(true);
+                }
             }
             
             playCurrentPart() {
