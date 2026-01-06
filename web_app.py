@@ -2443,17 +2443,120 @@ HTML_TEMPLATE = '''
             formData.append('stage2_prompt', document.getElementById('stage2Prompt').value);
             formData.append('stage3_prompt', document.getElementById('stage3Prompt').value);
 
+            // ============ 使用流式分析 (SSE) 避免超時 ============
             try {
-                const resp = await fetch('/analyze', { method: 'POST', body: formData });
-                const data = await resp.json();
-                stopProgress();
-                setTimeout(() => {
+                const response = await fetch('/analyze-stream', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let stage1Data = null, stage2Data = null, stage3Data = null;
+                let reportId = null;
+                
+                // 進度映射：每個階段完成時更新進度
+                const stageProgress = { 1: 35, 2: 65, 3: 90 };
+                const stageItems = ['s1', 's2', 's3', 's4', 's5', 's6', 's7'];
+                const stageItemMap = { 1: [1, 2, 3, 4], 2: [5, 6], 3: [7] };
+                
+                function updateStageUI(stage, status) {
+                    const items = stageItemMap[stage] || [];
+                    items.forEach((idx, i) => {
+                        const el = document.getElementById('s' + idx);
+                        if (!el) return;
+                        if (status === 'active' && i === items.length - 1) {
+                            el.classList.add('active');
+                            el.classList.remove('done');
+                            el.querySelector('.stage-icon').textContent = '⏳';
+                        } else if (status === 'done') {
+                            el.classList.remove('active');
+                            el.classList.add('done');
+                            el.querySelector('.stage-icon').textContent = '✓';
+                        }
+                    });
+                }
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+                    
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        const jsonStr = line.substring(6);
+                        if (!jsonStr.trim()) continue;
+                        
+                        try {
+                            const event = JSON.parse(jsonStr);
+                            console.log('📍 SSE 事件:', event.type, event);
+                            
+                            switch (event.type) {
+                                case 'status':
+                                    document.getElementById('loadingStage').textContent = event.message;
+                                    if (event.stage) {
+                                        updateStageUI(event.stage, 'active');
+                                        if (event.stage === 2) document.getElementById('loadingTitle').textContent = '正在深層溯源...';
+                                        if (event.stage === 3) document.getElementById('loadingTitle').textContent = '正在建構成長方案...';
+                                    }
+                                    break;
+                                    
+                                case 'stage_complete':
+                                    updateStageUI(event.stage, 'done');
+                                    const prog = stageProgress[event.stage] || 50;
+                                    document.getElementById('progressRing').style.strokeDashoffset = 502 - (502 * prog / 100);
+                                    document.getElementById('progressPercent').textContent = prog + '%';
+                                    
+                                    if (event.stage === 1) stage1Data = event.result;
+                                    if (event.stage === 2) stage2Data = event.result;
+                                    if (event.stage === 3) stage3Data = event.result;
+                                    break;
+                                    
+                                case 'complete':
+                                    reportId = event.report_id;
+                                    stopProgress();
+                                    setTimeout(() => {
+                                        document.getElementById('loadingOverlay').classList.remove('show');
+                                        fullResult = event.result;
+                                        displayResult(event.result, event.report_id);
+                                    }, 500);
+                                    break;
+                                    
+                                case 'error':
+                                    stopProgress();
+                                    document.getElementById('loadingOverlay').classList.remove('show');
+                                    showError(event.message);
+                                    break;
+                            }
+                        } catch (parseErr) {
+                            console.warn('SSE JSON 解析錯誤:', parseErr, jsonStr);
+                        }
+                    }
+                }
+                
+                // 如果沒收到 complete 事件但有資料，嘗試顯示結果
+                if (!reportId && stage1Data && stage2Data && stage3Data) {
+                    stopProgress();
                     document.getElementById('loadingOverlay').classList.remove('show');
-                    if (data.success) { fullResult = data.result; displayResult(data.result, data.report_id); }
-                    else showError(data.error);
-                }, 800);
-            } catch (err) { stopProgress(); document.getElementById('loadingOverlay').classList.remove('show'); showError('網路錯誤：' + err.message); }
-            finally { analyzeBtn.disabled = false; }
+                    showError('分析完成但未收到報告 ID，請重試');
+                }
+                
+            } catch (err) { 
+                console.error('分析錯誤:', err);
+                stopProgress(); 
+                document.getElementById('loadingOverlay').classList.remove('show'); 
+                showError('網路錯誤：' + err.message); 
+            } finally { 
+                analyzeBtn.disabled = false; 
+            }
         });
         
         // 顯示錯誤訊息
@@ -4321,6 +4424,132 @@ def analyze():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'success': False, 'error': f'伺服器錯誤：{str(e)}'})
+
+
+@app.route('/analyze-stream', methods=['POST'])
+def analyze_stream():
+    """
+    流式分析端點 (SSE) - 避免 Render 免費版 30 秒超時
+    
+    每完成一個階段就立即推送結果，而不是等待所有階段完成。
+    這樣每個 SSE 事件都能在 30 秒內發送，避免連線超時。
+    """
+    from flask import Response, stream_with_context
+    
+    # 獲取表單數據
+    if 'audio' not in request.files:
+        return jsonify({'success': False, 'error': '請選擇音訊檔案'})
+    
+    file = request.files['audio']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': '請選擇音訊檔案'})
+    
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'error': '不支援的檔案格式'})
+    
+    # 儲存檔案
+    filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
+    filepath = app.config['UPLOAD_FOLDER'] / filename
+    file.save(filepath)
+    
+    context = request.form.get('context', '')
+    stage1_prompt = request.form.get('stage1_prompt', '')
+    stage2_prompt = request.form.get('stage2_prompt', '')
+    stage3_prompt = request.form.get('stage3_prompt', '')
+    
+    report_id = f"CG-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
+    
+    def generate():
+        try:
+            analyzer = ConflictAnalyzer()
+            
+            # ==================== 階段 1 ====================
+            yield f"data: {json.dumps({'type': 'status', 'stage': 1, 'message': '正在進行一階分析：衝突演化追蹤...'})}\n\n"
+            
+            try:
+                stage1_result = analyzer.analyze_stage1(
+                    audio_path=str(filepath),
+                    additional_context=context,
+                    system_prompt=stage1_prompt if stage1_prompt else None,
+                    verbose=True
+                )
+                stage1_dict = stage1_result.model_dump()
+                
+                yield f"data: {json.dumps({'type': 'stage_complete', 'stage': 1, 'result': stage1_dict})}\n\n"
+                
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'stage': 1, 'message': f'一階分析失敗：{str(e)}'})}\n\n"
+                return
+            
+            # ==================== 階段 2 ====================
+            yield f"data: {json.dumps({'type': 'status', 'stage': 2, 'message': '正在進行二階分析：深層溯源...'})}\n\n"
+            
+            try:
+                stage2_result = analyzer.analyze_stage2(
+                    stage1_result=stage1_dict,
+                    additional_context=context,
+                    system_prompt=stage2_prompt if stage2_prompt else None,
+                    verbose=True
+                )
+                stage2_dict = stage2_result.model_dump()
+                
+                yield f"data: {json.dumps({'type': 'stage_complete', 'stage': 2, 'result': stage2_dict})}\n\n"
+                
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'stage': 2, 'message': f'二階分析失敗：{str(e)}'})}\n\n"
+                return
+            
+            # ==================== 階段 3 ====================
+            yield f"data: {json.dumps({'type': 'status', 'stage': 3, 'message': '正在進行三階分析：成長方案...'})}\n\n"
+            
+            try:
+                stage3_result = analyzer.analyze_stage3(
+                    stage1_result=stage1_dict,
+                    stage2_result=stage2_dict,
+                    additional_context=context,
+                    system_prompt=stage3_prompt if stage3_prompt else None,
+                    verbose=True
+                )
+                stage3_dict = stage3_result.model_dump()
+                
+                yield f"data: {json.dumps({'type': 'stage_complete', 'stage': 3, 'result': stage3_dict})}\n\n"
+                
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'stage': 3, 'message': f'三階分析失敗：{str(e)}'})}\n\n"
+                return
+            
+            # ==================== 完成：儲存報告 ====================
+            full_result = {
+                'stage1': stage1_dict,
+                'stage2': stage2_dict,
+                'stage3': stage3_dict
+            }
+            
+            report_path = app.config['REPORTS_FOLDER'] / f"{report_id}.json"
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(full_result, f, ensure_ascii=False, indent=2)
+            
+            yield f"data: {json.dumps({'type': 'complete', 'report_id': report_id, 'result': full_result})}\n\n"
+            
+        except Exception as e:
+            traceback.print_exc()
+            yield f"data: {json.dumps({'type': 'error', 'message': f'分析過程發生錯誤：{str(e)}'})}\n\n"
+        finally:
+            # 清理上傳的檔案
+            try:
+                filepath.unlink()
+            except:
+                pass
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # 禁用 Nginx/Render 的緩衝
+        }
+    )
 
 
 @app.route('/generate-images', methods=['POST'])
