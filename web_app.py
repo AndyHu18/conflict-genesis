@@ -36,10 +36,18 @@ app.config['IMAGES_FOLDER'].mkdir(exist_ok=True)
 
 # CORS 設定 - 允許 Vercel 前端跨域請求
 from flask_cors import CORS
-CORS(app, origins=[
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-], origins_regex=r"https://.*\.vercel\.app")
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://conflict-genesis-web.vercel.app",
+        ],
+        "origins_regex": r"https://.*\.vercel\.app",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+    }
+})
 
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'aiff', 'aac', 'ogg', 'flac', 'm4a'}
 
