@@ -34,6 +34,13 @@ app.config['REPORTS_FOLDER'].mkdir(exist_ok=True)
 app.config['IMAGES_FOLDER'] = Path(__file__).parent / 'generated_images'
 app.config['IMAGES_FOLDER'].mkdir(exist_ok=True)
 
+# CORS 設定 - 允許 Vercel 前端跨域請求
+from flask_cors import CORS
+CORS(app, origins=[
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+], origins_regex=r"https://.*\.vercel\.app")
+
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'aiff', 'aac', 'ogg', 'flac', 'm4a'}
 
 def allowed_file(filename):
@@ -4352,6 +4359,16 @@ HTML_TEMPLATE = '''
 @app.route('/')
 def index():
     return render_template_string(HTML_TEMPLATE)
+
+
+@app.route('/health')
+def health_check():
+    """健康檢查端點 - 用於前端偵測後端是否已喚醒"""
+    return jsonify({
+        'status': 'ok',
+        'service': 'conflict-genesis-api',
+        'timestamp': datetime.now().isoformat()
+    })
 
 
 @app.route('/analyze', methods=['POST'])

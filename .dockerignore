@@ -1,0 +1,50 @@
+# 排除不需要部署的文件
+
+# Python 緩存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虛擬環境
+venv/
+ENV/
+env/
+.venv/
+
+# 環境變數 (敏感數據)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# 測試
+tests/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 其他部署配置 (不是 Cloud Run 需要的)
+railway.toml
+render.yaml
+vercel.json
+nixpacks.toml
+
+# 文檔
+README.md
+TASKS.md
+ARCHITECTURE.md

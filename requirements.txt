@@ -3,6 +3,7 @@
 
 # Web 框架
 flask>=3.1.0
+flask-cors>=5.0.0
 Werkzeug>=3.1.0
 
 # Google GenAI SDK (2025 新版)

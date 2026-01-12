@@ -1,0 +1,25 @@
+============================================================
+Conflict Genesis - API Key Diagnostic
+============================================================
+
+[TEST] Primary: AIzaSyApMiwmJpb...d4Tk
+  [OK] Response: OK
+
+[TEST] Backup: AIzaSyAL0_cJPEp...01ks
+  [OK] Response: OK
+
+[TEST] Backup2: AIzaSyACKhhmtMM...Wxkc
+  [FAIL] ClientError: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': "Permission denied: Consumer 'api_key:AIzaSyACKhhmtMMjdOrjP1o7H9ZoFl5vSt_Wxkc' has been susp
+
+[TEST] ConflictAnalyzer init
+  [OK] Model: gemini-3-flash-preview
+
+============================================================
+SUMMARY
+============================================================
+  [OK] Primary
+  [OK] Backup
+  [FAIL] Backup2
+  [OK] ConflictAnalyzer
+============================================================
+Result: SOME FAILED
